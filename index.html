@@ -75,7 +75,6 @@
 <body class="antialiased">
 
     <!-- Campaign Modals -->
-    <!-- Monday Modal -->
     <div id="monday-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4 transition-opacity duration-300">
         <div class="card relative w-full max-w-2xl">
             <button id="close-monday-modal" class="absolute top-3 right-4 text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
@@ -90,7 +89,6 @@
             </div>
         </div>
     </div>
-    <!-- Friday Modal -->
     <div id="friday-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4 transition-opacity duration-300">
         <div class="card relative w-full max-w-2xl">
             <button id="close-friday-modal" class="absolute top-3 right-4 text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
@@ -106,14 +104,12 @@
         </div>
     </div>
 
-
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
 
         <!-- Header -->
         <header class="text-center mb-12">
             <h1 class="font-cinzel text-4xl sm:text-5xl lg:text-6xl font-bold text-amber-300">The Wanderer & The Torch</h1>
             <p class="text-lg text-gray-400 mt-2">The Cosmology & Timekeeping of Nevos</p>
-            <!-- Campaign Buttons -->
             <div class="mt-8 flex flex-wrap justify-center gap-4">
                 <button id="open-monday-modal" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 px-6 rounded-lg transition-colors shadow-lg">Monday Campaign</button>
                 <button id="open-friday-modal" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg">Friday Campaign</button>
@@ -126,34 +122,39 @@
             <!-- Left Column / Main Content on Mobile -->
             <main class="lg:col-span-2 space-y-8">
                 
-                <!-- Moons Section -->
+                <!-- The Moons Section -->
                 <section id="moons" class="card">
                     <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">🌕 The Moons</h2>
                     <div class="space-y-6">
                         <div>
                             <h3 class="text-2xl font-bold text-gray-200">The Wanderer</h3>
-                            <p class="text-gray-400 mt-1">Governs fate, change, and the 28-day cycle of weeks and months that make up the 13-month year.</p>
+                            <p class="text-gray-400 mt-1">This moon governs the 28-day cycle, shaping the weeks, months, and the calendar year. It is a celestial body of fate, change, and movement.</p>
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold text-gray-200">The Torch</h3>
-                            <p class="text-gray-400 mt-1">Marks the eight phases of a Nevosian day. Its current phase, based on your local time, is shown in the clock.</p>
+                            <p class="text-gray-400 mt-1">This moon cycles daily, waxing and waning through each 24-hour period. It marks the eight phases of a Nevosian day, as reflected in the calendar tool.</p>
                         </div>
                     </div>
                 </section>
                 
-                <!-- Zodiacal Regions -->
-                <section id="zodiac" class="card">
-                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">🌠 Zodiacal Regions</h2>
-                    <p class="text-gray-400 mb-6">Each of the 13 months corresponds to a zodiacal sign, which in turn governs a region of Nevos. Click each region to learn more.</p>
+                <!-- Celestial System & Pantheon Section -->
+                <section id="celestial-system" class="card">
+                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">☀️ Celestial System & Pantheon</h2>
+                    <div class="mb-6 bg-gray-800/50 p-4 rounded-lg">
+                        <h3 class="font-bold text-2xl text-amber-300">The Sun (Solivane)</h3>
+                        <p class="text-gray-400 mt-1">The prime deity and radiant heart of Nevos’ spiritual belief. Solivane is the origin point of all zodiacal signs. Its symbols include the radiant disk, a cupped flame, and the spiral sun.</p>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-200 mb-2">The Zodiac & The Shade</h3>
+                    <p class="text-gray-400 mb-6">Following Solivane are the 13 celestial signs that govern the months and regions of the world. Twelve are true constellations, while the thirteenth, The Shade, represents the unknown spaces between stars.</p>
                     <div id="zodiac-accordion-container" class="space-y-2">
                         <!-- Accordion items will be injected here by JS -->
                     </div>
                 </section>
 
-                <!-- Species & Faith Section -->
+                <!-- Species & Society Section -->
                 <section id="species" class="card">
-                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">👥 Species & Faith</h2>
-                    <p class="text-gray-400 mb-6">The peoples of Nevos are diverse, their societies and beliefs shaped by history and the ever-present stars. Click each species to explore their culture.</p>
+                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">👥 Species & Society</h2>
+                    <p class="text-gray-400 mb-6">The peoples of Nevos are diverse, their societies and beliefs shaped by history and their reverence for the Pantheon. Click each species to explore their culture.</p>
                     <div id="species-accordion-container" class="space-y-2">
                         <!-- Species accordion items will be injected here -->
                     </div>
@@ -192,6 +193,10 @@
                                 <label for="month-selector" class="block text-sm font-medium text-gray-400 mb-1">Month</label>
                                 <select id="month-selector" class="date-selector-input"></select>
                             </div>
+                             <div>
+                                <label for="time-selector" class="block text-sm font-medium text-gray-400 mb-1">Time of Day</label>
+                                <select id="time-selector" class="date-selector-input"></select>
+                            </div>
                         </div>
 
                         <!-- Full Date Display -->
@@ -209,7 +214,6 @@
                         </div>
                         <p class="text-3xl font-bold text-white" id="phase-name">Rest-time</p>
                         <p class="text-gray-400" id="phase-time">(12am – 3am)</p>
-                        <p class="text-lg font-mono text-amber-400 mt-4" id="current-time">00:00:00</p>
                     </div>
                 </div>
             </aside>
@@ -227,7 +231,7 @@
             const torchPhases = [ { name: 'Rest-time', time: '12am – 3am', svg: getMoonSVG(0) }, { name: 'Wake-time', time: '3am – 6am', svg: getMoonSVG(0.125) }, { name: 'Begin-time', time: '6am – 9am', svg: getMoonSVG(0.25) }, { name: 'Bustle-time', time: '9am – 12pm', svg: getMoonSVG(0.375) }, { name: 'Feast-time', time: '12pm – 3pm', svg: getMoonSVG(0.5) }, { name: 'Finale-time', time: '3pm – 6pm', svg: getMoonSVG(0.625) }, { name: 'Supine-time', time: '6pm – 9pm', svg: getMoonSVG(0.75) }, { name: 'Dim-time', time: '9pm – 12am', svg: getMoonSVG(0.875) }, ];
             const weekdays = ['Cressaturn', 'Quarturn', 'Gibbanturn', 'Seluturn', 'Drossturn', 'Fennelturn', 'Veilnight'];
             const zodiacRegions = [
-                { zodiac: "Valkeryn (War)", festival: "Crimson March", region: "Valerost", subtitle: "Land of Oaths and Blades", terrain: "Crimson hills, temperate plains, sparse stonewood", capital: "Redmarch Keep", peoples: "Humans, orcs, scattered camps", culture: "Duels, honor scars, martial rituals" }, { zodiac: "Meredahl (Life)", festival: "First Bloom", region: "Meredorn", subtitle: "Gentle Green", terrain: "River valleys, healing springs, meadows", capital: "Lindelwen", peoples: "Halflings, elves, humans", culture: "Herbalist clans, water sanctums, sacred gardens" }, { zodiac: "Aelos (Knowledge)", festival: "Whisper Week", region: "Aelorthal", subtitle: "Whispered Halls", terrain: "Highlands, sage groves, mirrored lakes", capital: "Vault of Names", peoples: "Elves, gnomes, warforged", culture: "Memory walks, oathscribes, hidden archives" }, { zodiac: "Kaelor (Light/Fire)", festival: "Torchwake", region: "Kaelmar", subtitle: "The Scorched Crown", terrain: "Fireplateaus, obsidian cliffs, geysers", capital: "Ashspire", peoples: "Warforged, fire-dwarves, dragonborn", culture: "Trial pyres, hymns of flame, forge rites" }, { zodiac: "Solmera (Luck/Travel)", festival: "Wanderer’s Respite", region: "Solvenar", subtitle: "Wanderer's Heart", terrain: "Coastal hills, salt roads, warm deserts", capital: "Caravanrest", peoples: "Humans, tieflings, aasimar, halflings", culture: "Traveling shrines, festivals, trade banners" }, { zodiac: "Elyth (Nature/Grave)", festival: "Petalfall", region: "Elyndor", subtitle: "The Blooming Rest", terrain: "Birch woods, grave gardens, lush valleys", capital: "Gravemire", peoples: "Elves, druids, gravekeepers", culture: "Petal offerings, ritewalks, seasonal mourning" }, { zodiac: "Vesht (Trickery)", festival: "Veilmarket", region: "Veshtarun", subtitle: "The Veiled Exchange", terrain: "Misty deltas, twilight ports, fog-wrapped isles", capital: "Maskmere", peoples: "Tieflings, goblins, gnomes, traders", culture: "Masked markets, riddled contracts, flood worship" }, { zodiac: "Threnys (Death)", festival: "Mourning Tide", region: "Threnvalen", subtitle: "The Mourning Deep", terrain: "Marshes, sunken ruins, blackwater rivers", capital: "Lanterndeep", peoples: "Elves, humans, spirit-touched", culture: "Veil masks, lantern barges, mourning choirs" }, { zodiac: "Dravath (Order/Tempest)", festival: "Stormbound", region: "Dravaskor", subtitle: "Stonebound Realm", terrain: "Mountain garrisons, thunder cliffs, high passes", capital: "Oathvault", peoples: "Dwarves, orcs, hardened humans", culture: "Storm vows, trial rains, stone justice" }, { zodiac: "Yureth (Twilight/Memory)", festival: "Dreaming Scrolls", region: "Yurevanth", subtitle: "Twilight Thought", terrain: "Fog canyons, hollow peaks, glass basins", capital: "Veilspire", peoples: "Elves, aasimar, oracles", culture: "Dreamwalks, ink maps, echo rites" }, { zodiac: "Inarith (Arcana/Forge)", festival: "Forgewake", region: "Inarune", subtitle: "Forgespire Dominion", terrain: "Iron valleys, ley-forges, arcane roads", capital: "Emberlock", peoples: "Warforged, artificers, dwarves", culture: "Guild apprenticeships, bonded craft, rune-laced cities" }, { zodiac: "Evarain (Fate/Exile)", festival: "Thread’s End", region: "Evarayne", subtitle: "The Shaded Path", terrain: "Prophecy glades, shadowed ridges", capital: "Fateshroud", peoples: "Tieflings, exiles, cults", culture: "Fateweaving, silence rites, mirror shrines" }, { zodiac: "Karnoss (Death)", festival: "Hollow Vigil", region: "Karnathul", subtitle: "Endward Reach", terrain: "Snow plains, aurora caverns, icy tundra", capital: "Finalhold", peoples: "Snow elves, survivors, death-priests", culture: "Ancestor feasts, winter rites, long watches" },
+                { zodiac: "Valkeryn (War)", festival: "Crimson March", region: "Valerost", subtitle: "Land of Oaths and Blades", terrain: "Crimson hills, temperate plains, sparse stonewood", capital: "Redmarch Keep", peoples: "Humans, orcs, scattered camps", culture: "Duels, honor scars, martial rituals" }, { zodiac: "Meredahl (Life)", festival: "First Bloom", region: "Meredorn", subtitle: "Gentle Green", terrain: "River valleys, healing springs, meadows", capital: "Lindelwen", peoples: "Halflings, elves, humans", culture: "Herbalist clans, water sanctums, sacred gardens" }, { zodiac: "Aelos (Knowledge)", festival: "Whisper Week", region: "Aelorthal", subtitle: "Whispered Halls", terrain: "Highlands, sage groves, mirrored lakes", capital: "Vault of Names", peoples: "Elves, gnomes, warforged", culture: "Memory walks, oathscribes, hidden archives" }, { zodiac: "Kaelor (Light/Fire)", festival: "Torchwake", region: "Kaelmar", subtitle: "The Scorched Crown", terrain: "Fireplateaus, obsidian cliffs, geysers", capital: "Ashspire", peoples: "Warforged, fire-dwarves, dragonborn", culture: "Trial pyres, hymns of flame, forge rites" }, { zodiac: "Solmera (Luck/Travel)", festival: "Wanderer’s Respite", region: "Solvenar", subtitle: "Wanderer's Heart", terrain: "Coastal hills, salt roads, warm deserts", capital: "Caravanrest", peoples: "Humans, tieflings, aasimar, halflings", culture: "Traveling shrines, festivals, trade banners" }, { zodiac: "Elyth (Nature/Grave)", festival: "Petalfall", region: "Elyndor", subtitle: "The Blooming Rest", terrain: "Birch woods, grave gardens, lush valleys", capital: "Gravemire", peoples: "Elves, druids, gravekeepers", culture: "Petal offerings, ritewalks, seasonal mourning" }, { zodiac: "Vesht (Trickery)", festival: "Veilmarket", region: "Veshtarun", subtitle: "The Veiled Exchange", terrain: "Misty deltas, twilight ports, fog-wrapped isles", capital: "Maskmere", peoples: "Tieflings, goblins, gnomes, traders", culture: "Masked markets, riddled contracts, flood worship" }, { zodiac: "Threnys (Death)", festival: "Mourning Tide", region: "Threnvalen", subtitle: "The Mourning Deep", terrain: "Marshes, sunken ruins, blackwater rivers", capital: "Lanterndeep", peoples: "Elves, humans, spirit-touched", culture: "Veil masks, lantern barges, mourning choirs" }, { zodiac: "Dravath (Order/Tempest)", festival: "Stormbound", region: "Dravaskor", subtitle: "Stonebound Realm", terrain: "Mountain garrisons, thunder cliffs, high passes", capital: "Oathvault", peoples: "Dwarves, orcs, hardened humans", culture: "Storm vows, trial rains, stone justice" }, { zodiac: "Yureth (Twilight/Memory)", festival: "Dreaming Scrolls", region: "Yurevanth", subtitle: "Twilight Thought", terrain: "Fog canyons, hollow peaks, glass basins", capital: "Veilspire", peoples: "Elves, aasimar, oracles", culture: "Dreamwalks, ink maps, echo rites" }, { zodiac: "Inarith (Arcana/Forge)", festival: "Forgewake", region: "Inarune", subtitle: "Forgespire Dominion", terrain: "Iron valleys, ley-forges, arcane roads", capital: "Emberlock", peoples: "Warforged, artificers, dwarves", culture: "Guild apprenticeships, bonded craft, rune-laced cities" }, { zodiac: "Evarain (The Shade)", festival: "Thread’s End", region: "Evarayne", subtitle: "The Shaded Path", isShade: true, terrain: "Prophecy glades, shadowed ridges", capital: "Fateshroud", peoples: "Tieflings, exiles, cults", culture: "Fateweaving, silence rites, mirror shrines" }, { zodiac: "Karnoss (Death)", festival: "Hollow Vigil", region: "Karnathul", subtitle: "Endward Reach", terrain: "Snow plains, aurora caverns, icy tundra", capital: "Finalhold", peoples: "Snow elves, survivors, death-priests", culture: "Ancestor feasts, winter rites, long watches" },
             ];
             const speciesAndFaith = [ { name: "Dwarves", society: "Governed by hearth-oaths and elder houses; consensus and stonebound law.", values: "Memory, endurance, craftsmanship.", faith: "Triad: Dravath (Order/Tempest), Tharamir (Forge/Grave), Ashunel (Earth/Law).", shrines: "Carved stone alcoves and memory-pillars." }, { name: "Elves", society: "Leaders chosen by memory and intuition. Variants: Highborn, Woodland, Dusk-kin.", values: "Belief that time itself casts votes.", faith: "Chorus: Thyrian (Arcana), Velora (Nature), Evarain (Exile).", shrines: "Moonpools, treetop sanctums, amphorae." }, { name: "Halflings", society: "Ruled by open vote until age 120; value lively debate.", values: "Festive, practical, tight-knit communities.", faith: "Deities: Halden (Life/Trickery), Liora (Harvest/Joy), Firaen (Luck).", shrines: "Village greens, kitchens, roadside stones." }, { name: "Gnomes", society: "Fluid leadership by local respect, whim, or talent.", values: "Innovative, chaotic-neutral leanings.", faith: "Favored: Thyrian, Halden, Shurakai (Change).", shrines: "Rooftop observatories, animated murals." }, { name: "Humans & Orcs", society: "Cohabitate as “Cousins of the world.” Humans follow charisma; orcs follow wise matriarchs.", values: "Mutual recognition despite rivalry.", faith: "Humans: Vessari, Liora, Dravath. Orcs: Ashunel, Evarain, Velora.", shrines: "Public altars, mountain caves, skin tattoos." }, { name: "Touched (Tieflings & Aasimar)", society: "Seen as star-marked harbingers of change.", values: "Feared, respected, or revered.", faith: "Tieflings: Halden, Evarain, Zirakkel (Fire). Aasimar: Solivane, Thyrian, Firaen (Hope).", shrines: "Mirrors, skin tattoos, fire sanctums." }, { name: "Warforged & Dragonborn", society: "Created as opposites; enduring animosity.", values: "Warforged seek purpose; Dragonborn are mistrustful survivors.", faith: "Warforged: Inarith, Thyrian, Ashunel. Dragonborn: Zirakkel, Ashunel, Velora.", shrines: "Inlaid glyphs, scorched stones." } ];
             const timelineData = { title: "Recent History (~150 Years)", content: `<ul class="list-disc list-inside space-y-2"><li><strong>~150 Years Ago:</strong> The Sundering of Pacthall; Age of Fracture begins.</li><li><strong>~130 Years Ago:</strong> Sea-Trials of Solvenar; Ashspire Collapse in Kaelmar.</li><li><strong>~115 Years Ago:</strong> Raid of the Red Moor; Gravemire Concord unifies funeral rites.</li><li><strong>~100 Years Ago:</strong> Veilmarket Compacts sanctify shadow-trade; Dawn of Diplomacy.</li><li><strong>~85-75 Years Ago:</strong> Discovery of Residuum; Gnomish Emergence and the Forgebound Treaty.</li><li><strong>~60 Years Ago:</strong> Emberlock Emissaries begin Warforged reactivation; Thirteen Star Concord founded.</li><li><strong>~40-30 Years Ago:</strong> False King of Finalhold ousted; Flood of the Gildmar Delta.</li><li><strong>~25-10 Years Ago:</strong> Lurkers Beneath Lanterndeep; Oathvault Siege; Veilspire Eclipse.</li></ul>` };
@@ -235,20 +239,20 @@
             const rumorsData = { title: "Rumors on the Wind", content: `<ul class="list-disc list-inside space-y-2"><li>"Ashspire’s core burns too hot—some say Kaelmar prepares for war."</li><li>"The waters around Lanterndeep whisper names no one should hear."</li><li>"Warforged are remembering the stars. Some build shrines again."</li><li>"An isle south of Elyndor rose after the last moon-phase... and none remember it."</li></ul>` };
 
             // --- DOM ELEMENTS ---
-            const currentTimeEl = document.getElementById('current-time'); const phaseNameEl = document.getElementById('phase-name'); const phaseTimeEl = document.getElementById('phase-time'); const moonContainer = document.getElementById('moon-phase-container'); const wandererCalendarEl = document.getElementById('wanderer-calendar'); const zodiacContainer = document.getElementById('zodiac-accordion-container'); const speciesContainer = document.getElementById('species-accordion-container'); const timelineContainer = document.getElementById('timeline-accordion-container');
-            const yearSelector = document.getElementById('year-selector'); const monthSelector = document.getElementById('month-selector'); const daySelector = document.getElementById('day-selector'); const fullDateDisplay = document.getElementById('full-date-display');
-            
-            // Modal Elements
-            const openMondayModalBtn = document.getElementById('open-monday-modal');
-            const openFridayModalBtn = document.getElementById('open-friday-modal');
-            const mondayModal = document.getElementById('monday-modal');
-            const fridayModal = document.getElementById('friday-modal');
-            const closeMondayModalBtn = document.getElementById('close-monday-modal');
-            const closeFridayModalBtn = document.getElementById('close-friday-modal');
+            const phaseNameEl = document.getElementById('phase-name'); const phaseTimeEl = document.getElementById('phase-time'); const moonContainer = document.getElementById('moon-phase-container'); const wandererCalendarEl = document.getElementById('wanderer-calendar'); const zodiacContainer = document.getElementById('zodiac-accordion-container'); const speciesContainer = document.getElementById('species-accordion-container'); const timelineContainer = document.getElementById('timeline-accordion-container');
+            const yearSelector = document.getElementById('year-selector'); const monthSelector = document.getElementById('month-selector'); const daySelector = document.getElementById('day-selector'); const timeSelector = document.getElementById('time-selector'); const fullDateDisplay = document.getElementById('full-date-display');
+            const openMondayModalBtn = document.getElementById('open-monday-modal'); const openFridayModalBtn = document.getElementById('open-friday-modal'); const mondayModal = document.getElementById('monday-modal'); const fridayModal = document.getElementById('friday-modal'); const closeMondayModalBtn = document.getElementById('close-monday-modal'); const closeFridayModalBtn = document.getElementById('close-friday-modal');
 
             // --- FUNCTIONS ---
             function getMoonSVG(phase) { const svgSize=192;const center=svgSize/2;const radius=svgSize/2-2;let lightPath;if(phase<=0.5){const x=center-radius*Math.cos(phase*2*Math.PI);const largeArcFlag=phase>0.25?1:0;lightPath=`M${center},${center-radius} A${radius},${radius} 0 ${largeArcFlag} 1 ${center},${center+radius} A${x},${radius} 0 ${largeArcFlag} 0 ${center},${center-radius}`}else{const x=center-radius*Math.cos(phase*2*Math.PI);const largeArcFlag=phase<0.75?1:0;lightPath=`M${center},${center-radius} A${radius},${radius} 0 ${largeArcFlag} 0 ${center},${center+radius} A${x},${radius} 0 ${largeArcFlag} 1 ${center},${center-radius}`} if(phase===0)lightPath='';if(phase===0.5)lightPath=`M${center},${center-radius} A${radius},${radius} 0 1 1 ${center},${center-radius-.01} Z`;return`<svg viewBox="0 0 ${svgSize} ${svgSize}" class="moon-phase-svg w-full h-full"><circle cx="${center}" cy="${center}" r="${radius}" fill="#374151"/><path d="${lightPath}" fill="#FBBF24"/></svg>` }
-            function updateTorchClock(){const now=new Date();currentTimeEl.textContent=now.toTimeString().split(' ')[0];const hours=now.getHours();const phaseIndex=Math.floor(hours/3);const currentPhase=torchPhases[phaseIndex];if(phaseNameEl.textContent!==currentPhase.name){phaseNameEl.textContent=currentPhase.name;phaseTimeEl.textContent=currentPhase.time;moonContainer.innerHTML=currentPhase.svg}}
+            
+            function updateTorchDisplay() {
+                const phaseIndex = parseInt(timeSelector.value, 10);
+                const currentPhase = torchPhases[phaseIndex];
+                phaseNameEl.textContent = currentPhase.name;
+                phaseTimeEl.textContent = currentPhase.time;
+                moonContainer.innerHTML = currentPhase.svg;
+            }
             
             function renderWandererCalendar() {
                 const selectedDay = parseInt(daySelector.value, 10);
@@ -266,7 +270,7 @@
                 const monthIndex = parseInt(monthSelector.value, 10);
                 const day = parseInt(daySelector.value, 10);
                 if (isNaN(day) || day < 1 || day > 28) return;
-                const monthName = zodiacRegions[monthIndex].zodiac.split(' ')[0];
+                const monthName = zodiacRegions[monthIndex].zodiac.split(' (')[0];
                 const weekday = weekdays[(day - 1) % 7];
                 const sup = (day % 10 == 1 && day != 11) ? 'st' : (day % 10 == 2 && day != 12) ? 'nd' : (day % 10 == 3 && day != 13) ? 'rd' : 'th';
                 fullDateDisplay.innerHTML = `${weekday}, the ${day}<sup>${sup}</sup> of ${monthName}, Year ${year}`;
@@ -280,45 +284,36 @@
                     option.textContent = `${index + 1}. ${region.zodiac}`;
                     monthSelector.appendChild(option);
                 });
+                 torchPhases.forEach((phase, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${phase.name} ${phase.time}`;
+                    timeSelector.appendChild(option);
+                });
                 yearSelector.value = 842;
                 monthSelector.value = 11; // Evarain is 12th month, index 11
                 daySelector.value = 12;
-                [yearSelector, monthSelector, daySelector].forEach(el => {
-                    el.addEventListener('change', updateFullDateDisplay);
-                });
+                timeSelector.value = 4; // Default to Feast-time
+                [yearSelector, monthSelector, daySelector].forEach(el => { el.addEventListener('change', updateFullDateDisplay); });
+                timeSelector.addEventListener('change', updateTorchDisplay);
             }
 
-            function setupModalListeners() {
-                const openModal = (modal) => modal.classList.remove('hidden');
-                const closeModal = (modal) => modal.classList.add('hidden');
-
-                openMondayModalBtn.addEventListener('click', () => openModal(mondayModal));
-                openFridayModalBtn.addEventListener('click', () => openModal(fridayModal));
-
-                closeMondayModalBtn.addEventListener('click', () => closeModal(mondayModal));
-                closeFridayModalBtn.addEventListener('click', () => closeModal(fridayModal));
-
-                // Close modal by clicking on the backdrop
-                mondayModal.addEventListener('click', (e) => { if (e.target === mondayModal) closeModal(mondayModal) });
-                fridayModal.addEventListener('click', (e) => { if (e.target === fridayModal) closeModal(fridayModal) });
-            }
-
+            function setupModalListeners() { const openModal = (modal) => modal.style.display = 'flex'; const closeModal = (modal) => modal.style.display = 'none'; openMondayModalBtn.addEventListener('click', () => openModal(mondayModal)); openFridayModalBtn.addEventListener('click', () => openModal(fridayModal)); closeMondayModalBtn.addEventListener('click', () => closeModal(mondayModal)); closeFridayModalBtn.addEventListener('click', () => closeModal(fridayModal)); mondayModal.addEventListener('click', (e) => { if (e.target === mondayModal) closeModal(mondayModal) }); fridayModal.addEventListener('click', (e) => { if (e.target === fridayModal) closeModal(fridayModal) }); }
             function createAccordionItem(title, content) { return `<div class="bg-gray-800/50 rounded-lg"><div class="accordion-header flex justify-between items-center p-4"><h3 class="font-bold text-lg text-amber-300">${title}</h3><svg class="accordion-arrow w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div><div class="accordion-content px-4 pb-4 text-gray-400"><div class="border-t border-gray-600 pt-4">${content}</div></div></div>`; }
-            function renderZodiacAccordion(){let accordionHTML='';zodiacRegions.forEach((item,index)=>{const title=`${index+1}. ${item.region} – <span class="italic text-gray-300 font-normal">${item.subtitle}</span>`;const content=`<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><strong class="text-gray-200">Zodiac Sign:</strong> ${item.zodiac}</div><div><strong class="text-gray-200">Festival:</strong> ${item.festival}</div><div><strong class="text-gray-200">Capital:</strong> ${item.capital}</div><div><strong class="text-gray-200">Peoples:</strong> ${item.peoples}</div><div class="md:col-span-2"><strong class="text-gray-200">Terrain:</strong> ${item.terrain}</div><div class="md:col-span-2"><strong class="text-gray-200">Culture:</strong> ${item.culture}</div></div>`;accordionHTML+=createAccordionItem(title,content)});zodiacContainer.innerHTML=accordionHTML}
+            function renderZodiacAccordion(){let accordionHTML='';zodiacRegions.forEach((item,index)=>{const title=`${index+1}. ${item.region} – <span class="italic text-gray-300 font-normal">${item.subtitle}</span>`;const content=`<div class="space-y-3"><p><strong class="text-gray-200">Zodiac Sign:</strong> ${item.zodiac}</p><p><strong class="text-gray-200">Associated Festival:</strong> ${item.festival}</p><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><strong class="text-gray-200">Capital:</strong> ${item.capital}</div><div><strong class="text-gray-200">Peoples:</strong> ${item.peoples}</div></div><p><strong class="text-gray-200">Terrain:</strong> ${item.terrain}</p><p><strong class="text-gray-200">Culture:</strong> ${item.culture}</p></div>`;accordionHTML+=createAccordionItem(title,content)});zodiacContainer.innerHTML=accordionHTML}
             function renderSpeciesAccordion(){let accordionHTML='';speciesAndFaith.forEach(item=>{const content=`<div class="space-y-3"><p><strong class="text-gray-200">Society:</strong> ${item.society}</p><p><strong class="text-gray-200">Values:</strong> ${item.values}</p><p><strong class="text-gray-200">Faith:</strong> ${item.faith}</p><p><strong class="text-gray-200">Shrines:</strong> ${item.shrines}</p></div>`;accordionHTML+=createAccordionItem(item.name,content)});speciesContainer.innerHTML=accordionHTML}
             function renderTimelineAccordion() { let accordionHTML = ''; accordionHTML += createAccordionItem(timelineData.title, timelineData.content); accordionHTML += createAccordionItem(factionsData.title, factionsData.content); accordionHTML += createAccordionItem(rumorsData.title, rumorsData.content); timelineContainer.innerHTML = accordionHTML; }
             function addAccordionListeners(){document.querySelectorAll('.accordion-header').forEach(header=>{header.addEventListener('click',()=>{header.classList.toggle('active')})})}
 
             // --- INITIALIZATION ---
-            updateTorchClock();
             setupDateSelectors();
             setupModalListeners();
             updateFullDateDisplay();
+            updateTorchDisplay();
             renderZodiacAccordion();
             renderSpeciesAccordion();
             renderTimelineAccordion();
             addAccordionListeners();
-            setInterval(updateTorchClock, 1000);
         });
     </script>
 
