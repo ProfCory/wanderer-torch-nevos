@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wanderer & The Torch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #E5E7EB;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel Decorative', cursive;
+        }
+        .card {
+            background-color: #1F2937;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .torch-clock {
+            transition: all 0.5s ease-in-out;
+        }
+        .moon-phase-svg {
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.7));
+        }
+        .section-title {
+            border-bottom: 2px solid #4B5563;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="font-cinzel text-4xl sm:text-5xl lg:text-6xl font-bold text-amber-300">The Wanderer & The Torch</h1>
+            <p class="text-lg text-gray-400 mt-2">The Cosmology & Timekeeping of Nevos</p>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column / Main Content on Mobile -->
+            <main class="lg:col-span-2 space-y-8">
+                
+                <!-- Moons Section -->
+                <section id="moons" class="card">
+                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">🌕 The Moons</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-200">The Wanderer</h3>
+                            <p class="text-gray-400 mt-1">Governs fate, change, and the 28-day cycle of weeks and months. Below is its current position in the 28-day cycle.</p>
+                            <div id="wanderer-calendar" class="grid grid-cols-7 gap-2 mt-4 p-4 bg-gray-900/50 rounded-lg">
+                                <!-- Calendar days will be injected here by JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-200">The Torch</h3>
+                            <p class="text-gray-400 mt-1">Marks the eight phases of a Nevosian day. Its current phase is shown in the clock to the right (or below on mobile).</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Calendar & Weekdays -->
+                 <section id="calendar" class="card">
+                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">🗓️ Calendar & Week</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-200 mb-2">Calendar Structure</h3>
+                            <ul class="list-disc list-inside text-gray-300 space-y-1">
+                                <li><span class="font-semibold">Year:</span> 364 days</li>
+                                <li><span class="font-semibold">Months:</span> 13, named after zodiacal stars</li>
+                                <li><span class="font-semibold">Weeks:</span> 7-day "turns", aligned with moon phases</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-200 mb-2">Turns of the Week</h3>
+                            <ul class="list-none text-gray-300 space-y-1">
+                                <li>Cressaturn (Waxing Crescent)</li>
+                                <li>Quarturn (First Quarter)</li>
+                                <li>Gibbanturn (Waxing Gibbous)</li>
+                                <li>Seluturn (Full Moon)</li>
+                                <li>Drossturn (Waning Gibbous)</li>
+                                <li>Fennelturn (Last Quarter)</li>
+                                <li>Veilnight (Waning Crescent)</li>
+                            </ul>
+                             <p class="text-sm text-gray-500 italic mt-3">"Save it for Neventurn."</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seasons Section -->
+                <section id="seasons" class="card">
+                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">🌦️ The Seven Seasons</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Verdance:</strong> Spring thaw, renewal.</div>
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Scorchrest:</strong> Intense heat, sun rituals.</div>
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Gildharrow:</strong> First harvest, prosperity.</div>
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Siltwane:</strong> Rains, flooding, hardship.</div>
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Ashreap:</strong> Second harvest, solemnity.</div>
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Drifthollow:</strong> Decay, fungal bloom.</div>
+                        <div class="p-4 bg-gray-800 rounded-lg"><strong>Frostwrath:</strong> Brutal cold, isolation.</div>
+                    </div>
+                </section>
+                
+                <!-- Zodiac & Festivals -->
+                 <section id="zodiac" class="card">
+                    <h2 class="font-cinzel text-3xl font-bold text-amber-400 section-title">🌠 Zodiac & Festivals</h2>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <ul class="space-y-2 text-gray-300">
+                             <li><strong>1. Valkeryn (War):</strong> Crimson March</li>
+                             <li><strong>2. Meredahl (Life):</strong> First Bloom</li>
+                             <li><strong>3. Aelos (Knowledge):</strong> Whisper Week</li>
+                             <li><strong>4. Kaelor (Light/Fire):</strong> Torchwake</li>
+                             <li><strong>5. Solmera (Luck/Travel):</strong> Wanderer’s Respite</li>
+                             <li><strong>6. Elyth (Nature/Grave):</strong> Petalfall</li>
+                             <li><strong>7. Vesht (Trickery):</strong> Veilmarket</li>
+                        </ul>
+                        <ul class="space-y-2 text-gray-300">
+                             <li><strong>8. Threnys (Death):</strong> Mourning Tide</li>
+                             <li><strong>9. Dravath (Order/Tempest):</strong> Stormbound</li>
+                             <li><strong>10. Yureth (Twilight/Memory):</strong> Dreaming Scrolls</li>
+                             <li><strong>11. Inarith (Arcana/Forge):</strong> Forgewake</li>
+                             <li><strong>12. Evarain (Fate/Exile):</strong> Thread’s End</li>
+                             <li><strong>13. Karnoss (Death):</strong> Hollow Vigil</li>
+                        </ul>
+                     </div>
+                 </section>
+                
+            </main>
+
+            <!-- Right Column / Torch Clock -->
+            <aside class="lg:col-span-1 space-y-8">
+                <div class="sticky top-8">
+                    <div id="torch-clock" class="torch-clock card text-center">
+                        <h3 class="font-cinzel text-2xl font-bold text-amber-300 mb-4">The Torch Clock</h3>
+                        <div id="moon-phase-container" class="relative w-48 h-48 mx-auto mb-4 flex items-center justify-center">
+                            <!-- Moon SVG will be injected here -->
+                        </div>
+                        <p class="text-3xl font-bold text-white" id="phase-name">Rest-time</p>
+                        <p class="text-gray-400" id="phase-time">(12am – 3am)</p>
+                        <p class="text-lg font-mono text-amber-400 mt-4" id="current-time">00:00:00</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+         <!-- Rites and Festivals Footer -->
+        <footer class="mt-12 pt-8 border-t border-gray-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1">
+                <h3 class="font-cinzel text-xl text-amber-400">Seasonal Cross-Festivals</h3>
+                <ul class="list-disc list-inside text-gray-400 mt-2">
+                    <li>Thaw’s Mercy</li>
+                    <li>Sun’s Bargain</li>
+                    <li>Grainwake</li>
+                    <li>Flood’s Gate</li>
+                    <li>Amber Fall</li>
+                    <li>First Ice</li>
+                    <li>Candlegate</li>
+                </ul>
+            </div>
+             <div class="lg:col-span-2">
+                <h3 class="font-cinzel text-xl text-amber-400">Liminal & Terminal Rites</h3>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                     <div class="text-gray-400">
+                        <h4 class="font-bold text-gray-300">Wanderer’s Arrival (New Year)</h4>
+                        <p>Oath-mud inscriptions, thawroot crowns, and the Yearbearer's lantern.</p>
+                     </div>
+                     <div class="text-gray-400">
+                        <h4 class="font-bold text-gray-300">Night of Threads (End of Year)</h4>
+                        <p>Whispered confessions, tokens of thread and bone, and the final walk into the snow.</p>
+                     </div>
+                 </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA FOR NEVOS TIMEKEEPING ---
+            const torchPhases = [
+                { name: 'Rest-time', time: '12am – 3am', svg: getMoonSVG(0) },
+                { name: 'Wake-time', time: '3am – 6am', svg: getMoonSVG(0.125) },
+                { name: 'Begin-time', time: '6am – 9am', svg: getMoonSVG(0.25) },
+                { name: 'Bustle-time', time: '9am – 12pm', svg: getMoonSVG(0.375) },
+                { name: 'Feast-time', time: '12pm – 3pm', svg: getMoonSVG(0.5) },
+                { name: 'Finale-time', time: '3pm – 6pm', svg: getMoonSVG(0.625) },
+                { name: 'Supine-time', time: '6pm – 9pm', svg: getMoonSVG(0.75) },
+                { name: 'Dim-time', time: '9pm – 12am', svg: getMoonSVG(0.875) },
+            ];
+
+            // --- DOM ELEMENTS ---
+            const currentTimeEl = document.getElementById('current-time');
+            const phaseNameEl = document.getElementById('phase-name');
+            const phaseTimeEl = document.getElementById('phase-time');
+            const moonContainer = document.getElementById('moon-phase-container');
+            const wandererCalendarEl = document.getElementById('wanderer-calendar');
+
+            // --- FUNCTIONS ---
+            /**
+             * Generates an SVG for the moon phase.
+             * @param {number} phase - A value from 0 (new) to 0.5 (full) to 1 (new).
+             */
+            function getMoonSVG(phase) {
+                const svgSize = 192; // 48 * 4
+                const center = svgSize / 2;
+                const radius = svgSize / 2 - 2;
+
+                // Path for the lit part of the moon
+                let lightPath;
+                if (phase <= 0.5) { // Waxing
+                    const x = center - radius * Math.cos(phase * 2 * Math.PI);
+                    const largeArcFlag = phase > 0.25 ? 1 : 0;
+                    lightPath = `M${center},${center-radius} A${radius},${radius} 0 ${largeArcFlag} 1 ${center},${center+radius} A${x},${radius} 0 ${largeArcFlag} 0 ${center},${center-radius}`;
+                } else { // Waning
+                    const x = center - radius * Math.cos(phase * 2 * Math.PI);
+                    const largeArcFlag = phase < 0.75 ? 1 : 0;
+                     lightPath = `M${center},${center-radius} A${radius},${radius} 0 ${largeArcFlag} 0 ${center},${center+radius} A${x},${radius} 0 ${largeArcFlag} 1 ${center},${center-radius}`;
+                }
+                
+                // Handle perfect new and full moons
+                if (phase === 0) lightPath = ''; // No light
+                if (phase === 0.5) lightPath = `M${center},${center-radius} A${radius},${radius} 0 1 1 ${center},${center-radius-.01} Z`; // Full circle
+
+
+                return `
+                    <svg viewBox="0 0 ${svgSize} ${svgSize}" class="moon-phase-svg w-full h-full">
+                        <!-- Dark side of the moon -->
+                        <circle cx="${center}" cy="${center}" r="${radius}" fill="#374151"/>
+                        <!-- Light side of the moon -->
+                        <path d="${lightPath}" fill="#FBBF24"/>
+                    </svg>
+                `;
+            }
+
+            /**
+             * Get the day of the year (1-366)
+             */
+            function getDayOfYear(date) {
+                const start = new Date(date.getFullYear(), 0, 0);
+                const diff = date - start;
+                const oneDay = 1000 * 60 * 60 * 24;
+                return Math.floor(diff / oneDay);
+            }
+
+            /**
+             * Updates the torch clock based on the current time.
+             */
+            function updateTorchClock() {
+                const now = new Date();
+                
+                // Update digital time
+                currentTimeEl.textContent = now.toTimeString().split(' ')[0];
+
+                // Calculate current phase
+                const hours = now.getHours();
+                const phaseIndex = Math.floor(hours / 3);
+                const currentPhase = torchPhases[phaseIndex];
+
+                // Update DOM if phase has changed
+                if (phaseNameEl.textContent !== currentPhase.name) {
+                    phaseNameEl.textContent = currentPhase.name;
+                    phaseTimeEl.textContent = currentPhase.time;
+                    moonContainer.innerHTML = currentPhase.svg;
+                }
+            }
+
+            /**
+             * Renders the 28-day Wanderer calendar.
+             */
+            function renderWandererCalendar() {
+                const dayOfYear = getDayOfYear(new Date());
+                const currentDayInCycle = (dayOfYear - 1) % 28; // 0-27
+                
+                let calendarHTML = '';
+                for (let i = 0; i < 28; i++) {
+                    const isCurrentDay = i === currentDayInCycle;
+                    const dayClass = isCurrentDay 
+                        ? 'bg-amber-400 text-gray-900 font-bold' 
+                        : 'bg-gray-700 text-gray-300';
+                    calendarHTML += `<div class="flex items-center justify-center h-10 rounded-md ${dayClass}">${i + 1}</div>`;
+                }
+                wandererCalendarEl.innerHTML = calendarHTML;
+            }
+
+
+            // --- INITIALIZATION ---
+            updateTorchClock();
+            renderWandererCalendar();
+            setInterval(updateTorchClock, 1000); // Update every second
+        });
+    </script>
+
+</body>
+</html>
