@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zodiacal Calendar of the Realm</title>
+  <style>
+    body {
+      font-family: "Garamond", serif;
+      background: #f4f1e9;
+      color: #2f2f2f;
+      padding: 2rem;
+      display: flex;
+    }
+    main {
+      flex: 3;
+    }
+    aside {
+      flex: 1;
+      margin-left: 2rem;
+      padding: 1rem;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .month {
+      margin-bottom: 2rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      background-color: #fff;
+      border-radius: 8px;
+    }
+    .month-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .day-name {
+      font-weight: bold;
+      background-color: #ddd;
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+    .day {
+      padding: 0.5rem;
+      background-color: #fafafa;
+      border: 1px solid #e2e2e2;
+      border-radius: 4px;
+    }
+    .festival {
+      background-color: #ffeecf;
+      border: 2px solid #e0c07d;
+    }
+    .season-label {
+      text-align: center;
+      font-style: italic;
+      margin: 0.5rem 0;
+    }
+    .cross-festival, .liminal-rite {
+      background-color: #dbe4ff;
+      border: 2px dashed #8598c7;
+    }
+    .moon-phase {
+      font-size: 0.75rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Zodiacal Calendar of the Realm</h1>
+  <h2>364 Days | 13 Months | 28-Day Lunar Cycle | 7-Turn Weeks</h2>
+
+  <script>
+    const months = [
+      "Valkeryn", "Meredahl", "Aelos", "Kaelor", "Solmera", "Elyth", "Vesht",
+      "Threnys", "Dravath", "Yureth", "Inarith", "Evarain", "Karnoss"
+    ];
+
+    const moonPhases = [
+      "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent",
+      "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous"
+    ];
+
+    const weekTurns = ["Cressaturn", "Quarturn", "Gibbanturn", "Seluturn", "Drossturn", "Fennelturn", "Veilnight"];
+
+    const seasons = [
+      { start: 0, label: "🌱 Verdance (Rain 1)" },
+      { start: 2, label: "🔥 Scorchrest (Heat)" },
+      { start: 4, label: "🌾 Gildharrow (Harvest 1)" },
+      { start: 6, label: "🌊 Siltwane (Rain 2)" },
+      { start: 8, label: "🍁 Ashreap (Harvest 2)" },
+      { start: 10, label: "🌫️ Drifthollow (Rain 3)" },
+      { start: 12, label: "❄️ Frostwrath (Snow)" }
+    ];
+
+    const festivalNames = [
+      "Crimson March", "First Bloom", "Whisper Week", "Torchwake", "Wanderer's Respite", "Petalfall", "Veilmarket",
+      "Mourning Tide", "Stormbound", "Dreaming Scrolls", "Forgewake", "Thread’s End", "Hollow Vigil"
+    ];
+
+    const crossFestivalDays = [56, 112, 168, 224, 280, 335, 364];
+    const liminalRites = [1, 336];
+    const moonPhaseDates = [1, 46, 91, 137, 182, 228, 273, 319];
+
+    const calendarContainer = document.createElement("div");
+    document.querySelector("main").appendChild(calendarContainer);
+
+    let dayOfYear = 0;
+
+    months.forEach((month, index) => {
+      const season = seasons.find(s => s.start === index);
+      if (season) {
+        const seasonLabel = document.createElement("div");
+        seasonLabel.className = "season-label";
+        seasonLabel.textContent = season.label;
+        calendarContainer.appendChild(seasonLabel);
+      }
+
+      const monthDiv = document.createElement("div");
+      monthDiv.className = "month";
+
+      const title = document.createElement("div");
+      title.className = "month-name";
+      title.textContent = `${index + 1}. ${month} – Festival: ${festivalNames[index]}`;
+      monthDiv.appendChild(title);
+
+      const grid = document.createElement("div");
+      grid.className = "calendar-grid";
+
+      weekTurns.forEach(day => {
+        const dayHeader = document.createElement("div");
+        dayHeader.className = "day-name";
+        dayHeader.textContent = day;
+        grid.appendChild(dayHeader);
+      });
+
+      for (let d = 1; d <= 28; d++) {
+        dayOfYear++;
+        const day = document.createElement("div");
+        day.className = "day";
+        day.textContent = d;
+
+        if ([5, 6, 7].includes((d - 1) % 7 + 1) && d <= 7) {
+          day.classList.add("festival");
+          day.title = `${festivalNames[index]} Festival (First Weekend)`;
+        }
+
+        if (crossFestivalDays.includes(dayOfYear)) {
+          day.classList.add("cross-festival");
+          day.title = "Seasonal Cross-Festival (Moon-Tied)";
+        }
+
+        if (liminalRites.includes(dayOfYear)) {
+          day.classList.add("liminal-rite");
+          day.title = dayOfYear === 1 ? "Wanderer’s Arrival – New Year Rite" : "Night of Threads – Terminal Rite";
+        }
+
+        if (moonPhaseDates.includes(dayOfYear)) {
+          const index = moonPhaseDates.indexOf(dayOfYear);
+          const phase = moonPhases[index % moonPhases.length];
+          const label = document.createElement("div");
+          label.className = "moon-phase";
+          label.textContent = `🌕 ${phase}`;
+          day.appendChild(label);
+        }
+
+        grid.appendChild(day);
+      }
+
+      monthDiv.appendChild(grid);
+      calendarContainer.appendChild(monthDiv);
+    });
+  </script>
+</main>
+<aside>
+  <h3>Calendar Symbols</h3>
+  <ul>
+    <li><strong>🟨 Weekend Festival:</strong> First weekend (Fennelturn–Veilnight)</li>
+    <li><strong>🟦 Cross-Festival:</strong> Seasonal moon-aligned transition</li>
+    <li><strong>🟪 Liminal Rite:</strong> Day 1 – Wanderer’s Arrival (New Year)</li>
+    <li><strong>⬛ Terminal Rite:</strong> Day 336 – Night of Threads (before Karnoss)</li>
+    <li><strong>🌕 Moon Phase:</strong> Wandering celestial moment</li>
+  </ul>
+  <h4>Wanderer's Phases (45.5-Day Cycle)</h4>
+  <ol>
+    <li>Day 1 – Full Moon</li>
+    <li>Day 46 – Waning Gibbous</li>
+    <li>Day 91 – Last Quarter</li>
+    <li>Day 137 – Waning Crescent</li>
+    <li>Day 182 – New Moon</li>
+    <li>Day 228 – Waxing Crescent</li>
+    <li>Day 273 – First Quarter</li>
+    <li>Day 319 – Waxing Gibbous</li>
+  </ol>
+  <h4>Seasonal Cross-Festival Days</h4>
+  <ul>
+    <li>56 – Thaw’s Mercy (Verdance → Scorchrest)</li>
+    <li>112 – Sun’s Bargain (Scorchrest → Gildharrow)</li>
+    <li>168 – Grainwake (Gildharrow → Siltwane)</li>
+    <li>224 – Flood’s Gate (Siltwane → Ashreap)</li>
+    <li>280 – Amber Fall (Ashreap → Drifthollow)</li>
+    <li>335 – First Ice (Drifthollow → Frostwrath)</li>
+    <li>364 – Candlegate (Frostwrath → Verdance)</li>
+  </ul>
+</aside>
+</body>
+</html>
