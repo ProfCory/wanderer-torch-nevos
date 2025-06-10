@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.campaign-button {
+  display: inline-block;
+  background-color: #0073e6;
+  color: white;
+  padding: 15px 25px;
+  margin: 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.campaign-button:hover {
+  background-color: #005bb5;
+}
+
+footer {
+  margin-top: 50px;
+  font-size: 14px;
+}
+
+footer a {
+  color: #0073e6;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
