@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giant-Kin of Nevos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-bottom-width: 2px;
+            border-color: transparent;
+        }
+        .tab-btn.active {
+            border-color: #f56565;
+            color: #f56565;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: #2d3748;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .table-header {
+            background-color: #4a5568;
+        }
+        .table-row-odd {
+            background-color: #2d3748;
+        }
+        .table-row-even {
+            background-color: #384252;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Main Title -->
+        <h1 class="text-4xl font-bold text-center mb-2 text-red-400">Giant-Kin in Nevos</h1>
+        <p class="text-center text-gray-400 mb-8">An interactive guide to their origins, locations, and status.</p>
+
+        <!-- Canonical Origins Card -->
+        <div class="card mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-red-300">Canonical Origins</h2>
+            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                <li>Giants once ruled but were driven to the fringes by elves and dwarves.</li>
+                <li>They now exist in storm-rimmed edges of the world, exiled and bitter.</li>
+                <li>Their culture is dream-haunted, and they follow a trinity of gods: <strong>Ashunel</strong> (Stone), <strong>Evarain</strong> (Shadow), and <strong>Solivane</strong> (Fire).</li>
+            </ul>
+        </div>
+
+        <!-- Interactive Tab Section for Locations -->
+        <div class="card mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-red-300">Probable Locations</h2>
+            <!-- Tab Buttons -->
+            <div class="flex border-b border-gray-600 mb-4">
+                <button class="tab-btn active text-lg font-semibold py-2 px-4" onclick="openTab(event, 'goliaths')">Goliaths</button>
+                <button class="tab-btn text-lg font-semibold py-2 px-4" onclick="openTab(event, 'firbolg')">Firbolg</button>
+            </div>
+
+            <!-- Tab Content: Goliaths -->
+            <div id="goliaths" class="tab-content active">
+                <h3 class="text-xl font-bold text-gray-200 mb-2">Goliaths <span class="text-base font-normal text-gray-400">(Earth/Storm-lineage)</span></h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-red-200">Dravaskor:</h4>
+                        <p class="text-gray-300 ml-4">The harsh cliffs and mountain garrisons are a perfect match for rare goliath enclaves, especially those maintaining ancient storm rites or oaths.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-red-200">Karnathul:</h4>
+                        <p class="text-gray-300 ml-4">Exiled goliaths from old orders may have fled to this icy tundra. While culturally bleak, it is mythically resonant for their kind.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-red-200">Planar Note (Shadowfell/Ethereal):</h4>
+                        <p class="text-gray-300 ml-4">More spiritual tribes might be partially phased into the Ethereal Plane or lost in echo-realms, fitting their "dreaming of thunder" nature.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Firbolg -->
+            <div id="firbolg" class="tab-content">
+                 <h3 class="text-xl font-bold text-gray-200 mb-2">Firbolg <span class="text-base font-normal text-gray-400">(Nature/Magic-lineage)</span></h3>
+                 <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-red-200">Elyndor:</h4>
+                        <p class="text-gray-300 ml-4">The grave gardens and sacred valleys here would allow firbolg to easily blend with the local druidic and mourning cultures.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-red-200">Yurevanth or Evarayne:</h4>
+                        <p class="text-gray-300 ml-4">For firbolg with a more mystical or fey-descended nature, the dream-libraries or prophecy cloisters of these regions are a perfect fit.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-red-200">Planar Note (Feywild/Limbo):</h4>
+                        <p class="text-gray-300 ml-4">Some could be considered refugees from the Feywild, having fled into Nevos during an ancient cosmic breach, a fact now lost to most local lore.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Information Cards -->
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <div class="card">
+                <h2 class="text-2xl font-semibold mb-4 text-red-300">Planar Justification</h2>
+                <p class="text-gray-300">While Nevos' cosmology is centered on stars and seasons, it references the Fey, Shadows, and Hells. An "Outlands-style" city beyond the known world implies Nevos touches the multiverse, supporting giant-kin roots in realms like the Shadowfell, Feywild, and Ethereal Plane.</p>
+            </div>
+            <div class="card">
+                <h2 class="text-2xl font-semibold mb-4 text-red-300">Social Stigma</h2>
+                <p class="text-gray-300">Giant-kin are rare, marginalized, and unwelcome. Hunted by elves and dwarves, they face hostility in places like <strong class="text-red-200">Aelorthal</strong> and dwarven strongholds. In modern Nevos, they are often seen as "myth-kin" or cursed relics of a bygone age.</p>
+            </div>
+        </div>
+
+        <!-- Summary Table -->
+        <div>
+            <h2 class="text-2xl font-semibold text-center mb-4 text-red-300">Summary Placement</h2>
+            <div class="overflow-x-auto rounded-lg shadow">
+                <table class="w-full text-left">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="p-3">Type</th>
+                            <th class="p-3">Region(s)</th>
+                            <th class="p-3">Planar Tie</th>
+                            <th class="p-3">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-row-odd">
+                            <td class="p-3 font-semibold text-red-200">Goliath</td>
+                            <td class="p-3">Dravaskor, Karnathul</td>
+                            <td class="p-3">Shadowfell, Ethereal</td>
+                            <td class="p-3">Storm-oath keepers, exiles in peaks or frostlands</td>
+                        </tr>
+                        <tr class="table-row-even">
+                            <td class="p-3 font-semibold text-red-200">Firbolg</td>
+                            <td class="p-3">Elyndor, Yurevanth, Evarayne</td>
+                            <td class="p-3">Feywild, Limbo</td>
+                            <td class="p-3">Nature priests, fatewalkers, or grave tenders</td>
+                        </tr>
+                        <tr class="table-row-odd">
+                            <td class="p-3 font-semibold text-red-200">Other Giants</td>
+                            <td class="p-3">World’s Edge, Storm-Rimmed Peaks</td>
+                            <td class="p-3">Elemental Chaos, Primordial Realms</td>
+                            <td class="p-3">Rare mythic figures, often seen as cursed</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // JavaScript for tab functionality
+        function openTab(event, tabName) {
+            // Get all elements with class="tab-content" and hide them
+            const tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove('active');
+            }
+
+            // Get all elements with class="tab-btn" and remove the "active" class
+            const tablinks = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove('active');
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Set the default tab to be open
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('goliaths').style.display = 'block';
+        });
+    </script>
+
+</body>
+</html>
