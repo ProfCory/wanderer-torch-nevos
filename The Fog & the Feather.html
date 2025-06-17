@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fog & Feather - Thalen "Inkgut" Brost</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .section-title {
+            color: #a0aec0; /* Lighter grey for titles */
+            border-bottom: 2px solid #2d3748; /* Darker border */
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card {
+            background-color: #2d3748; /* Slightly lighter dark for cards */
+            border-radius: 0.75rem; /* Rounded corners */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .item-name {
+            color: #cbd5e0; /* Off-white for item names */
+        }
+        .item-description {
+            color: #a0aec0; /* Lighter grey for descriptions */
+        }
+        .price {
+            color: #90cdf4; /* Blueish for prices */
+            font-weight: 600;
+        }
+        .stock {
+            color: #c6f6d5; /* Greenish for stock */
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #4a5568; /* Slightly lighter border for table cells */
+        }
+        th {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover {
+            background-color: #4a5568; /* Hover effect for rows */
+        }
+        th:first-child { border-top-left-radius: 0.75rem; }
+        th:last-child { border-top-right-radius: 0.75rem; }
+        tr:last-child td:first-child { border-bottom-left-radius: 0.75rem; }
+        tr:last-child td:last-child { border-bottom-right-radius: 0.75rem; }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                margin-bottom: 1rem;
+                border: 1px solid #4a5568;
+                border-radius: 0.75rem;
+                overflow: hidden; /* Ensures rounded corners on mobile */
+            }
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 45%;
+                padding-left: 0.75rem;
+                font-weight: 600;
+                text-align: left;
+                color: #e2e8f0;
+            }
+            td:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="container mx-auto rounded-xl overflow-hidden shadow-lg p-6 sm:p-10 bg-gray-800">
+        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-2 text-center">The Fog & Feather</h1>
+        <p class="text-xl sm:text-2xl text-gray-400 mb-8 text-center">- Thalen "Inkgut" Brost // fence and operator</p>
+
+        <!-- General Merchandise -->
+        <h2 class="text-3xl font-semibold section-title mb-6">General Merchandise</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Veilshard Amulet</td>
+                        <td data-label="Description">Fragment of magically inert residuum, still resonates faintly in dream-planes. Illegal to possess in Yurevanth.</td>
+                        <td data-label="Price (gp)">60</td>
+                        <td data-label="Notes">Traceable by some divination</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Unblessed Temple Coin</td>
+                        <td data-label="Description">Stolen from old Solivane shrine, causes unease in devout. Some say it blocks divine intervention for 10 minutes.</td>
+                        <td data-label="Price (gp)">35</td>
+                        <td data-label="Notes">Tied to cold cases</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Veil-Forged Lockbreaker</td>
+                        <td data-label="Description">Tiny residuum edge-tool, disables mundane locks in silence. Melts after 3 uses.</td>
+                        <td data-label="Price (gp)">50</td>
+                        <td data-label="Notes">Quietly banned in 3 regions</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Inquisitor’s Eyestone</td>
+                        <td data-label="Description">False eye that records 1 minute of visual memory. One-time use. Used by spies and blackmailers.</td>
+                        <td data-label="Price (gp)">85</td>
+                        <td data-label="Notes">Seen as treasonous gear</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Scroll of False Light</td>
+                        <td data-label="Description">Can mimic divine spell signatures; often used to impersonate clerics or frame spellcasters.</td>
+                        <td data-label="Price (gp)">40</td>
+                        <td data-label="Notes">Known forgery script</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Inkworm Pouch</td>
+                        <td data-label="Description">Contains 2–3 creatures that can “digest” written words—used to destroy records.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Notes">Illegal to own without scribe guild approval</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Brass-Sliver Blade</td>
+                        <td data-label="Description">Blade known to bypass warded bindings, rumored to be linked to Hollow Trace sabotage.</td>
+                        <td data-label="Price (gp)">70</td>
+                        <td data-label="Notes">Has a telltale tang</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Old Guard Badge</td>
+                        <td data-label="Description">Forged or stolen insignia from pre-unification guard of Redmarch. Opens doors in the wrong places.</td>
+                        <td data-label="Price (gp)">20</td>
+                        <td data-label="Notes">Branded as counterfeit</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Mirror Dust</td>
+                        <td data-label="Description">Blinds scrying for 1 minute if scattered mid-spell. Irritates skin and eyes.</td>
+                        <td data-label="Price (gp)">30</td>
+                        <td data-label="Notes">Rare but toxic</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Whispershard Sliver</td>
+                        <td data-label="Description">Sliver of a broken Veilspire dream-mirror. Can transmit dreams or nightmares once. Causes headaches.</td>
+                        <td data-label="Price (gp)">40</td>
+                        <td data-label="Notes">Sometimes cursed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Zodiacal & Celestial Items -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Zodiacal & Celestial Items</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Tied To</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Starbound Locket</td>
+                        <td data-label="Tied To">Any sign</td>
+                        <td data-label="Description">A tarnished silver locket containing a shard of etched starglass. Holding it grants calm dreams.</td>
+                        <td data-label="Price (gp)">35</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Lapel Pin of Yureth</td>
+                        <td data-label="Tied To">Yureth (Twilight)</td>
+                        <td data-label="Description">Emits a faint glimmer during the Torch Moon's zenith. Used by dream-rites and archivists.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Orric Prayer Ring</td>
+                        <td data-label="Tied To">Orran (Motion/Impulse)</td>
+                        <td data-label="Description">A looped bronze ring that rattles faintly when a decision looms.</td>
+                        <td data-label="Price (gp)">18</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Glass Bead of Kaeluun</td>
+                        <td data-label="Tied To">Kaeluun (Cycles/Storms)</td>
+                        <td data-label="Description">Bead swirls with lightning-like strands. Changes color based on nearby tension.</td>
+                        <td data-label="Price (gp)">28</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Coin of Astara</td>
+                        <td data-label="Tied To">Astara (Balance/Truth)</td>
+                        <td data-label="Description">An ancient balance-scale coin that always lands upright. It is not a lucky coin—just strange.</td>
+                        <td data-label="Price (gp)">22</td>
+                        <td data-label="Stock">6</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Divination Tools -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Divination Tools</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Use</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Zodiacal Lens</td>
+                        <td data-label="Use">Augury tool</td>
+                        <td data-label="Description">A crystal lens etched with 12 star signs. Used by oracles to cast bones or read omens.</td>
+                        <td data-label="Price (gp)">40</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Nightcaller Staff Top</td>
+                        <td data-label="Use">Spell focus</td>
+                        <td data-label="Description">Carved wood and starmetal sphere, resonates faintly with one's associated sign during full moons.</td>
+                        <td data-label="Price (gp)">45</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Sky-Tether Diagram Cloth</td>
+                        <td data-label="Use">Divination mat</td>
+                        <td data-label="Description">A silk chart used for rituals under the stars. Glows faintly when moonlight strikes it.</td>
+                        <td data-label="Price (gp)">30</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Echo-Sigil Ink (vial)</td>
+                        <td data-label="Use">Ritual item</td>
+                        <td data-label="Description">Used to scribe temporary zodiac signs during rites. Burns away after a night.</td>
+                        <td data-label="Price (gp)">10</td>
+                        <td data-label="Stock">5</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">The 12 Faces Die</td>
+                        <td data-label="Use">Entertainment or omen game</td>
+                        <td data-label="Description">Dodecahedron die with each zodiac’s sigil. Used in tavern bets and minor fortune games.</td>
+                        <td data-label="Price (gp)">5</td>
+                        <td data-label="Stock">10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Ritual & Dreamcraft Items -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Ritual & Dreamcraft Items</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Use</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Fragment of the Lost Hour</td>
+                        <td data-label="Use">Ritual boon</td>
+                        <td data-label="Description">Used in zodiac-based ceremonies. Burnt in offering for +1 to Insight/Religion rolls for 1 hour.</td>
+                        <td data-label="Price (gp)">20</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Eclipse Thread</td>
+                        <td data-label="Use">Ward focus</td>
+                        <td data-label="Description">When tied to a staff or amulet, grants resistance to being charmed for 10 minutes (once).</td>
+                        <td data-label="Price (gp)">35</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Grain of Star Salt</td>
+                        <td data-label="Use">Dream trigger</td>
+                        <td data-label="Description">Crushed under tongue during sleep rites to enter lucid dreams tied to your sign. Rare among dreamwalkers.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Scrolls -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Scrolls</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Scroll Name</th>
+                        <th>Spell</th>
+                        <th>Price (gp)</th>
+                        <th>Scribe's Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Scroll Name">Scroll of Silver Words</td>
+                        <td data-label="Spell">Comprehend Languages</td>
+                        <td data-label="Price (gp)">60</td>
+                        <td data-label="Scribe's Note">“Works even if the language has never been spoken aloud.”</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Scroll Name">Scroll of Cold Denial</td>
+                        <td data-label="Spell">Shield</td>
+                        <td data-label="Price (gp)">75</td>
+                        <td data-label="Scribe's Note">“Script glows with pale frost when read.”</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Scroll Name">Scroll of the Inked Path</td>
+                        <td data-label="Spell">Feather Fall</td>
+                        <td data-label="Price (gp)">55</td>
+                        <td data-label="Scribe's Note">“Always found near spires or cliffs.”</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Scroll Name">Scroll of Dust's Warning</td>
+                        <td data-label="Spell">Detect Poison and Disease</td>
+                        <td data-label="Price (gp)">65</td>
+                        <td data-label="Scribe's Note">“Mostly sold to cooks and tunnel priests.”</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Scroll Name">Scroll of Sleep's Tether</td>
+                        <td data-label="Spell">Sleep</td>
+                        <td data-label="Price (gp)">70</td>
+                        <td data-label="Scribe's Note">“Dreamwalkers say it mimics old rites.”</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Scroll Name">Scroll of Silent Passing</td>
+                        <td data-label="Spell">Disguise Self</td>
+                        <td data-label="Price (gp)">85</td>
+                        <td data-label="Scribe's Note">“Often banned in cities. No refund if arrested.”</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Minor Magical Trinkets -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Minor Magical Trinkets <span class="text-lg text-gray-500">(always-on or passive, but low-impact)</span></h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Effect</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Matchfinder Ring</td>
+                        <td data-label="Effect">Warmth points you to the nearest lit flame (within 100 ft).</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Whisper Pin</td>
+                        <td data-label="Effect">Lets you whisper across 20 ft once per minute—audible only to the recipient.</td>
+                        <td data-label="Price (gp)">30</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Spindle Orb</td>
+                        <td data-label="Effect">Tiny hovering orb that orbits your head for 6 hours; emits 5 ft dim light.</td>
+                        <td data-label="Price (gp)">40</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Veilmoth Charm</td>
+                        <td data-label="Effect">Makes your footsteps silent for 10 minutes per long rest (no stealth bonus).</td>
+                        <td data-label="Price (gp)">35</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Thread of Remembrance</td>
+                        <td data-label="Effect">A knotted string that recalls the last 10 words said aloud within 5 ft.</td>
+                        <td data-label="Price (gp)">20</td>
+                        <td data-label="Stock">5</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Seal of Dry Ink</td>
+                        <td data-label="Effect">Prevents anything in your pack or pouch from smearing or waterlogging.</td>
+                        <td data-label="Price (gp)">18</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Single-Use Magical Items -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Single-Use Magical Items <span class="text-lg text-gray-500">(potent but limited—arcane grenades, alchemical scribbles, etc.)</span></h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Effect</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Glimmerbomb</td>
+                        <td data-label="Effect">Throws a 10 ft flash of blinding light (DC 13 CON or blinded 1 round).</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Ash Pouch</td>
+                        <td data-label="Effect">Throw to extinguish all non-magical flames in a 15 ft cube.</td>
+                        <td data-label="Price (gp)">20</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Scribe’s Curse Bead</td>
+                        <td data-label="Effect">Target a creature you can see: for 1 minute, they cannot speak above a whisper (DC 12 CHA negates).</td>
+                        <td data-label="Price (gp)">30</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Dream Ink Capsule</td>
+                        <td data-label="Effect">Crush in hand to restore one use of a 1st-level class feature (once/day limit per person).</td>
+                        <td data-label="Price (gp)">50</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Veilbreaker Thread</td>
+                        <td data-label="Effect">A black silk ribbon you snap to cast feather fall on the holder.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Melee Weapons & Improvised Gear -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Melee Weapons & Improvised Gear</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Properties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Brass Knuckles</td>
+                        <td data-label="Description">Weighted finger loops. Treated as a simple melee weapon. Often concealed.</td>
+                        <td data-label="Price (gp)">2</td>
+                        <td data-label="Properties">1d4 bludgeoning, light, unarmed-compatible</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Punch Dagger</td>
+                        <td data-label="Description">Short triangular blade jutting from a palm grip. Popular with street enforcers.</td>
+                        <td data-label="Price (gp)">4</td>
+                        <td data-label="Properties">1d4 piercing, light, finesse</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Spire Hook</td>
+                        <td data-label="Description">A climbing pick modified for combat. Can be thrown or used to grapple surfaces.</td>
+                        <td data-label="Price (gp)">10</td>
+                        <td data-label="Properties">1d6 slashing, light, thrown (range 20/60), utility</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Veilstaff (Weighted Cane)</td>
+                        <td data-label="Description">A walking stick with a hidden lead core. Legal in most cities… technically.</td>
+                        <td data-label="Price (gp)">6</td>
+                        <td data-label="Properties">1d6 bludgeoning, versatile (1d8), doubles as walking stick</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Echo Buckler</td>
+                        <td data-label="Description">Small, dense shield lined with veiltin. Emits a brief ring when struck.</td>
+                        <td data-label="Price (gp)">15</td>
+                        <td data-label="Properties">+1 AC, weighs 3 lbs, one-handed, can be used as improvised weapon (1d4)</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Needle Fan</td>
+                        <td data-label="Description">Folding iron fan with razor-tipped spokes. Used in old elven dueling traditions.</td>
+                        <td data-label="Price (gp)">10</td>
+                        <td data-label="Properties">1d6 slashing, finesse, light, concealable</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Inkrazor Bracer</td>
+                        <td data-label="Description">Wrist sheath with a spring-loaded stylus-blade. Used for writing or slashing.</td>
+                        <td data-label="Price (gp)">20</td>
+                        <td data-label="Properties">1d4 piercing, hidden (DC 15 to detect), must reload</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Ashthorn Chainblade</td>
+                        <td data-label="Description">A short, flexible chain weapon with bone-hilt handle and serrated segments. Illegal in Valerost.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Properties">1d6 slashing, finesse, reach, special: entangle on crit (DC 12 STR)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Crafting Kits -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Crafting Kits</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pack Name</th>
+                        <th>Use</th>
+                        <th>Contents</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Pack Name">Spindleleaf Brewkit</td>
+                        <td data-label="Use">Healing potion base</td>
+                        <td data-label="Contents">Spindleleaf tufts, redroot bark, diluted residuum jelly, beesblood resin</td>
+                        <td data-label="Price (gp)">20</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Fogbloom Poultice Kit</td>
+                        <td data-label="Use">Anti-infection salve</td>
+                        <td data-label="Contents">Crushed fogbloom petals, sap moss, veilwax, iron-spice ash</td>
+                        <td data-label="Price (gp)">18</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Ashthorn Venin Mix</td>
+                        <td data-label="Use">Poison base (ingested or injury)</td>
+                        <td data-label="Contents">Ashthorn oil, wormwort pulp, shadevine tendrils</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Driftshard Elixir Kit</td>
+                        <td data-label="Use">Potion of darkvision (1 dose)</td>
+                        <td data-label="Contents">Pulverized driftshard crystal, eyebright tea blend, veilstem</td>
+                        <td data-label="Price (gp)">30</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Murkcap Soupset</td>
+                        <td data-label="Use">Resistance to psychic effects (questionable)</td>
+                        <td data-label="Contents">Boiled murkcap mushrooms, salt-mud extract, bronzeleaf binding</td>
+                        <td data-label="Price (gp)">22</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Stonemarrow Filter Pack</td>
+                        <td data-label="Use">Antidote to common toxins</td>
+                        <td data-label="Contents">Ground stonemarrow root, diluted lumenvine sap, breathmint leaves</td>
+                        <td data-label="Price (gp)">15</td>
+                        <td data-label="Stock">5</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Gloam-Ink Veilset</td>
+                        <td data-label="Use">Disguise salve / skin dye</td>
+                        <td data-label="Contents">Veilspore soot, thick inkvine gel, ochre dust</td>
+                        <td data-label="Price (gp)">10</td>
+                        <td data-label="Stock">6</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Torcheshade Draught Kit</td>
+                        <td data-label="Use">Minor fire resistance (temporary)</td>
+                        <td data-label="Contents">Dried torcheshade petals, charred bone flakes, crimsonroot</td>
+                        <td data-label="Price (gp)">28</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Skullcap Dream Mix</td>
+                        <td data-label="Use">Mild sedative / sleep agent</td>
+                        <td data-label="Contents">Crushed skullcap herbs, honeygum, whispermoss</td>
+                        <td data-label="Price (gp)">12</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Pack Name">Hollowtrace Dust Kit</td>
+                        <td data-label="Use">Tracer reagent (reveals tracks or blood)</td>
+                        <td data-label="Contents">Glassground, copper filings, veil-mint oil</td>
+                        <td data-label="Price (gp)">17</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mt-6">
+                <h3 class="text-xl font-semibold text-gray-300 mb-2">Add-ons:</h3>
+                <ul class="list-disc list-inside text-gray-400">
+                    <li>Distiller’s Veilcase (Tool Kit) – 35 gp – contains alembic glass, tincture spoons, and heat ward stones</li>
+                    <li>Alchemist’s Travel Press – 50 gp – collapsible kit that lets you brew in the field (requires DC 12 check)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Questionable Curios -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Questionable Curios</h2>
+        <div class="card p-6 mb-8 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Lunecradle Marbles</td>
+                        <td data-label="Description">Glassy marbles said to mimic the phases of the Torch Moon when held under starlight. No two agree on the phase.</td>
+                        <td data-label="Price (gp)">6</td>
+                        <td data-label="Stock">9</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Scroll of Forgotten Whispers</td>
+                        <td data-label="Description">A sealed scroll containing a poem written entirely in a lost dialect. Rumored to contain a blessing—actually gibberish.</td>
+                        <td data-label="Price (gp)">10</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Veil-Nocked Arrow (Blunt)</td>
+                        <td data-label="Description">Arrow with a silvered crescent tip. Bounces off walls gracefully. Too light to do damage, too pretty to ignore.</td>
+                        <td data-label="Price (gp)">4</td>
+                        <td data-label="Stock">7</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Dreamleaf Infused Quill</td>
+                        <td data-label="Description">The quill’s feather gently trembles when writing in dim light. Writes nonsense if left unattended.</td>
+                        <td data-label="Price (gp)">12</td>
+                        <td data-label="Stock">5</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Echo-Stone</td>
+                        <td data-label="Description">Smooth, black pebble that “records” ambient sound—when placed in water, emits vague echoes. Not accurate.</td>
+                        <td data-label="Price (gp)">8</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Lantern of One Color</td>
+                        <td data-label="Description">Glows a calming teal, always teal. Cannot be adjusted, dimmed, or covered. Too dim for travel, too bright for stealth.</td>
+                        <td data-label="Price (gp)">10</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Dustcloak Brooch</td>
+                        <td data-label="Description">A swirling brooch made of stormglass and brass. Supposed to “ward off static fate.” Looks cool, does nothing.</td>
+                        <td data-label="Price (gp)">14</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Moss-Packed Hourglass</td>
+                        <td data-label="Description">Full of creeping moss that ignores time and flows randomly. Useless for tracking time but relaxing to watch.</td>
+                        <td data-label="Price (gp)">9</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Glassy Tongue Clip</td>
+                        <td data-label="Description">A crystal tongue ring that “lets you speak in dreams.” Reality: makes you drool and gives minor tongue splinters.</td>
+                        <td data-label="Price (gp)">7</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Cursed Book of Empty Pages</td>
+                        <td data-label="Description">Ornate. Expensive. Blank. Refuses to hold ink for more than a few days.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Common & Uncommon Underground Travel Gear -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Common & Uncommon Underground Travel Gear</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Shelter & Rest -->
+            <div class="card p-6">
+                <h3 class="text-2xl font-semibold text-gray-300 mb-4">Shelter & Rest</h3>
+                <ul class="space-y-4">
+                    <li>
+                        <p><strong class="item-name">Folded Burrow Tent</strong> <span class="text-sm text-gray-500">(Common)</span></p>
+                        <p class="item-description">A tarp-like cocoon that uses spring ribs and ground spikes to form a quick sleeping nook in tight tunnels. Canvas is reinforced against humidity and mold.</p>
+                        <p><span class="price">Price: 10 gp</span> | <span class="stock">Weight: 6 lbs</span></p>
+                    </li>
+                    <li>
+                        <p><strong class="item-name">Stonebiter Stakes</strong> <span class="text-sm text-gray-500">(Common)</span></p>
+                        <p class="item-description">Iron pitons with mild enchantment to anchor to stone. Used for tents, ropes, or wall hammocks.</p>
+                        <p><span class="price">Price: 5 gp for 6</span> | <span class="stock">Effect: Auto-anchors to rock, DC 20 to pull free.</span></p>
+                    </li>
+                    <li>
+                        <p><strong class="item-name">Echo-Damp Bedroll</strong> <span class="text-sm text-gray-500">(Uncommon)</span></p>
+                        <p class="item-description">Bedroll that muffles sound within 10 ft when sealed. Used by Veilspire scribe-guards and quiet thieves alike.</p>
+                        <p><span class="price">Price: 40 gp</span> | <span class="stock">Effect: Grants advantage on stealth during rests underground.</span></p>
+                    </li>
+                    <li>
+                        <p><strong class="item-name">Cave-Dome Frame</strong> <span class="text-sm text-gray-500">(Uncommon)</span></p>
+                        <p class="item-description">Collapsible half-sphere frame (like a yurt) that assembles with no nails. Wrap it in your own cloth/tarp. Popular with residuum miners and archivists.</p>
+                        <p><span class="price">Price: 35 gp (frame only), 60 gp (with dust-proof veil tarp)</span> | <span class="stock">Bonus: +2 to saves vs inhaled dust or mold while inside.</span></p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Survival & Navigation -->
+            <div class="card p-6">
+                <h3 class="text-2xl font-semibold text-gray-300 mb-4">Survival & Navigation</h3>
+                <ul class="space-y-4">
+                    <li>
+                        <p><strong class="item-name">Veinscripter Chalk</strong> <span class="text-sm text-gray-500">(Common)</span></p>
+                        <p class="item-description">Glows faintly when drawn along walls in active cave systems. Fades after 8 hours.</p>
+                        <p><span class="price">Price: 2 gp per stick</span> | <span class="stock">Uses: 10 marks per stick.</span></p>
+                    </li>
+                    <li>
+                        <p><strong class="item-name">Mosswater Canteen</strong> <span class="text-sm text-gray-500">(Uncommon)</span></p>
+                        <p class="item-description">Contains an alchemical lining that purifies stagnant or fungus-heavy water over 1 hour.</p>
+                        <p><span class="price">Price: 25 gp</span> | <span class="stock">Effect: Removes minor toxins, spores, and parasites.</span></p>
+                    </li>
+                    <li>
+                        <p><strong class="item-name">Lantern of the Slow Fade</strong> <span class="text-sm text-gray-500">(Uncommon)</span></p>
+                        <p class="item-description">Emits no visible flame or smoke. Instead produces a ghostly pale light in a 30 ft cone that dims over 10 minutes if not tended.</p>
+                        <p><span class="price">Price: 50 gp</span> | <span class="stock">Fuel: Wisp oil or fungal wax (harder to find than normal oil).</span></p>
+                    </li>
+                    <li>
+                        <p><strong class="item-name">Tunnel Censer</strong> <span class="text-sm text-gray-500">(Uncommon)</span></p>
+                        <p class="item-description">Releases a low-burning incense designed to deter common cave vermin and subtly mark routes (detectable by trained noses).</p>
+                        <p><span class="price">Price: 30 gp</span> | <span class="stock">Duration: 2 hours | Smell trail lasts 12 hrs</span></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Beast & Burden -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Beast & Burden</h2>
+        <div class="card p-6 mb-8">
+            <ul class="space-y-4">
+                <li>
+                    <p><strong class="item-name">Pack-Bug Shell</strong> <span class="text-sm text-gray-500">(Common)</span></p>
+                    <p class="item-description">Collapsible shell frame for small beasts (like giant rats or cave lizards). Turns a trained animal into a stable bearer.</p>
+                    <p><span class="price">Price: 15 gp</span> | <span class="stock">Weight Limit: 100 lbs</span></p>
+                </li>
+                <li>
+                    <p><strong class="item-name">Folded Arc-Carpet</strong> <span class="text-sm text-gray-500">(Uncommon)</span></p>
+                    <p class="item-description">A rune-stitched tarp that can be magnetized to stone and bent into bridges or sleds.</p>
+                    <p><span class="price">Price: 75 gp</span> | <span class="stock">Effect: Can hold 200 lbs and cling to walls or floor.</span></p>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Other Shop Items -->
+        <h2 class="text-3xl font-semibold section-title mb-6">Other Shop Items</h2>
+        <div class="card p-6 overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th>Price (gp)</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Item">Whisperbound Journal</td>
+                        <td data-label="Description">Softbound blank book that muffles nearby sound while open. Ideal for private notes or silent watches.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Veilwine Flask</td>
+                        <td data-label="Description">Fortified dream-wine said to keep the mind lucid in deep inkstorms. Slightly narcotic.</td>
+                        <td data-label="Price (gp)">15</td>
+                        <td data-label="Stock">6</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Sleeprock Censer</td>
+                        <td data-label="Description">Palm-sized carved stone censer that emits slow-burning calming smoke. Used in rites or for safe rest in echo-chambers.</td>
+                        <td data-label="Price (gp)">12</td>
+                        <td data-label="Stock">4</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Echo-Mesh Tarp</td>
+                        <td data-label="Description">Black silken tarp that muffles impact, used to line tents or conceal sleeping areas. Acts as camouflage underground.</td>
+                        <td data-label="Price (gp)">18</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Twilight Inkstick</td>
+                        <td data-label="Description">Faintly luminous chalk that draws visible lines only under moonlight or lowlight. Used by dreamwalkers and cartographers.</td>
+                        <td data-label="Price (gp)">8</td>
+                        <td data-label="Stock">7</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Mind-Spike Compass</td>
+                        <td data-label="Description">A spindly metallic compass attuned to residual psychic fields. Points toward “strong thoughts” or disturbances.</td>
+                        <td data-label="Price (gp)">45</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Folded Spire-Kit</td>
+                        <td data-label="Description">A collapsible vertical rest platform with hooks, spikes, and anti-sway threads. Used to sleep on canyon or spire walls.</td>
+                        <td data-label="Price (gp)">60</td>
+                        <td data-label="Stock">1</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Scribe’s Lure</td>
+                        <td data-label="Description">A small engraved charm that emits warmth when within 60 ft of active scriptwork (magical or mundane). Used to detect scrolls, journals, traps with writing.</td>
+                        <td data-label="Price (gp)">30</td>
+                        <td data-label="Stock">2</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Fogbreather’s Mask</td>
+                        <td data-label="Description">Filtered mask with layered petals of dried veilmoss. Reduces inhaled toxins and spores in deep tunnels.</td>
+                        <td data-label="Price (gp)">35</td>
+                        <td data-label="Stock">3</td>
+                    </tr>
+                    <tr>
+                        <td data-label="Item">Residuum Dust Vial</td>
+                        <td data-label="Description">A single-use vial of shimmerdust residue used for triggering inert glyphs or “stirring” dormant arcane mechanisms.</td>
+                        <td data-label="Price (gp)">25</td>
+                        <td data-label="Stock">5</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
