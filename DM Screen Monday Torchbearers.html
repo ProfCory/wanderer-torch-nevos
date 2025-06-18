@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM Master Lookup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Slate & Amber -->
+    <!-- Application Structure Plan: The application uses a top navigation bar for instant character switching, a core design choice for DM usability. Clicking a character's name immediately displays their full dossier. The dossier itself is a responsive grid, prioritizing at-a-glance information (Core Stats, Visualizations) while organizing deeper details (Combat, Spells, Features) into clear, scannable cards. This structure prevents information overload and minimizes scrolling, allowing a DM to find critical data like AC, Passive Perception, or a specific action in seconds, which is crucial during a live game session. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Character Ability Scores -> Goal: Quick assessment of a character's primary strengths/weaknesses -> Viz: Radar Chart -> Interaction: Hover for exact score -> Justification: Provides an immediate visual "fingerprint" of the character's build.
+        - Report Info: Skill Modifiers -> Goal: Identify top skills for checks -> Viz: Horizontal Bar Chart -> Interaction: Hover for exact modifier -> Justification: Clearly ranks the character's most effective skills, useful for setting impromptu DCs.
+        - Report Info: Class Levels -> Goal: Understand multiclass composition -> Viz: Donut Chart -> Interaction: Hover for level details -> Justification: Simple visual cue for the character's primary and secondary class roles.
+        - Report Info: Attacks, Spells, Features, Equipment, Proficiencies -> Goal: Detailed reference -> Presentation: Styled Tables & Lists -> Interaction: None needed, clarity is key -> Justification: Tables provide structured, readable data for combat options, spell lists, and equipment. All charts use Chart.js on a Canvas element.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #f59e0b;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+     <link rel="preconnect" href="https://rsms.me/">
+     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">DM Master Lookup</h1>
+            <p class="text-slate-600 mt-2">Your quick-reference character dossiers for the Monday Game.</p>
+        </header>
+
+        <nav id="character-nav" class="flex flex-wrap justify-center gap-2 mb-8">
+        </nav>
+
+        <main id="character-content">
+        </main>
+    </div>
+
+    <script>
+        const characterData = {
+            wade: {
+                name: "Wade",
+                classLevel: "Rogue 3 / Ranger 1",
+                classes: { Rogue: 3, Ranger: 1 },
+                species: "Hadozee",
+                background: "Guide",
+                hp: 28,
+                ac: 19,
+                speed: "30 ft. walk, 30 ft. climb",
+                abilities: { STR: 9, DEX: 20, CON: 12, INT: 14, WIS: 15, CHA: 13 },
+                abilityMods: { STR: -1, DEX: +5, CON: +1, INT: +2, WIS: +2, CHA: +1 },
+                saves: ["DEX", "INT"],
+                senses: { perception: 16, insight: 12, investigation: 14, darkvision: "None" },
+                proficiencies: {
+                    skills: [
+                        { name: "Acrobatics", modifier: 7, ability: "DEX" }, { name: "Stealth", modifier: 9, ability: "DEX" }, { name: "Sleight of Hand", modifier: 7, ability: "DEX" },
+                        { name: "Perception", modifier: 6, ability: "WIS" }, { name: "Investigation", modifier: 4, ability: "INT" }, { name: "Nature", modifier: 4, ability: "INT" },
+                        { name: "Survival", modifier: 4, ability: "WIS" }, { name: "Insight", modifier: 2, ability: "WIS" }, { name: "Animal Handling", modifier: 2, ability: "WIS" },
+                        { name: "Arcana", modifier: 2, ability: "INT" }, { name: "History", modifier: 2, ability: "INT" }, { name: "Medicine", modifier: 2, ability: "WIS" }, { name: "Religion", modifier: 2, ability: "INT" },
+                        { name: "Deception", modifier: 1, ability: "CHA" }, { name: "Intimidation", modifier: 1, ability: "CHA" }, { name: "Performance", modifier: 1, ability: "CHA" }, { name: "Persuasion", modifier: 1, ability: "CHA" },
+                        { name: "Athletics", modifier: -1, ability: "STR" }
+                    ],
+                    armor: "Light Armor, Medium Armor, Shields",
+                    weapons: "Simple Weapons, Martial Weapons",
+                    tools: "Thieves' Tools, Cartographer's Tools",
+                    languages: "Common, Hadozee, Thieves' Cant, Common Sign Language"
+                },
+                attacks: [
+                    { name: "Longbow (Slow)", bonus: "+7", damage: "1d8+5 Piercing", notes: "Target's speed reduced by 10ft." },
+                    { name: "Shortbow (Vex)", bonus: "+7", damage: "1d6+5 Piercing", notes: "Gain Advantage on next attack vs target." },
+                    { name: "Shortsword (Vex)", bonus: "+7", damage: "1d6+5 Slashing", notes: "Gain Advantage on next attack vs target." },
+                    { name: "Dagger (Nick)", bonus: "+7", damage: "1d4+5 Piercing", notes: "Can make extra attack as part of Attack Action." },
+                    { name: "Unarmed Strike", bonus: "+1", damage: "0 Bludgeoning", notes: "" }
+                ],
+                features: [
+                    { name: "Sneak Attack", desc: "Once per turn, deal an extra 2d6 damage if you have advantage or an ally is within 5ft of the target." },
+                    { name: "Cunning Action", desc: "Use a bonus action to Dash, Disengage, or Hide." },
+                    { name: "Fast Hands", desc: "Use a bonus action to make a Sleight of Hand check, use a magic item, or use an object." },
+                    { name: "Second-Story Work", desc: "Climb speed equals walking speed. Use DEX for jump distance." },
+                    { name: "Steady Aim", desc: "As a bonus action, gain advantage on your next attack if you don't move." },
+                    { name: "Favored Enemy", desc: "Always have Hunter's Mark prepared, can cast 2/long rest without spell slot." },
+                    { name: "Glide", desc: "Use reaction to negate fall damage and glide horizontally." },
+                    { name: "Hadozee Dodge", desc: "Use reaction to reduce damage by 1d6+2 (2/long rest)." }
+                ],
+                spells: {
+                    dc: 12,
+                    attack: "+4",
+                    slots: { "1st Level": 2 },
+                    cantrips: [{name:"Message", source:"Magic Initiate (Druid)", castingTime:"1 Action", range:"120 ft.", components:"V, S, M", duration:"1 round", notes:"D: 1Rnd, S/M"}, {name:"Guidance", source:"Magic Initiate (Druid)", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"1 minute", notes:"D: 1m, V/S"}],
+                    level1: [{name:"Hunter's Mark", source:"Favored Enemy (Always Prepared)", castingTime:"1 Bonus Action", range:"90 ft.", components:"V", duration:"Concentration, up to 1 hour", notes:"2/Long Rest"}, {name:"Goodberry", source:"Magic Initiate (Druid)", castingTime:"1 Action", range:"Self", components:"V, S, M", duration:"24 hours", notes:"1/LR"}, {name:"Alarm", source:"Ranger", castingTime:"1 minute", range:"30 ft./20 ft. Cube", components:"V, S, M", duration:"8 hours", notes:"D: 8h, 20 ft. Cube, V/S/M"}, {name:"Detect Poison and Disease", source:"Ranger", castingTime:"1 Action", range:"Self/30 ft. Sphere", components:"V, S, M", duration:"10 minutes", notes:"D: 10m, 30 ft. Sphere, V/S/M"}],
+                    level2: [],
+                    level3: []
+                },
+                equipment: [
+                    { name: "Serpent Scale Armor", weight: "45 lb.", notes: "Magic Armor" },
+                    { name: "Bag of Tricks", weight: "0.5 lb.", notes: "Magical item" },
+                    { name: "Goggles of Night", weight: "1 lb.", notes: "Magic Item" },
+                    { name: "Feather Token", weight: "0 lb.", notes: "Feather Fall, single use" },
+                    { name: "Spellwrought Tattoo (Divine Favor)", weight: "0 lb.", notes: "Single use" },
+                    { name: "Spell Scroll (Lvl 1)", weight: "0 lb.", notes: "4 total" },
+                    { name: "Longbow", weight: "2 lb.", notes: "Slow property" },
+                    { name: "Shortbow", weight: "2 lb.", notes: "Vex property" },
+                    { name: "Shortsword", weight: "2 lb.", notes: "Vex property" },
+                    { name: "Dagger", weight: "1 lb.", notes: "Nick property, 2 total" },
+                    { name: "Arrows", weight: "3 lb.", notes: "60 total" },
+                    { name: "Thieves' Tools", weight: "1 lb.", notes: "" },
+                    { name: "Cartographer's Tools", weight: "6 lb.", notes: "" },
+                    { name: "Cartographer's Map Case", weight: "1 lb.", notes: "" },
+                    { name: "Oil", weight: "7 lb.", notes: "7 total" },
+                    { name: "Ball Bearings", weight: "2 lb.", notes: "1,000 total" },
+                    { name: "Rations", weight: "22 lb.", notes: "11 days total" },
+                    { name: "Rope", weight: "5 lb.", notes: "" },
+                    { name: "Bell", weight: "0 lb.", notes: "" },
+                    { name: "Tinderbox", weight: "1 lb.", notes: "" },
+                    { name: "Tent, Two-Person", weight: "20 lb.", notes: "" },
+                    { name: "Backpack", weight: "5 lb.", notes: "" },
+                    { name: "Quiver", weight: "1 lb.", notes: "" },
+                    { name: "Waterskin", weight: "5 lb.", notes: "" },
+                    { name: "Hooded Lantern", weight: "2 lb.", notes: "" },
+                    { name: "Candle", weight: "0 lb.", notes: "10 total" },
+                    { name: "Crowbar", weight: "5 lb.", notes: "" }
+                ]
+            },
+            scarpphire: {
+                name: "Scarpphire",
+                classLevel: "Barbarian 2 / Fighter 2",
+                classes: { Barbarian: 2, Fighter: 2 },
+                species: "Shifter",
+                background: "Guide",
+                hp: 43,
+                ac: 15,
+                speed: "30 ft. walk, 30 ft. fly",
+                abilities: { STR: 17, DEX: 14, CON: 16, INT: 9, WIS: 14, CHA: 11 },
+                abilityMods: { STR: +3, DEX: +2, CON: +3, INT: -1, WIS: +2, CHA: +0 },
+                saves: ["STR", "CON"],
+                senses: { perception: 14, insight: 12, investigation: 9, darkvision: "60 ft." },
+                 proficiencies: {
+                    skills: [
+                        { name: "Athletics", modifier: 5, ability: "STR" }, { name: "Survival", modifier: 4, ability: "WIS" }, { name: "Stealth", modifier: 4, ability: "DEX" },
+                        { name: "Acrobatics", modifier: 2, ability: "DEX" }, { name: "Animal Handling", modifier: 2, ability: "WIS" }, { name: "Insight", modifier: 2, ability: "WIS" },
+                        { name: "Intimidation", modifier: 2, ability: "CHA" }, { name: "Medicine", modifier: 2, ability: "WIS" }, { name: "Perception", modifier: 2, ability: "WIS" },
+                        { name: "Sleight of Hand", modifier: 2, ability: "DEX" }, { name: "Arcana", modifier: -1, ability: "INT" }, { name: "Deception", modifier: 0, ability: "CHA" },
+                        { name: "History", modifier: -1, ability: "INT" }, { name: "Investigation", modifier: -1, ability: "INT" }, { name: "Nature", modifier: -1, ability: "INT" },
+                        { name: "Performance", modifier: 0, ability: "CHA" }, { name: "Persuasion", modifier: 0, ability: "CHA" }, { name: "Religion", modifier: -1, ability: "INT" }
+                    ],
+                    armor: "Light Armor, Medium Armor, Shields",
+                    weapons: "Simple Weapons, Martial Weapons",
+                    tools: "Cartographer's Tools",
+                    languages: "Common, Sylvan"
+                },
+                attacks: [
+                    { name: "Silvered Maul (Topple)", bonus: "+5", damage: "2d6+3 Bludgeoning", notes: "Target must make CON save or be knocked Prone." },
+                    { name: "Unarmed Strike", bonus: "+5", damage: "1d6+3 Bludgeoning", notes: "1d8+3 if hands are free. 1d4 damage to grappled target at start of your turn." },
+                    { name: "Fangs (Bonus Action)", bonus: "+5", damage: "1d6+3 Piercing", notes: "Available while Shifted." },
+                    { name: "Thorn Whip", bonus: "+4", damage: "1d6 Piercing", notes: "Cantrip, pull target 10ft closer." }
+                ],
+                features: [
+                    { name: "Rage (2/long rest)", desc: "Bonus action to enter. Gain +2 rage damage, advantage on STR checks/saves, resistance to B/P/S damage." },
+                    { name: "Unarmored Defense", desc: "AC = 10 + DEX Mod + CON Mod." },
+                    { name: "Reckless Attack", desc: "Gain advantage on STR attacks, but attacks against you have advantage." },
+                    { name: "Danger Sense", desc: "Advantage on DEX saves against effects you can see." },
+                    { name: "Action Surge (1/short rest)", desc: "Take one additional action on your turn." },
+                    { name: "Second Wind (2/long rest)", desc: "Bonus action to regain 1d10+2 HP." },
+                    { name: "Shifting (2/long rest)", desc: "Bonus action to gain 4 temp HP. As Longtooth, can make a bonus action fang attack." },
+                    { name: "Unarmed Fighting", desc: "Unarmed strikes deal 1d6 (1d8 if no weapons/shield). Deal 1d4 to grappled creature at start of turn." },
+                    { name: "Tactical Mind", desc: "Expend Second Wind on failed ability check to roll 1d10 and add. If still failed, Second Wind not expended." }
+                ],
+                spells: {
+                    dc: 12,
+                    attack: "+4",
+                    slots: {},
+                    cantrips: [{name:"Thorn Whip", source:"Magic Initiate (Druid)", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"Instantaneous", notes:""}, {name:"Gust Barrier", source:"Magic Initiate (Druid)", castingTime:"1 Action", range:"Self", components:"S", duration:"1 round", notes:"D: 1Rnd, S"}],
+                    level1: [{name:"Veil of Dusk", source:"Magic Initiate (Druid)", castingTime:"1 Bonus Action", range:"60 ft.", components:"V, S, M", duration:"10 minutes", notes:"1/Long Rest, D: 10m, V/S/M"}],
+                    level2: [],
+                    level3: [{name:"Daylight", source:"Cloak of the Raven", castingTime:"1 Action", range:"60 ft./60 ft. Sphere", components:"V, S", duration:"1 hour", notes:"1 Charge, D: 1h, 60 ft. Sphere, V/S"}]
+                },
+                equipment: [
+                    { name: "Silvered Maul", weight: "10 lb.", notes: "Topple property, 2d6+3 Bludgeoning" },
+                    { name: "Cloak of the Raven", weight: "3 lb.", notes: "Grants Daylight spell" },
+                    { name: "Tan Bag of Tricks", weight: "0.5 lb.", notes: "" },
+                    { name: "Potion of Healing", weight: "0.5 lb.", notes: "" },
+                    { name: "Healer's Kit", weight: "3 lb.", notes: "" }
+                ]
+            },
+            onya: {
+                name: "Onya Tisslyn",
+                classLevel: "Monk 3 / Ranger 1",
+                classes: { Monk: 3, Ranger: 1 },
+                species: "Air Genasi",
+                background: "Custom",
+                hp: 32,
+                ac: 16,
+                speed: "45 ft. walk",
+                abilities: { STR: 10, DEX: 17, CON: 15, INT: 14, WIS: 17, CHA: 8 },
+                abilityMods: { STR: +0, DEX: +3, CON: +2, INT: +2, WIS: +3, CHA: -1 },
+                saves: ["STR", "DEX"],
+                senses: { perception: 13, insight: 13, investigation: 12, darkvision: "60 ft." },
+                proficiencies: {
+                    skills: [
+                        { name: "Acrobatics", modifier: 5, ability: "DEX" }, { name: "Stealth", modifier: 5, ability: "DEX" }, { name: "Insight", modifier: 3, ability: "WIS" },
+                        { name: "Medicine", modifier: 3, ability: "WIS" }, { name: "Sleight of Hand", modifier: 3, ability: "DEX" }, { name: "Survival", modifier: 3, ability: "WIS" },
+                        { name: "Perception", modifier: 3, ability: "WIS" }, { name: "Animal Handling", modifier: 2, ability: "WIS" }, { name: "Arcana", modifier: 2, ability: "INT" },
+                        { name: "History", modifier: 2, ability: "INT" }, { name: "Investigation", modifier: 2, ability: "INT" }, { name: "Nature", modifier: 2, ability: "INT" },
+                        { name: "Religion", modifier: 2, ability: "INT" }, { name: "Athletics", modifier: 0, ability: "STR" }, { name: "Deception", modifier: -1, ability: "CHA" },
+                        { name: "Intimidation", modifier: -1, ability: "CHA" }, { name: "Performance", modifier: -1, ability: "CHA" }, { name: "Persuasion", modifier: 1, ability: "CHA" }
+                    ],
+                    armor: "Light Armor, Medium Armor, Shields",
+                    weapons: "Simple Weapons, Martial Weapons",
+                    tools: "Navigator's Tools, Tinker's Tools, Poisoner's Kit",
+                    languages: "Common, Halfling, Common Sign Language"
+                },
+                attacks: [
+                    { name: "Unarmed Strike", bonus: "+5", damage: "1d6+3 Bludgeoning", notes: "Can be used as a bonus action." },
+                    { name: "Flurry of Blows (1 Focus)", bonus: "+5", damage: "2 unarmed strikes", notes: "Bonus action." },
+                    { name: "Light Hammer (Nick)", bonus: "+5", damage: "1d6+3 Bludgeoning", notes: "Thrown (20/60)." },
+                    { name: "Shocking Grasp", bonus: "+5", damage: "1d8 Lightning", notes: "Target can't take reactions." }
+                ],
+                features: [
+                    { name: "Focus (3 points)", desc: "Regain on short/long rest. Fuel Monk abilities. DC 13." },
+                    { name: "Martial Arts", desc: "Use DEX for unarmed/monk weapons, 1d6 damage, bonus action unarmed strike." },
+                    { name: "Unarmored Defense", desc: "AC = 10 + DEX Mod + WIS Mod." },
+                    { name: "Unarmored Movement", desc: "+10 ft. speed." },
+                    { name: "Deflect Attacks", desc: "Use reaction to reduce B/P/S damage by 1d10+6. Can spend 1 focus to redirect if damage becomes 0 (2d6+3 damage, DC 13 DEX save)." },
+                    { name: "Shadow Arts (Warrior of Shadow)", desc: "Spend 1 focus to cast Darkness (can see within, move area), gain Darkvision, know Minor Illusion." },
+                    { name: "Mingle with the Wind", desc: "Know Shocking Grasp. Can cast Feather Fall." },
+                    { name: "Favored Enemy", desc: "Always have Hunter's Mark prepared, can cast 2/long rest without spell slot." },
+                    { name: "Uncanny Metabolism", desc: "Once per Long Rest, on Initiative roll, regain all expended Focus Points and 1d6+3 HP." },
+                    { name: "Dual Wielder", desc: "+1 AC when dual wielding. Can use non-light one-handed weapons for two-weapon fighting. Draw/stow two weapons." }
+                ],
+                spells: {
+                    dc: 13,
+                    attack: "+5",
+                    slots: { "1st Level": 2 },
+                    cantrips: [{name:"Shocking Grasp", source:"Mingle with the Wind", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"Instantaneous", notes:""}, {name:"Minor Illusion", source:"Shadow Arts", castingTime:"1 Action", range:"30 ft./5 ft. Cube", components:"S, M", duration:"1 minute", notes:"D: 1m, 5 ft. Cube, S/M"}],
+                    level1: [{name:"Hunter's Mark", source:"Favored Enemy (Always Prepared)", castingTime:"1 Bonus Action", range:"90 ft.", components:"V", duration:"Concentration, up to 1 hour", notes:"2/Long Rest"}, {name:"Feather Fall", source:"Mingle with the Wind", castingTime:"1 Reaction", range:"60 ft.", components:"V, M", duration:"1 minute", notes:"2 Slots"}],
+                    level2: [{name:"Darkness", source:"Shadow Arts", castingTime:"1 Action", range:"60 ft./15 ft. Sphere", components:"V, M", duration:"10 minutes", notes:"1/Long Rest, D: 10m, 15 ft. Sphere, V/M"}],
+                    level3: []
+                },
+                equipment: [
+                    { name: "Bag of Holding", weight: "5 lb.", notes: "Expands carrying capacity." },
+                    { name: "Light Hammers", weight: "2 lb.", notes: "2 total, Nick property" },
+                    { name: "Poisoner's Kit", weight: "2 lb.", notes: "" },
+                    { name: "Ball Bearings", weight: "4 lb.", notes: "2000 total" },
+                    { name: "Basic Poison", weight: "0 lb.", notes: "2 doses" },
+                    { name: "Dagger", weight: "1 lb.", notes: "2 total" },
+                    { name: "Blowgun", weight: "1 lb.", notes: "" },
+                    { name: "Pouch", weight: "1 lb.", notes: "2 total" },
+                    { name: "Waterskin", weight: "5 lb.", notes: "" },
+                    { name: "Traveler's Clothes", weight: "4 lb.", notes: "" },
+                    { name: "Rations", weight: "12 lb.", notes: "6 days" },
+                    { name: "Bedroll", weight: "7 lb.", notes: "" },
+                    { name: "Vial", weight: "0 lb.", notes: "10 total" },
+                    { name: "Tinker's Tools", weight: "10 lb.", notes: "" },
+                    { name: "Navigator's Tools", weight: "2 lb.", notes: "" }
+                ]
+            },
+            lyarieth: {
+                name: "Lyari'eth Anársarn",
+                classLevel: "Cleric 4",
+                classes: { Cleric: 4 },
+                species: "Astral Elf",
+                background: "Sage",
+                hp: 35,
+                ac: 20,
+                speed: "30 ft. walk",
+                abilities: { STR: 8, DEX: 14, CON: 16, INT: 10, WIS: 20, CHA: 10 },
+                abilityMods: { STR: -1, DEX: +2, CON: +3, INT: +0, WIS: +5, CHA: +0 },
+                saves: ["WIS", "CHA"],
+                senses: { perception: 22, insight: 17, investigation: 10, darkvision: "300 ft." },
+                proficiencies: {
+                    skills: [
+                        { name: "Insight", modifier: 7, ability: "WIS" }, { name: "Perception", modifier: 7, ability: "WIS" }, { name: "Arcana", modifier: 7, ability: "INT" },
+                        { name: "Animal Handling", modifier: 5, ability: "WIS" }, { name: "Medicine", modifier: 5, ability: "WIS" }, { name: "Survival", modifier: 5, ability: "WIS" },
+                        { name: "History", modifier: 2, ability: "INT" }, { name: "Religion", modifier: 2, ability: "INT" }, { name: "Acrobatics", modifier: 2, ability: "DEX" },
+                        { name: "Sleight of Hand", modifier: 2, ability: "DEX" }, { name: "Stealth", modifier: 2, ability: "DEX" }, { name: "Deception", modifier: 0, ability: "CHA" },
+                        { name: "Intimidation", modifier: 0, ability: "CHA" }, { name: "Investigation", modifier: 0, ability: "INT" }, { name: "Nature", modifier: 0, ability: "INT" },
+                        { name: "Performance", modifier: 0, ability: "CHA" }, { name: "Persuasion", modifier: 2, ability: "CHA" }, { name: "Athletics", modifier: -1, ability: "STR" }
+                    ],
+                    armor: "Light, Medium, Heavy Armor, Shields",
+                    weapons: "Simple Weapons, Martial Weapons",
+                    tools: "Calligrapher's Supplies, Herbalism Kit",
+                    languages: "Celestial, Common, Elvish, Sylvan"
+                },
+                attacks: [
+                    { name: "Toll the Dead", bonus: "DC 15 WIS", damage: "1d8 Necrotic", notes: "1d12 if target is missing HP." },
+                    { name: "Guiding Bolt", bonus: "+7", damage: "4d6 Radiant", notes: "Next attack on target has advantage." },
+                    { name: "Spiritual Weapon", bonus: "+7", damage: "1d8+5 Force", notes: "Bonus action spell and attack." },
+                    { name: "Shocking Grasp", bonus: "+7", damage: "1d8 Lightning", notes: "Target can't take reactions." },
+                    { name: "Inkrazor Bracer", bonus: "+4", damage: "1d4+2 Piercing (+1d4 Piercing)", notes: "Vex property, thrown." },
+                    { name: "Mace", bonus: "+1", damage: "1d6-1 Bludgeoning", notes: "Sap property." },
+                    { name: "Unarmed Strike", bonus: "+1", damage: "0 Bludgeoning", notes: "" }
+                ],
+                features: [
+                    { name: "War Caster", desc: "Adv. on CON saves for concentration. Can cast spells as opportunity attacks." },
+                    { name: "Channel Divinity (2/long rest)", desc: "Turn Undead or Twilight Sanctuary (DC 15)." },
+                    { name: "Twilight Sanctuary", desc: "Action. 30ft dim light sphere. Allies ending turn inside gain 1d6+4 temp HP or end charmed/frightened." },
+                    { name: "Eyes of Night", desc: "300ft Darkvision. Can share with up to 5 allies (1/LR or spell slot)." },
+                    { name: "Vigilant Blessing", desc: "Give a creature advantage on their next initiative roll." },
+                    { name: "Starlight Step (2/long rest)", desc: "Bonus action to teleport 30ft." },
+                    { name: "Divine Order: Thaumaturge", desc: "Knows 1 extra Cleric cantrip, +5 bonus to Arcana and Religion checks." },
+                    { name: "Divine Order: Spare the Dying", desc: "Knows this cantrip." },
+                    { name: "Astral Trance", desc: "4hr long rest meditation. Gain prof in skill/weapon/tool until next long rest." },
+                    { name: "Fey Ancestry", desc: "Advantage on saves vs charmed." }
+                ],
+                spells: {
+                    dc: 15,
+                    attack: "+7",
+                    slots: { "1st Level": 4, "2nd Level": 3 },
+                    cantrips: [
+                        {name:"Toll the Dead", source:"Cleric", castingTime:"1 Action", range:"60 ft.", components:"V, S", duration:"Instantaneous", notes:"At Will"},
+                        {name:"Word of Radiance", source:"Cleric", castingTime:"1 Action", range:"Self/5 ft. Emanation", components:"V, M", duration:"Instantaneous", notes:""},
+                        {name:"Thaumaturgy", source:"Cleric", castingTime:"1 Action", range:"30 ft.", components:"V", duration:"1 minute", notes:"D: 1m, V"},
+                        {name:"Bright Sparks", source:"Cleric", castingTime:"1 Action", range:"Self", components:"V, M", duration:"1 round", notes:"D: 1Rnd, V/M"},
+                        {name:"Blade Ward", source:"Magic Initiate (Wizard)", castingTime:"1 Action", range:"Self", components:"V, S", duration:"1 minute", notes:"D: 1m, V/S"},
+                        {name:"Shocking Grasp", source:"Magic Initiate (Wizard)", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"Dancing Lights", source:"Astral Fire", castingTime:"1 Action", range:"120 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Spare the Dying", source:"Divine Order", castingTime:"1 Action", range:"15 ft.", components:"V, S", duration:"Instantaneous", notes:"V/S"}
+                    ],
+                    level1: [
+                        {name:"Bane", source:"Cleric", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Bless", source:"Cleric", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Cure Wounds", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"Healing Word", source:"Cleric", castingTime:"1 Bonus Action", range:"60 ft.", components:"V", duration:"Instantaneous", notes:"V"},
+                        {name:"Guiding Bolt", source:"Cleric", castingTime:"1 Action", range:"120 ft.", components:"V, S", duration:"1 round", notes:"D: 1Rnd, V/S"},
+                        {name:"Faerie Fire", source:"Cleric (Always Prepared)", castingTime:"1 Action", range:"60 ft./20 ft. Cube", components:"V", duration:"1 minute", notes:"D: 1m, 20 ft. Cube, V"},
+                        {name:"Sleep", source:"Cleric (Always Prepared)", castingTime:"1 Action", range:"60 ft./5 ft. Sphere", components:"V, S, M", duration:"1 minute", notes:"D: 1m, 5 ft. Sphere, V/S/M"},
+                        {name:"Ceremony", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S, M", duration:"Instantaneous", notes:"V/S/M"},
+                        {name:"Elevated Sight", source:"Cleric", castingTime:"1 Action", range:"Self", components:"V, S", duration:"Concentration, up to 1 minute", notes:"D: 1m, V/S"},
+                        {name:"Protection from Evil and Good", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S, M", duration:"10 minutes", notes:"D: 10m, V/S/M"},
+                        {name:"Purify Food and Drink", source:"Cleric", castingTime:"1 Action", range:"10 ft./5 ft. Sphere", components:"V, S", duration:"Instantaneous", notes:"5 ft. Sphere, V/S"},
+                        {name:"Command", source:"Cleric", castingTime:"1 Action", range:"60 ft.", components:"V", duration:"1 round", notes:"V"},
+                        {name:"Sanctuary", source:"Cleric", castingTime:"1 Bonus Action", range:"30 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Shield of Faith", source:"Cleric", castingTime:"1 Bonus Action", range:"60 ft.", components:"V, S, M", duration:"Concentration, up to 10 minutes", notes:"D: 10m, V/S/M"},
+                        {name:"Create or Destroy Water", source:"Cleric", castingTime:"1 Action", range:"30 ft./30 ft. Cube", components:"V, S, M", duration:"Instantaneous", notes:"30 ft. Cube, V/S/M"},
+                        {name:"Detect Evil and Good", source:"Cleric", castingTime:"1 Action", range:"Self/30 ft. Sphere", components:"V, S", duration:"Concentration, up to 10 minutes", notes:"D: 10m, 30 ft. Sphere, V/S"},
+                        {name:"Detect Poison and Disease", source:"Cleric", castingTime:"1 Action (10 minutes)", range:"Self/30 ft. Sphere", components:"V, S, M", duration:"Concentration, up to 10 minutes", notes:"D: 10m, 30 ft. Sphere, V/S/M"},
+                        {name:"Detect Magic", source:"Cleric", castingTime:"1 Action (10 minutes)", range:"Self/30 ft. Sphere", components:"V, S", duration:"Concentration, up to 10 minutes", notes:"D: 10m, 30 ft. Sphere, V/S"},
+                        {name:"Inflict Wounds", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"Doom of Poor Fortune", source:"Cleric", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"24 hours", notes:"D: 24h, V/S/M"},
+                        {name:"Emerald Goblet", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S, M", duration:"1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Fireflies", source:"Cleric", castingTime:"1 Action", range:"60 ft./15 ft. Sphere", components:"V, S", duration:"1 round", notes:"D: 1h, 15 ft. Sphere, V/S"},
+                        {name:"Shield", source:"Magic Initiate (Wizard)", castingTime:"1 Reaction", range:"Self", components:"V, S", duration:"1 round", notes:"1/LR, D: 1Rnd, V/S"}
+                    ],
+                    level2: [
+                        {name:"Ominous Winds", source:"Cleric", castingTime:"1 Action", range:"60 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Lesser Restoration", source:"Cleric", castingTime:"1 Bonus Action", range:"Touch", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"See Invisibility", source:"Cleric (Always Prepared)", castingTime:"1 Action", range:"Self", components:"V, S, M", duration:"1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Moonbeam", source:"Cleric (Always Prepared)", castingTime:"1 Action", range:"120 ft./5 ft. Cylinder", components:"V, S, M", duration:"Concentration, up to 1 minute", notes:"D: 1m, 5 ft. Cylinder, V/S/M"},
+                        {name:"Borrowed Knowledge", source:"Cleric", castingTime:"1 Action", range:"Self", components:"V, S, M", duration:"1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Aid", source:"Cleric", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"8 hours", notes:"D: 8h, V/S/M"},
+                        {name:"Augury", source:"Cleric", castingTime:"1 minute", range:"Self", components:"V, S, M", duration:"Instantaneous", notes:"V/S/M"},
+                        {name:"Find Traps", source:"Cleric", castingTime:"1 Action", range:"120 ft.", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"Prayer of Healing", source:"Cleric", castingTime:"10 minutes", range:"30 ft.", components:"V", duration:"Instantaneous", notes:"V"},
+                        {name:"Protection from Poison", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"1 hour", notes:"D: 1h, V/S"},
+                        {name:"Blindness/Deafness", source:"Cleric", castingTime:"1 Action", range:"120 ft.", components:"V", duration:"1 minute", notes:"D: 1m, V"},
+                        {name:"Gentle Repose", source:"Cleric", castingTime:"1 Action (10 minutes)", range:"Touch", components:"V, S, M", duration:"10 days", notes:"D: 10d, V/S/M"},
+                        {name:"Calm Emotions", source:"Cleric", castingTime:"1 Action", range:"60 ft./20 ft. Sphere", components:"V, S", duration:"Concentration, up to 1 minute", notes:"D: 1m, 20 ft. Sphere, V/S"},
+                        {name:"Locate Object", source:"Cleric", castingTime:"1 Action", range:"Self", components:"V, S, M", duration:"Concentration, up to 10 minutes", notes:"D: 10m, V/S/M"},
+                        {name:"Silence", source:"Cleric", castingTime:"1 Action (10 minutes)", range:"120 ft./20 ft. Sphere", components:"V, S", duration:"Concentration, up to 10 minutes", notes:"D: 10m, 20 ft. Sphere, V/S"},
+                        {name:"Continual Flame", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S, M", duration:"Until dispelled", notes:"D: Until Dispelled, V/S/M"},
+                        {name:"Spiritual Weapon", source:"Cleric", castingTime:"1 Bonus Action", range:"60 ft.", components:"V, S", duration:"1 minute", notes:"D: 1m, V/S"},
+                        {name:"Hold Person", source:"Cleric", castingTime:"1 Action", range:"60 ft.", components:"V, S, M", duration:"Concentration, up to 1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Enhance Ability", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S, M", duration:"Concentration, up to 1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Warding Bond", source:"Cleric", castingTime:"1 Action", range:"Touch", components:"V, S, M", duration:"1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Zone of Truth", source:"Cleric", castingTime:"1 Action", range:"60 ft./15 ft. Sphere", components:"V, S", duration:"10 minutes", notes:"D: 10m, 15 ft. Sphere, V/S"},
+                        {name:"Conjure Ferryman", source:"Cleric", castingTime:"1 Action", range:"90 ft.", components:"V, S, M", duration:"Concentration, up to 1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Drayfn's Blunted Blade", source:"Cleric", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"}
+                    ],
+                    level3: []
+                },
+                equipment: [
+                    { name: "Mithral Plate", weight: "65 lb.", notes: "Heavy Armor" },
+                    { name: "Sentinel Shield", weight: "6 lb.", notes: "" },
+                    { name: "Inkrazor Bracer", weight: "0.25 lb.", notes: "Vex property, 1d4+2 Piercing (+1d4 Piercing)" },
+                    { name: "Mace", weight: "4 lb.", notes: "Sap property, 1d6-1 Bludgeoning" },
+                    { name: "Crescent Amulet", weight: "0 lb.", notes: "Magic Item" },
+                    { name: "Lapel Pin of Yureth", weight: "0 lb.", notes: "Magic Item" },
+                    { name: "Wand of Pyrotechnics", weight: "1 lb.", notes: "Magic Item" },
+                    { name: "Everbright Lantern", weight: "2 lb.", notes: "Magic Item, no fuel needed" },
+                    { name: "Rope of Climbing", weight: "3 lb.", notes: "Magic Item" },
+                    { name: "Mosswater Canteen", weight: "1 lb.", notes: "Magic Item" },
+                    { name: "Fogbreather's Mask", weight: "0.5 lb.", notes: "Magic Item" },
+                    { name: "Moss-Packed Hourglass", weight: "0.5 lb.", notes: "Magic Item" },
+                    { name: "Whisperbound Journal", weight: "1 lb.", notes: "Magic Item" },
+                    { name: "Backpack", weight: "5 lb.", notes: "" },
+                    { name: "Robe", weight: "4 lb.", notes: "2 total" },
+                    { name: "Holy Symbol", weight: "1 lb.", notes: "" },
+                    { name: "Component Pouch", weight: "2 lb.", notes: "" },
+                    { name: "Mess Kit", weight: "1 lb.", notes: "" },
+                    { name: "Oil", weight: "3 lb.", notes: "3 total" },
+                    { name: "Parchment", weight: "0 lb.", notes: "8 total" },
+                    { name: "Alchemist's Supplies", weight: "8 lb.", notes: "" },
+                    { name: "Calligrapher's Supplies", weight: "5 lb.", notes: "" },
+                    { name: "Rations", weight: "6 lb.", notes: "3 days" },
+                    { name: "Rope", weight: "15 lb.", notes: "3 total" },
+                    { name: "Blanket", weight: "3 lb.", notes: "" },
+                    { name: "Tinderbox", weight: "1 lb.", notes: "" },
+                    { name: "Book", weight: "5 lb.", notes: "" },
+                    { name: "Waterskin", weight: "5 lb.", notes: "" },
+                    { name: "Herbalism Kit", weight: "3 lb.", notes: "" },
+                    { name: "Lamp", weight: "1 lb.", notes: "" },
+                    { name: "Candle", weight: "0 lb.", notes: "10 total" },
+                    { name: "Grappling Hook", weight: "4 lb.", notes: "" },
+                    { name: "Residuum", weight: "0 lb.", notes: "1,600 total" },
+                    { name: "Holy Water", weight: "2 lb.", notes: "2 total" }
+                ]
+            },
+            nihlium: {
+                name: "Nihlium",
+                classLevel: "Sorcerer 3 / Warlock 1",
+                classes: { Sorcerer: 3, Warlock: 1 },
+                species: "Stygian Shade",
+                background: "Investigator",
+                hp: 35,
+                ac: 15,
+                speed: "30 ft. walk",
+                abilities: { STR: 8, DEX: 14, CON: 18, INT: 16, WIS: 12, CHA: 19 },
+                abilityMods: { STR: -1, DEX: +2, CON: +4, INT: +3, WIS: +1, CHA: +4 },
+                saves: ["CON", "CHA"],
+                senses: { perception: 13, insight: 11, investigation: 15, darkvision: "60 ft." },
+                proficiencies: {
+                    skills: [
+                        { name: "Deception", modifier: 6, ability: "CHA" }, { name: "Persuasion", modifier: 6, ability: "CHA" }, { name: "Arcana", modifier: 5, ability: "INT" },
+                        { name: "History", modifier: 5, ability: "INT" }, { name: "Investigation", modifier: 5, ability: "INT" }, { name: "Nature", modifier: 5, ability: "INT" },
+                        { name: "Intimidation", modifier: 4, ability: "CHA" }, { name: "Performance", modifier: 4, ability: "CHA" }, { name: "Religion", modifier: 3, ability: "INT" },
+                        { name: "Perception", modifier: 3, ability: "WIS" }, { name: "Acrobatics", modifier: 2, ability: "DEX" }, { name: "Sleight of Hand", modifier: 2, ability: "DEX" },
+                        { name: "Stealth", modifier: 2, ability: "DEX" }, { name: "Animal Handling", modifier: 1, ability: "WIS" }, { name: "Insight", modifier: 1, ability: "WIS" },
+                        { name: "Medicine", modifier: 1, ability: "WIS" }, { name: "Athletics", modifier: -1, ability: "STR" }, { name: "Survival", modifier: 1, ability: "WIS" }
+                    ],
+                    armor: "Light Armor",
+                    weapons: "Simple Weapons",
+                    tools: "Disguise Kit, Thieves' Tools",
+                    languages: "Celestial, Umbral"
+                },
+                attacks: [
+                    { name: "Eldritch Blast", bonus: "+7", damage: "1d10 Force", notes: "The go-to damage cantrip." },
+                    { name: "Chromatic Orb", bonus: "+6", damage: "3d8 Acid/Cold/Fire/etc.", notes: "Costs a 1st-level slot." },
+                    { name: "Sorcerous Burst", bonus: "+6", damage: "1d8 Acid", notes: "" },
+                    { name: "Unarmed Strike", bonus: "+1", damage: "0 Bludgeoning", notes: "" }
+                ],
+                features: [
+                    { name: "Metamagic (3 Sorcery Pts)", desc: "Quickened Spell (cast action spell as bonus action), Empowered Spell (reroll damage dice)." },
+                    { name: "Favored by the Gods (1/short rest)", desc: "If you fail a save or miss an attack, add 2d4 to the roll." },
+                    { name: "Eldritch Mind", desc: "Advantage on CON saves for concentration." },
+                    { name: "Ghostly Flesh (1/long rest)", desc: "Action to transform for 1 min. Gain 30ft fly speed (hover), resistance to nonmagical B/P/S, move through objects." },
+                    { name: "Death Mask (4/day)", desc: "Action to frighten non-undead in 30ft (DC 13 WIS save)." },
+                    { name: "Spectral Resilience", desc: "Advantage on saves vs poison/disease, resistance to necrotic damage." },
+                    { name: "Imperfect Undeath", desc: "Can regain HP from healing spells, affected by undead-targeting effects. Raise dead spells return as shade." }
+                ],
+                spells: {
+                    dc: 15,
+                    attack: "+7",
+                    slots: { "1st Level": 4, "2nd Level": 2, "Pact Slots": 1 },
+                    cantrips: [
+                        {name:"Eldritch Blast", source:"Warlock", castingTime:"1 Action", range:"120 ft.", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"Mage Hand", source:"Sorcerer", castingTime:"1 Action", range:"30 ft.", components:"V, S", duration:"1 minute", notes:"D: 1m, V/S"},
+                        {name:"Mind Sliver", source:"Warlock", castingTime:"1 Action", range:"60 ft.", components:"V", duration:"1 round", notes:"D: 1Rnd, V"},
+                        {name:"Blade Ward", source:"Sorcerer", castingTime:"1 Action", range:"Self", components:"V, S", duration:"1 minute", notes:"D: 1m, V/S"},
+                        {name:"Sorcerous Burst", source:"Elementalism", castingTime:"1 Action", range:"30 ft.", components:"V, S", duration:"Instantaneous", notes:"V/S"}
+                    ],
+                    level1: [
+                        {name:"Shield", source:"Sorcerer", castingTime:"1 Reaction", range:"Self", components:"V, S", duration:"1 round", notes:"D: 1Rnd, V/S"},
+                        {name:"Absorb Elements", source:"Sorcerer", castingTime:"1 Reaction", range:"Self", components:"V, S", duration:"1 round", notes:"D: 1Rnd, V/S"},
+                        {name:"Chromatic Orb", source:"Sorcerer", castingTime:"1 Action", range:"90 ft.", components:"V, S, M", duration:"Instantaneous", notes:"V/S/M"},
+                        {name:"Tasha's Hideous Laughter", source:"Sorcerer", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"Concentration, up to 1 minute", notes:"D: 1m, V/S/M"},
+                        {name:"Armor of Agathys", source:"Warlock", castingTime:"1 Action", range:"Self", components:"V, S, M", duration:"1 hour", notes:"D: 1h, V/S/M"},
+                        {name:"Cure Wounds", source:"Divine Soul", castingTime:"1 Action", range:"Touch", components:"V, S", duration:"Instantaneous", notes:"V/S"},
+                        {name:"Bless", source:"Divine Soul", castingTime:"1 Action", range:"30 ft.", components:"V, S, M", duration:"1 minute", notes:"D: 1m, V/S/M"}
+                    ],
+                    level2: [
+                        {name:"Spiritual Weapon", source:"Cleric", castingTime:"1 Bonus Action", range:"60 ft.", components:"V, S", duration:"1 minute", notes:"D: 1m, V/S"}
+                    ],
+                    level3: []
+                },
+                equipment: [
+                    { name: "Potion of Healing", weight: "0.5 lb.", notes: "2 total" },
+                    { name: "Amulet of the Devout +1", weight: "1 lb.", notes: "Magic Item" },
+                    { name: "Bloodwell Vial +1", weight: "1 lb.", notes: "Magic Item" },
+                    { name: "Scroll of Invisibility", weight: "0 lb.", notes: "" }
+                ]
+            }
+        };
+
+        let activeChartInstances = {};
+
+        const chartColors = {
+            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+            borderColor: 'rgba(245, 158, 11, 1)',
+            pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(245, 158, 11, 1)',
+        };
+
+        function createAbilityChart(charId) {
+            const canvasId = `${charId}-ability-chart`;
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            if (activeChartInstances[canvasId]) {
+                activeChartInstances[canvasId].destroy();
+            }
+            const data = characterData[charId];
+            activeChartInstances[canvasId] = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(data.abilities),
+                    datasets: [{
+                        label: 'Ability Scores',
+                        data: Object.values(data.abilities),
+                        ...chartColors,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(100, 116, 139, 0.2)' },
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
+                            pointLabels: { font: { size: 12 }, color: 'rgb(30, 41, 59)' },
+                            ticks: {
+                                color: 'rgb(71, 85, 105)',
+                                backdropColor: 'rgba(241, 245, 249, 0.6)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 20
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function createSkillChart(charId) {
+            const canvasId = `${charId}-skill-chart`;
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            if (activeChartInstances[canvasId]) {
+                activeChartInstances[canvasId].destroy();
+            }
+            const skills = characterData[charId].proficiencies.skills
+                                .sort((a, b) => b.modifier - a.modifier)
+                                .slice(0, 6); // Display top 6 skills
+            
+            const skillNames = skills.map(s => {
+                // Wrap labels if too long
+                const maxLen = 16; // Max characters before wrapping
+                if (s.name.length > maxLen) {
+                    const words = s.name.split(' ');
+                    let currentLine = '';
+                    const lines = [];
+                    for (const word of words) {
+                        if ((currentLine + word).length <= maxLen) {
+                            currentLine += (currentLine ? ' ' : '') + word;
+                        } else {
+                            lines.push(currentLine);
+                            currentLine = word;
+                        }
+                    }
+                    lines.push(currentLine);
+                    return lines;
+                }
+                return s.name;
+            });
+
+            activeChartInstances[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: skillNames,
+                    datasets: [{
+                        label: 'Top Skills',
+                        data: skills.map(s => s.modifier),
+                        backgroundColor: 'rgba(2, 132, 199, 0.6)',
+                        borderColor: 'rgba(2, 132, 199, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { display: false },
+                            ticks: { color: 'rgb(71, 85, 105)' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(100, 116, 139, 0.1)' },
+                            ticks: { color: 'rgb(30, 41, 59)' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function createClassChart(charId) {
+             const canvasId = `${charId}-class-chart`;
+             const ctx = document.getElementById(canvasId);
+             if (!ctx) return;
+             if (activeChartInstances[canvasId]) {
+                activeChartInstances[canvasId].destroy();
+            }
+             const data = characterData[charId].classes;
+             const classNames = Object.keys(data);
+             const classLevels = Object.values(data);
+
+             if (classNames.length <= 1) {
+                ctx.parentElement.classList.add('hidden');
+                return;
+             }
+             ctx.parentElement.classList.remove('hidden');
+
+             activeChartInstances[canvasId] = new Chart(ctx, {
+                 type: 'doughnut',
+                 data: {
+                     labels: classNames,
+                     datasets: [{
+                         label: 'Class Levels',
+                         data: classLevels,
+                         backgroundColor: [ 'rgba(13, 148, 136, 0.7)', 'rgba(124, 58, 237, 0.7)', 'rgba(190, 24, 93, 0.7)'],
+                         borderColor: ['rgb(15, 118, 110)','rgb(109, 40, 217)','rgb(159, 18, 57)'],
+                         borderWidth: 1
+                     }]
+                 },
+                 options: {
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'top',
+                             labels: { color: 'rgb(30, 41, 59)' }
+                         }
+                     }
+                 }
+             });
+        }
+
+        function buildCharacterHTML(charId) {
+            const data = characterData[charId];
+            const abilityScoresHTML = Object.entries(data.abilities).map(([key, value]) => `
+                <div class="text-center bg-white/50 rounded-lg p-2 shadow">
+                    <div class="font-bold text-slate-900 text-sm">${key}</div>
+                    <div class="text-2xl font-light text-slate-700">${value}</div>
+                    <div class="text-amber-600 font-semibold">${data.abilityMods[key] > 0 ? '+' : ''}${data.abilityMods[key]}</div>
+                </div>
+            `).join('');
+
+            const skillsTableHTML = `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-700">
+                        <thead class="text-xs text-slate-900 uppercase bg-slate-200 rounded-t-lg">
+                            <tr>
+                                <th scope="col" class="px-3 py-2 rounded-tl-lg">Skill</th>
+                                <th scope="col" class="px-3 py-2 text-center">Modifier</th>
+                                <th scope="col" class="px-3 py-2 rounded-tr-lg">Ability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.proficiencies.skills.map(skill => `
+                                <tr class="bg-white border-b border-slate-200 hover:bg-slate-50">
+                                    <td class="px-3 py-2 whitespace-nowrap">${skill.name}</td>
+                                    <td class="px-3 py-2 text-center font-bold text-sky-700">${skill.modifier > 0 ? '+' : ''}${skill.modifier}</td>
+                                    <td class="px-3 py-2 text-slate-500">${skill.ability}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            const attacksHTML = data.attacks.map(attack => `
+                <tr class="border-b border-slate-200 last:border-b-0">
+                    <td class="py-2 pr-2">
+                        <div class="font-semibold text-slate-900">${attack.name}</div>
+                        <div class="text-xs text-slate-500">${attack.notes}</div>
+                    </td>
+                    <td class="py-2 px-2 text-center font-mono text-slate-700">${attack.bonus}</td>
+                    <td class="py-2 pl-2 text-right font-mono text-slate-700">${attack.damage}</td>
+                </tr>
+            `).join('');
+
+            const featuresHTML = data.features.map(feature => `
+                <div class="py-2 border-b border-slate-200 last:border-b-0">
+                    <h4 class="font-semibold text-slate-900">${feature.name}</h4>
+                    <p class="text-slate-600 text-sm">${feature.desc}</p>
+                </div>
+            `).join('');
+
+            let spellSectionHTML = '';
+            if (data.spells) {
+                const spells = data.spells;
+
+                const renderSpells = (spellList) => spellList.map(s => `
+                    <div class="bg-slate-100 rounded p-3 mb-2 shadow-sm">
+                        <div class="font-semibold text-slate-900">${s.name}</div>
+                        <div class="text-xs text-slate-600">
+                            Source: ${s.source} | Time: ${s.castingTime} | Range: ${s.range} | Components: ${s.components} | Duration: ${s.duration}
+                            ${s.notes ? `| Notes: ${s.notes}` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                const spellSlotsHTML = Object.entries(spells.slots).map(([level, count]) => `
+                    <div class="text-center">
+                        <div class="text-sm font-semibold">${level}</div>
+                        <div class="text-lg text-slate-700">${count} Slots</div>
+                    </div>
+                `).join('');
+
+                spellSectionHTML = `
+                    <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                        <h3 class="text-xl font-bold mb-4 text-slate-900">Spellcasting</h3>
+                        <p class="text-slate-600 text-sm mb-4">This section outlines the character's magical abilities, including their most relevant prepared spells and available spell slots.</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-center bg-slate-100 p-3 rounded-lg">
+                            <div><div class="text-sm font-semibold">Save DC</div><div class="text-2xl font-light text-slate-700">${spells.dc}</div></div>
+                            <div><div class="text-sm font-semibold">Attack Bonus</div><div class="text-2xl font-light text-slate-700">${spells.attack}</div></div>
+                            ${spellSlotsHTML}
+                        </div>
+                        ${spells.cantrips && spells.cantrips.length > 0 ? `<div><h4 class="font-semibold mt-4 mb-2 text-slate-900">Cantrips</h4>${renderSpells(spells.cantrips)}</div>` : ''}
+                        ${spells.level1 && spells.level1.length > 0 ? `<div><h4 class="font-semibold mt-4 mb-2 text-slate-900">1st Level Spells</h4>${renderSpells(spells.level1)}</div>` : ''}
+                        ${spells.level2 && spells.level2.length > 0 ? `<div><h4 class="font-semibold mt-4 mb-2 text-slate-900">2nd Level Spells</h4>${renderSpells(spells.level2)}</div>` : ''}
+                        ${spells.level3 && spells.level3.length > 0 ? `<div><h4 class="font-semibold mt-4 mb-2 text-slate-900">3rd Level Spells</h4>${renderSpells(spells.level3)}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            const equipmentHTML = data.equipment.map(item => `
+                <li class="bg-amber-100 text-amber-800 rounded-lg p-2 text-sm flex flex-col items-center justify-center min-w-[120px]">
+                    <span class="font-semibold text-center">${item.name}</span>
+                    <span class="text-xs text-amber-700">${item.weight ? `(${item.weight})` : ''} ${item.notes ? ` - ${item.notes}` : ''}</span>
+                </li>
+            `).join('');
+
+            return `
+                <div id="${charId}-content" class="character-pane space-y-8 hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 space-y-8">
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h2 class="text-3xl font-bold text-slate-900">${data.name}</h2>
+                                <p class="text-md text-slate-500">${data.species} ${data.classLevel}</p>
+                                <div class="mt-4 grid grid-cols-3 gap-4">
+                                    <div class="text-center bg-slate-100 p-3 rounded-lg"><div class="text-2xl font-light text-slate-700">${data.hp}</div><div class="text-sm font-semibold text-slate-600">HP</div></div>
+                                    <div class="text-center bg-slate-100 p-3 rounded-lg"><div class="text-2xl font-light text-slate-700">${data.ac}</div><div class="text-sm font-semibold text-slate-600">AC</div></div>
+                                    <div class="text-center bg-slate-100 p-3 rounded-lg"><div class="text-2xl font-light text-slate-700">${data.speed.split(' ')[0]}</div><div class="text-sm font-semibold text-slate-600">Speed</div></div>
+                                </div>
+                                <div class="mt-4 text-center text-sm text-slate-500">
+                                    Passive Perception: <span class="font-bold text-slate-700">${data.senses.perception}</span> &bull;
+                                    Passive Insight: <span class="font-bold text-slate-700">${data.senses.insight}</span> &bull;
+                                    Darkvision: <span class="font-bold text-slate-700">${data.senses.darkvision}</span>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Ability Scores</h3>
+                                <p class="text-slate-600 text-sm mb-4">A visual representation of the character's core abilities, highlighting their most dominant and weakest stats.</p>
+                                <div class="grid grid-cols-3 gap-2 mb-4">
+                                    ${abilityScoresHTML}
+                                </div>
+                                <div class="chart-container"><canvas id="${charId}-ability-chart"></canvas></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Skills Overview</h3>
+                                <p class="text-slate-600 text-sm mb-4">This chart displays the character's highest skill modifiers, indicating their areas of expertise for ability checks.</p>
+                                <div class="chart-container h-64 md:h-80"><canvas id="${charId}-skill-chart"></canvas></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Proficiencies & Languages</h3>
+                                <p class="text-slate-600 text-sm mb-4">Comprehensive list of proficiencies, including armor, weapons, tools, and languages.</p>
+                                <div class="space-y-4">
+                                    <div><span class="font-semibold text-slate-900">Armor:</span> ${data.proficiencies.armor}</div>
+                                    <div><span class="font-semibold text-slate-900">Weapons:</span> ${data.proficiencies.weapons}</div>
+                                    <div><span class="font-semibold text-slate-900">Tools:</span> ${data.proficiencies.tools}</div>
+                                    <div><span class="font-semibold text-slate-900">Languages:</span> ${data.proficiencies.languages}</div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">All Skills Details</h3>
+                                <p class="text-slate-600 text-sm mb-4">A full breakdown of all skill modifiers for precise reference.</p>
+                                ${skillsTableHTML}
+                            </div>
+                             <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 ${Object.keys(data.classes).length > 1 ? '' : 'hidden'}">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Class Distribution</h3>
+                                <p class="text-slate-600 text-sm mb-4">A breakdown of the character's levels in each class, illustrating their multiclass specialization.</p>
+                                <div class="chart-container h-56"><canvas id="${charId}-class-chart"></canvas></div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2 space-y-8">
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Combat Actions</h3>
+                                <p class="text-slate-600 text-sm mb-4">A summary of the character's primary attack options for quick reference during an encounter.</p>
+                                <table class="w-full text-sm text-left">
+                                    <thead>
+                                        <tr class="bg-slate-200">
+                                            <th class="px-3 py-2 rounded-tl-lg">Attack Name</th>
+                                            <th class="px-3 py-2 text-center">Bonus</th>
+                                            <th class="px-3 py-2 text-right rounded-tr-lg">Damage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${attacksHTML}</tbody>
+                                </table>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Key Features & Traits</h3>
+                                <p class="text-slate-600 text-sm mb-4">This section highlights the most impactful class features, racial traits, and feats that define the character's unique abilities.</p>
+                                <div class="space-y-3">${featuresHTML}</div>
+                            </div>
+                            ${spellSectionHTML}
+                            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+                                <h3 class="text-xl font-bold mb-4 text-slate-900">Full Equipment List</h3>
+                                <p class="text-slate-600 text-sm mb-4">A comprehensive list of all the character's gear, including special properties and weight where applicable.</p>
+                                <ul class="flex flex-wrap gap-2 list-none p-0">${equipmentHTML}</ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showCharacter(charId) {
+            document.querySelectorAll('.character-pane').forEach(pane => pane.classList.add('hidden'));
+            const targetPane = document.getElementById(`${charId}-content`);
+            if (targetPane) {
+                targetPane.classList.remove('hidden');
+            }
+
+            document.querySelectorAll('#character-nav .nav-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.char === charId);
+            });
+            
+            // Re-render charts for the active pane to ensure they draw correctly
+            createAbilityChart(charId);
+            createSkillChart(charId);
+            createClassChart(charId);
+        }
+
+        function init() {
+            const navContainer = document.getElementById('character-nav');
+            const contentContainer = document.getElementById('character-content');
+            
+            Object.keys(characterData).forEach(charId => {
+                const data = characterData[charId];
+                const button = document.createElement('button');
+                button.className = 'nav-button bg-white text-slate-700 font-semibold py-2 px-4 rounded-full shadow-sm hover:bg-slate-200';
+                button.textContent = data.name;
+                button.dataset.char = charId;
+                button.addEventListener('click', () => showCharacter(charId));
+                navContainer.appendChild(button);
+
+                contentContainer.innerHTML += buildCharacterHTML(charId);
+            });
+            
+            showCharacter('wade'); // Default to Wade on load
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
