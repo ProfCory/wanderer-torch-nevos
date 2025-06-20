@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM Screen</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font: Inter (generally good for readability, consider OpenDyslexic if issues arise) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background for good contrast */
+            color: #e2e8f0; /* Light text */
+            line-height: 1.8; /* Increased line height for better readability */
+            letter-spacing: 0.02em; /* Slightly increased letter spacing */
+            scroll-behavior: smooth;
+        }
+        .container {
+            max-width: 1200px;
+            padding: 2rem; /* Increased padding */
+        }
+        .tab-button {
+            @apply px-8 py-4 text-xl font-bold rounded-t-lg transition-colors duration-300; /* Larger text, more padding */
+            @apply bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white;
+            margin: 0 0.25rem; /* Small margin between buttons */
+        }
+        .tab-button.active {
+            @apply bg-gray-800 text-white border-b-4 border-red-500; /* Thicker border */
+        }
+        .tab-content {
+            display: none;
+            padding: 1.5rem; /* Consistent padding for content */
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .section-title {
+            @apply text-4xl font-extrabold text-red-400 mb-6 pb-3 border-b-2 border-gray-600; /* Larger, bolder titles */
+            text-align: left; /* Ensure left-aligned */
+        }
+        .subsection-title {
+            @apply text-2xl font-bold text-blue-300 mb-4 mt-6; /* Larger, bolder sub-titles */
+            text-align: left; /* Ensure left-aligned */
+        }
+        details {
+            @apply bg-gray-800 rounded-xl shadow-md mb-6; /* More rounded, larger margin */
+            border: 1px solid #4a5568;
+            overflow: hidden; /* Ensures rounded corners are visible */
+        }
+        summary {
+            @apply p-5 cursor-pointer font-extrabold text-gray-100 hover:bg-gray-700 rounded-xl; /* More padding, bolder text */
+            user-select: none;
+        }
+        details[open] summary {
+            @apply border-b-2 border-gray-600 rounded-b-none;
+        }
+        .details-content {
+            @apply p-5 pt-0 text-gray-300; /* More padding */
+        }
+        table {
+            @apply w-full border-separate; /* Use border-separate for more spacing */
+            border-spacing: 0 0.5rem; /* Add vertical spacing between rows */
+            text-align: left;
+            border-radius: 0.75rem; /* Rounded corners for the entire table */
+            overflow: hidden; /* Ensures rounded corners on desktop */
+        }
+        th, td {
+            @apply p-4; /* Increased padding in cells */
+            border: 1px solid #4a5568; /* Individual cell borders */
+        }
+        th {
+            @apply bg-gray-700 text-gray-200 font-semibold uppercase text-sm;
+        }
+        tr:nth-child(even) {
+            background-color: #2d3748; /* Slightly lighter dark for rows */
+        }
+        tr:nth-child(odd) {
+            background-color: #1f2937; /* Even lighter dark for alternate rows */
+        }
+        /* Rounded corners for table cells */
+        th:first-child { border-top-left-radius: 0.75rem; }
+        th:last-child { border-top-right-radius: 0.75rem; }
+        tr:last-child td:first-child { border-bottom-left-radius: 0.75rem; }
+        tr:last-child td:last-child { border-bottom-right-radius: 0.75rem; }
+
+        ul {
+            @apply list-disc list-inside space-y-2; /* More space between list items */
+            padding-left: 1.5rem; /* Indent list for clarity */
+        }
+        ol {
+            @apply list-decimal list-inside space-y-2; /* More space between list items */
+            padding-left: 1.5rem; /* Indent list for clarity */
+        }
+        /* Styling for links as buttons */
+        .details-content a {
+            @apply inline-block bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200; /* Larger buttons, more rounded */
+            @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75;
+            @apply no-underline text-center;
+            margin-top: 1rem; /* More space above */
+            margin-right: 1rem; /* More space between buttons */
+        }
+        .map-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 1rem; /* More rounded image corners */
+            box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.2), 0 3px 7px -3px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+        }
+        /* Textarea and input styling */
+        textarea, input[type="text"] {
+            @apply w-full p-4 bg-gray-700 border-2 border-gray-600 rounded-lg text-gray-200; /* More padding, thicker border, more rounded */
+            @apply focus:ring-4 focus:ring-blue-500 focus:border-transparent; /* Stronger focus ring */
+            margin-bottom: 1rem; /* Space below input/textarea */
+        }
+        textarea {
+            min-height: 200px; /* Increased height */
+        }
+        .llm-button {
+            @apply bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 mt-2; /* Larger, more rounded buttons */
+            @apply hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75;
+        }
+        .note-button {
+            @apply bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 mt-2 mr-2;
+            @apply hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-75;
+        }
+        .archive-button {
+            @apply bg-purple-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 mt-2 mr-2;
+            @apply hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 0.75rem; /* More space for spinner */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .highlight {
+            background-color: #ffeb3b; /* Bright yellow for highlights */
+            color: #1a202c; /* Dark text on highlight */
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .archived-entry {
+            @apply bg-gray-700 p-4 rounded-lg mb-4 border border-gray-600;
+        }
+        .archived-entry-timestamp {
+            @apply text-sm text-gray-400 mb-2 block;
+        }
+        .archived-entry-content {
+            @apply text-gray-200 whitespace-pre-wrap;
+        }
+
+        /* Responsive table for small screens */
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                margin-bottom: 1rem;
+                border: 1px solid #4a5568;
+                border-radius: 0.75rem;
+                overflow: hidden;
+            }
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 45%;
+                padding-left: 0.75rem;
+                font-weight: 600;
+                text-align: left;
+                color: #e2e8f0;
+            }
+            td:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+    <div class="container mx-auto bg-gray-900 rounded-xl shadow-2xl">
+        <h1 class="text-5xl font-extrabold text-center mb-6 pt-8 text-red-500">
+            <span class="block">DM Screen</span>
+        </h1>
+
+        <!-- Global Search Bar -->
+        <details class="mb-8 bg-gray-800 rounded-xl shadow-md border border-gray-700">
+            <summary class="p-5 font-extrabold text-gray-100 hover:bg-gray-700 rounded-xl">Search DM Screen 🔎</summary>
+            <div class="details-content">
+                <label for="global-search-input" class="block text-gray-400 text-sm font-bold mb-2">Search Term:</label>
+                <input type="text" id="global-search-input" placeholder="e.g., residuum, Elyndor, goblin" onkeyup="if(event.key === 'Enter') performGlobalSearch()">
+                <button class="llm-button" onclick="performGlobalSearch()">Search 🔍</button>
+                <button class="note-button" onclick="clearGlobalHighlights()">Clear Highlights</button>
+            </div>
+        </details>
+
+
+        <!-- Tab Buttons -->
+        <div class="flex flex-wrap justify-center mb-8 gap-2">
+            <button class="tab-button active" onclick="openTab(event, 'general-dnd')">General D&D Info</button>
+            <button class="tab-button" onclick="openTab(event, 'nevos-overview')">Nevos Overview</button>
+            <button class="tab-button" onclick="openTab(event, 'monday-campaign')">Monday Campaign</button>
+            <button class="tab-button" onclick="openTab(event, 'friday-campaign')">Friday Campaign</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="general-dnd" class="tab-content active">
+            <h2 class="section-title">General D&D 5e Reference</h2>
+
+            <details>
+                <summary>Conditions</summary>
+                <div class="details-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Condition</th>
+                                <th>Effect</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-label="Condition">Blinded</td>
+                                <td data-label="Effect">Cannot see. Attacks have disadvantage, attacks against have advantage.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Charmed</td>
+                                <td data-label="Effect">Cannot attack charmer or target charmer with harmful abilities. Charmer has advantage on social checks.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Deafened</td>
+                                <td data-label="Effect">Cannot hear. Fails any ability check that requires hearing.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Frightened</td>
+                                <td data-label="Effect">Disadvantage on attack rolls & ability checks while source of fear is in line of sight. Cannot willingly move closer to source.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Grappled</td>
+                                <td data-label="Effect">Speed is 0. Cannot benefit from any bonus to speed. Ends if grappler is incapacitated or if grappled creature escapes.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Incapacitated</td>
+                                <td data-label="Effect">Cannot take actions or reactions.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Invisible</td>
+                                <td data-label="Effect">Cannot be seen without magic/special sense. Attacks have advantage, attacks against have disadvantage.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Paralyzed</td>
+                                <td data-label="Effect">Incapacitated, cannot move/speak. Fails Str/Dex saves. Attacks against are critical if within 5ft.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Petrified</td>
+                                <td data-label="Effect">Transformed into solid, inanimate substance. Weight increases x10, no aging, immune to poison/disease. Incapacitated, cannot move/speak, unaware of surroundings. Attacks against have advantage. Resistant to all damage.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Poisoned</td>
+                                <td data-label="Effect">Disadvantage on attack rolls and ability checks.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Prone</td>
+                                <td data-label="Effect">Only movement option is crawling (half speed). Disadvantage on attack rolls. Attacks within 5ft have advantage, attacks beyond 5ft have disadvantage.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Restrained</td>
+                                <td data-label="Effect">Speed is 0. Attacks have disadvantage, attacks against have advantage. Disadvantage on Dex saves.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Stunned</td>
+                                <td data-label="Effect">Incapacitated, cannot move/speak. Fails Str/Dex saves. Attacks against have advantage.</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Condition">Unconscious</td>
+                                <td data-label="Effect">Incapacitated, cannot move/speak, unaware of surroundings. Drops held items, falls prone. Attacks against have advantage. Attacks within 5ft are critical.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details>
+                <summary>Damage Types</summary>
+                <div class="details-content">
+                    <p>Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, Thunder.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Cover</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>Half Cover:</strong> +2 AC and Dex saves. Obstacle blocks at least half of body (low wall, large tree trunk, creature).</li>
+                        <li><strong>Three-Quarters Cover:</strong> +5 AC and Dex saves. Obstacle blocks at least three-quarters of body (portcullis, arrow slit, thick tree).</li>
+                        <li><strong>Total Cover:</strong> Cannot be targeted directly by attack or spell.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Light & Vision</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>Bright Light:</strong> Normal vision.</li>
+                        <li><strong>Dim Light (Shadows):</strong> Lightly obscured. Disadvantage on Wisdom (Perception) checks.</li>
+                        <li><strong>Darkness:</strong> Heavily obscured. Effectively blinded.</li>
+                        <li><strong>Blindsight:</strong> Perceive surroundings without relying on sight, within certain range.</li>
+                        <li><strong>Darkvision:</strong> Treat dim light as bright, darkness as dim light. Cannot discern color in darkness.</li>
+                        <li><strong>Truesight:</strong> See in normal/magical darkness, see invisible creatures/objects, automatically detect visual illusions and succeed on saves against them, perceive original form of shapeshifters/transformed creatures, see into Ethereal Plane.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Action Economy</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>Action:</strong> Attack, Cast a Spell, Dash, Disengage, Dodge, Help, Hide, Ready, Search, Use an Object, Special (Class Features).</li>
+                        <li><strong>Bonus Action:</strong> Quick, secondary actions (e.g., off-hand attack, some spells/features). Can only take one per turn.</li>
+                        <li><strong>Reaction:</strong> Instant response to a trigger (e.g., Opportunity Attack, Counterspell). One per round.</li>
+                        <li><strong>Movement:</strong> Walk, run, climb, swim. Can be broken up.</li>
+                        <li><strong>Free Object Interaction:</strong> One per turn (e.g., draw weapon, open door).</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Ability Checks</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>Strength:</strong> Athletics (climbing, jumping, swimming, grappling).</li>
+                        <li><strong>Dexterity:</strong> Acrobatics (balance, tightropes), Stealth (hiding), Sleight of Hand (pickpocketing, nimble tasks).</li>
+                        <li><strong>Constitution:</strong> HP, Concentration, resisting poisons/diseases, holding breath.</li>
+                        <li><strong>Intelligence:</strong> Arcana (magic), History (lore), Investigation (clues), Nature (plants/animals), Religion (deities/rites).</li>
+                        <li><strong>Wisdom:</strong> Animal Handling (calming animals), Insight (detecting lies), Medicine (healing), Perception (seeing/hearing/smelling), Survival (tracking, foraging).</li>
+                        <li><strong>Charisma:</strong> Deception (lying), Intimidation (threatening), Performance (entertaining), Persuasion (convincing).</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Travel Pace</summary>
+                <div class="details-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pace</th>
+                                <th>Per Minute</th>
+                                <th>Per Hour</th>
+                                <th>Per Day</th>
+                                <th>Effect</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-label="Pace">Fast</td>
+                                <td data-label="Per Minute">400 ft</td>
+                                <td data-label="Per Hour">4 miles</td>
+                                <td data-label="Per Day">30 miles</td>
+                                <td data-label="Effect">-5 penalty to passive Perception</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Pace">Normal</td>
+                                <td data-label="Per Minute">300 ft</td>
+                                <td data-label="Per Hour">3 miles</td>
+                                <td data-label="Per Day">24 miles</td>
+                                <td data-label="Effect">—</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Pace">Slow</td>
+                                <td data-label="Per Minute">200 ft</td>
+                                <td data-label="Per Hour">2 miles</td>
+                                <td data-label="Per Day">18 miles</td>
+                                <td data-label="Effect">Can use Stealth.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+
+        <div id="nevos-overview" class="tab-content">
+            <h2 class="section-title">Nevos Campaign Overview</h2>
+
+            <details open>
+                <summary>Map of Nevos & Regions</summary>
+                <div class="details-content">
+                    <p class="mb-4">Nevos is a world shaped by its celestial bodies – The Wanderer (a 28-day lunar cycle governing the calendar year) and The Torch (marking daily phases). Its history is marked by the Age of Mortals, following the fall of dragons.</p>
+                    <img src="https://placehold.co/800x600/1a202c/e2e8f0?text=Nevos+Main+Map+(Image+from+Nevos+main.jpg)" alt="Continent of Nevos" class="map-image mx-auto my-4">
+                    <p class="mt-4"><strong>Key Regions:</strong></p>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        <li><strong>Aelorthal:</strong> Home to elven scholars and ancient libraries.</li>
+                        <li><strong>Dravaskor:</strong> Harsh cliffs and mountain garrisons, home to goliath enclaves.</li>
+                        <li><strong>Elyndor:</strong> Grave gardens and sacred valleys, often with druidic and mourning cultures.</li>
+                        <li><strong>Evarayne:</strong> Mystical and fey-descended nature, dream-libraries, prophecy cloisters.</li>
+                        <li><strong>Inarune:</strong> Forge-lords and arcane guilds, warforged reactivation.</li>
+                        <li><strong>Kaelmar:</b> Volcanic activity, half the city relocated underground.</li>
+                        <li><strong>Karnathul:</strong> Icy tundra, fears cold-born uprisings.</li>
+                        <li><strong>Krevalen:</strong> (Implied from map)</li>
+                        <li><strong>Meredorn:</strong> (Implied from map)</li>
+                        <li><strong>Solvenar:</strong> Long-sea trade routes, caravan lords, residuum trading.</li>
+                        <li><strong>Threnvalen:</strong> Reports strange drownings.</li>
+                        <li><strong>Valerost:</strong> Orc-led matriarchs, dual governance, honor-duel economy.</li>
+                        <li><strong>Veshtarun:</strong> Trade dynasties, Veilmarket Compacts, harbor city susceptible to floods.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>Time & Calendar of Nevos</summary>
+                <div class="details-content">
+                    <p>Nevos operates on a 364-day year, divided into 13 months of 28 days each. Weeks have 7 "Turns."</p>
+                    <h4 class="subsection-title">Moons:</h4>
+                    <ul>
+                        <li><strong>The Wanderer:</strong> 28-day cycle, governs the calendar year.</li>
+                        <li><strong>The Torch:</strong> Marks phases of the day, waxing and waning over a 24-hour rhythm.</li>
+                    </ul>
+                    <h4 class="subsection-title">Day/Time Phases (approx. 3-hour blocks):</h4>
+                    <ol>
+                        <li>New Moon (~12a-3a) or Rest-time</li>
+                        <li>Waxing Crescent (~3a-6a) or Wake-time</li>
+                        <li>First Quarter (~6a-9a) or Begin-time</li>
+                        <li>Waxing Gibbous (~9a-12p) or Bustle-time</li>
+                        <li>Full Moon (~12p-3p) or Feast-time</li>
+                        <li>Waning Gibbous (~3p-6p) or Finale-time</li>
+                        <li>Last Quarter (~6p-9p) or Supine-time</li>
+                        <li>Waning Crescent (~9p-12a) or Dim-time</li>
+                    </ol>
+                    <p><em>Note: "Supine" and "Dim" are often joined in shorthand as "Descent".</em></p>
+                    <h4 class="subsection-title">Days/Turns of the Week:</h4>
+                    <p>Cressaturn, Quarturn, Gibbanturn, Seluturn, Drossturn, Fennelturn, Veilnight. Neventurn (New Moon) is a symbolic "omitted turn" – never observed, a term for dismissal or death.</p>
+                    <h4 class="subsection-title">Seasons (7 total):</h4>
+                    <ol>
+                        <li><strong>Verdance:</strong> Spring melt, soft rains, new growth.</li>
+                        <li><strong>Scorchrest:</strong> Intense summer heat, droughts, increased raids.</li>
+                        <li><strong>Gildharrow:</strong> Prosperity, trade, celebrations.</li>
+                        <li><strong>Siltwane:</b> Mid-year floods, disease, turbulent skies.</li>
+                        <li><strong>Ashreap:</strong> Grimmer harvest, tax collection, provisioning for winter.</li>
+                        <li><strong>Drifthollow:</b> Mists, decay, fungal proliferation, thinning veil.</li>
+                        <li><strong>Frostwrath:</strong> Brutal winter, blizzards, famine, isolation.</li>
+                    </ol>
+                    <h4 class="subsection-title">Festivals & Rites:</h4>
+                    <ul>
+                        <li><strong>Zodiacal Weekend Festivals:</strong> One per month (first weekend), themed to the star (e.g., Crimson March for Valkeryn).</li>
+                        <li><strong>Seasonal Cross-Festivals:</strong> One per season transition, moon-tied (e.g., Thaw's Mercy).</li>
+                        <li><strong>Liminal Rites:</strong> "Wanderer's Arrival" (New Year, Day 1 of Valkeryn) – renewal oaths, rekindling fires.</li>
+                        <li><strong>Terminal Rites:</strong> "Night of Threads" (Last day of Evarain, Day 336) – confessions, secrets unburdened.</li>
+                    </ul>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <a href="Z Realm Calendar.html" target="_blank">View Full Interactive Calendar</a>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Species & Society of Nevos</summary>
+                <div class="details-content">
+                    <p>Nevos is populated by diverse peoples, each with their own history, societal structure, and relationship with the stars.</p>
+                    <h4 class="subsection-title">Key Species:</h4>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                        <li><strong>Dwarves:</strong> Governed by hearth-bound oaths and elder houses. Revere Dravath (Order/Tempest), Tharamir (Forge/Grave), Ashunel (Earth/Law).</li>
+                        <li><strong>Elves:</strong> Gather in counsel, led by oldest voices. Tend toward Thyrian (Arcana/Light), Velora (Nature/Moon), or Evarain (Twilight/Exile).</li>
+                        <li><strong>Halflings:</strong> Communities elect leaders by clear vote. Favor Halden (Life/Trickery), Liora (Harvest/Joy), Firaen (Home/Luck).</li>
+                        <li><strong>Gnomes:</b> Ruled regionally by consensus or local genius. Favor Thyrian (Arcana), Halden (Trickery), Shurakai (Curiosity/Change).</li>
+                        <li><strong>Humans & Orcs:</strong> Share lands. Humans value charisma/cleverness; Orcs revere wise/enduring, led by matriarchs.</li>
+                        <li><strong>Nomadic Folk (Kobolds, Goblins):</b> Live in pods, rarely rooted or welcome. Honor stars that guard their band.</li>
+                        <li><strong>Touched (Tieflings & Aasimar):</strong> Seen as Star-Touched (by flame or starlight). Tieflings often claimed by Halden, Evarain, Zirakkel (Change/Fire); Aasimar by Solivane, Thyrian, Firaen (Hope).</li>
+                        <li><strong>Warforged:</strong> Ritual remembrance of forging stars. Revere Inarith (Purpose/Light) or Thyrian (Knowledge/Order). Inherited hatred for Dragonborn.</li>
+                        <li><strong>Dragonborn:</strong> View Solivane as "Flame That Betrayed." Devotion instinctive, centered on Zirakkel (Fire/Destruction) or Ashunel (Honor). Inherited hatred for Warforged.</li>
+                        <li><strong>Giants (Giant-Kin):</strong> Once ruled, now exiled to storm-rimmed edges. Pray to stars that watched them fall (Ashunel, Evarain, Solivane). Marginalized and unwelcome.</li>
+                        <li><strong>Celestial Elves:</strong> Devoted disciples of Solivane, keepers of stellar silence, guardians of radiant gates. From ancient high elves altered by "Unbound Radiance." Travel to "Quiet Beyond" through Solivane Gates.</li>
+                    </ul>
+                    <h4 class="subsection-title mt-4">The Central Light: Solivane</h4>
+                    <p>Venerated across all lands as "The Torch Sovereign," "Flame of Noon," or "The Bright One." Principal flame by which constellations are read, origin of all signs and seasons. Common symbols: golden spiral, open flame in cupped hands, radiant disk with 13 rays.</p>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <a href="Giant_kin.html" target="_blank">Details on Giant-Kin</a>
+                        <a href="celestial_elves_solivane.html" target="_blank">Details on Celestial Elves</a>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Factions & Current Rumors</summary>
+                <div class="details-content">
+                    <h4 class="subsection-title">Factions of Note:</h4>
+                    <ul>
+                        <li><strong>The Residuum Pact:</strong> Gnome-led guild extracting and mapping residuum veins.</li>
+                        <li><strong>The Children of the Scale:</strong> Secretive dragonborn cult claiming the old age will rise anew.</li>
+                        <li><strong>The Starborn Order:</strong> Celestially marked tieflings and aasimar forming a wandering monastery.</li>
+                        <li><strong>Veilwalkers:</strong> Discreet sorcerers and scholars of Evarayne studying fate manipulation.</li>
+                    </ul>
+                    <h4 class="subsection-title mt-4">Rumors on the Wind:</h4>
+                    <ul>
+                        <li>“Ashspire’s core burns too hot—some say Kaelmar prepares for war.”</li>
+                        <li>“The waters around Lanterndeep whisper names no one should hear.”</li>
+                        <li>“Warforged are remembering the stars. Some have started building shrines again.”</li>
+                        <li>“An isle south of Elyndor rose after the last moon-phase... and none remember it.”</li>
+                    </ul>
+                    <h4 class="subsection-title mt-4">Regional Concerns:</h4>
+                    <ul>
+                        <li>Karnathul fears another cold-born uprising or ancient curse under Finalhold.</li>
+                        <li>Solvenar’s caravan lords argue over residuum trading rights, risking bloodshed.</li>
+                        <li>Elyndor sees a strange bloom of funeral lilies during unseasonal times—a sign?</li>
+                        <li>Valerost’s orcish houses now lead two of the three warrior halls.</li>
+                    </ul>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <a href="Timeline of Nevos – The Last 150 Years.txt" target="_blank">View Full Timeline</a>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Shops & Notable Items</summary>
+                <div class="details-content">
+                    <h4 class="subsection-title">The Fog & Feather (Thalen "Inkgut" Brost // fence and operator)</h4>
+                    <p>A source for general merchandise, zodiacal items, divination tools, ritual items, scrolls, minor magical trinkets, single-use magical items, melee weapons, crafting kits, and questionable curios.</p>
+                    <p class="mb-2"><strong>A Few Notable Items:</strong></p>
+                    <ul>
+                        <li><strong>Veilshard Amulet:</strong> Fragment of inert residuum, illegal in Yurevanth.</li>
+                        <li><strong>Inquisitor’s Eyestone:</strong> False eye that records 1 min of visual memory (one-time use).</li>
+                        <li><strong>Zodiacal Lens:</strong> Crystal lens etched with 12 star signs, used for augury.</li>
+                        <li><strong>Grain of Star Salt:</strong> Crushed under tongue for lucid dreams tied to your sign.</li>
+                        <li><strong>Scroll of Silent Passing:</strong> (Disguise Self) Often banned in cities.</li>
+                        <li><strong>Whisper Pin:</b> Lets you whisper across 20 ft once per minute.</li>
+                        <li><strong>Glimmerbomb:</strong> Throws a 10 ft flash of blinding light.</li>
+                        <li><strong>Ashthorn Chainblade:</strong> Short, flexible chain weapon, illegal in Valerost.</li>
+                        <li><strong>Spindleleaf Brewkit:</b> Base for healing potions.</li>
+                        <li><strong>Lunecradle Marbles:</strong> Glassy marbles said to mimic Torch Moon phases (often unreliable).</li>
+                    </ul>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <a href="The Fog & the Feather.html" target="_blank">View Full Fog & Feather Shop</a>
+                    </div>
+
+                    <h4 class="subsection-title mt-6">The Crimson Horn (Redmarch Keep, Valerost)</h4>
+                    <p>A place for martial gear, Valerost-specific constellation items, utility magic, and more.</p>
+                    <p class="mb-2"><strong>A Few Notable Items:</strong></p>
+                    <ul>
+                        <li><strong>Honor‑Brand Manacles:</strong> Heat if wearer breaks a spoken oath (+1d4 fire dmg).</li>
+                        <li><strong>Blood‑Oath Vial:</b> Shuts & screams if contract breaks.</li>
+                        <li><strong>Valkeryn War‑Medal:</strong> Rings like steel once/day to open formal duels.</li>
+                        <li><strong>Driftglobe:</strong> 60‑ft light on voice command; floats & follows.</li>
+                        <li><strong>Rope of Mending:</strong> Self‑repairs in 1 min.</li>
+                        <li><strong>Stone‑Echo Token:</strong> Vibrates faintly when footfalls echo within 60 ft.</li>
+                        <li><strong>Spelunker’s Core Kit:</strong> Hooded lantern, oil flasks, silk rope, pitons, hammer, etc.</li>
+                        <li><strong>Oath‑Spark Capsule:</strong> BA: weapon gains +1 dmg & crackling sparks (1 min).</li>
+                        <li><strong>Feather‑Drop Sheet:</strong> (Feather Fall) Slow descent for 5 creatures.</li>
+                        <li><strong>Petrified Boar‑Snout Totem:</b> Supposedly wards off cave spirits, but just smells like bacon.</li>
+                    </ul>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <a href="crimson_horn_shop.html" target="_blank">View Full Crimson Horn Shop</a>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div id="monday-campaign" class="tab-content">
+            <h2 class="section-title">Monday Campaign: Notes & Tools</h2>
+            <p class="text-gray-300 mb-4">Use these sections to prepare and manage your Monday campaign sessions. Notes are saved automatically to your browser's local storage.</p>
+
+            <details open>
+                <summary>Current Objective/Quest Hook</summary>
+                <div class="details-content">
+                    <textarea id="monday-objective-notes" placeholder="e.g., The party is investigating strange funeral lilies in Elyndor, which seem to grow near unquiet graves and might signify a broken ancient Threnys rite."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('monday-objective-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('monday-objective-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Key NPCs & Factions</summary>
+                <div class="details-content">
+                    <textarea id="monday-npc-factions-notes" placeholder="e.g., Elder Lyra (Elyndor) - gravekeeper concerned about lilies. Children of the Scale - sighted near burial grounds. Warforged Rememberers - building shrines."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('monday-npc-factions-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('monday-npc-factions-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Recent Developments / Clues</summary>
+                <div class="details-content">
+                    <textarea id="monday-developments-notes" placeholder="e.g., Lilies emit mournful hum. Local wildlife avoids dense lily areas. Inscription found: 'slumbering sorrow of Threnys'."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('monday-developments-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('monday-developments-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Potential Encounters</summary>
+                <div class="details-content">
+                    <textarea id="monday-encounters-notes" placeholder="e.g., Shadowy cultists (Karnoss/Children of Scale) disturbing graves. Undead animated by lily energies. Stone Golem guardian awakened."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('monday-encounters-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('monday-encounters-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Session Notes</summary>
+                <div class="details-content">
+                    <textarea id="monday-session-notes" placeholder="Add your freeform notes for the Monday campaign here."></textarea>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <button class="note-button" onclick="copyContent('monday-session-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('monday-session-notes')">Clear Content</button>
+                        <button class="archive-button" onclick="addToArchive('monday')">Add to Archive</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Campaign Rumor Generator ✨</summary>
+                <div class="details-content">
+                    <label for="monday-rumor-context" class="block text-gray-400 text-sm font-bold mb-2">Context (optional, e.g., "about the lilies", "Valerost"):</label>
+                    <input type="text" id="monday-rumor-context" placeholder="e.g., about the lilies, Valerost">
+                    <button class="llm-button" onclick="generateRumor('monday')">Generate Rumor ✨</button>
+                    <div id="monday-rumor-output" class="mt-4 p-3 bg-gray-700 rounded-md text-gray-200 min-h-[50px] flex items-center">
+                        <span id="monday-rumor-placeholder">Click 'Generate Rumor' to get an idea!</span>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Quick NPC Generator ✨</summary>
+                <div class="details-content">
+                    <label for="monday-npc-type" class="block text-gray-400 text-sm font-bold mb-2">NPC Type (e.g., "grumpy innkeeper", "elven scout"):</label>
+                    <input type="text" id="monday-npc-type" placeholder="e.g., grumpy innkeeper, elven scout">
+                    <button class="llm-button" onclick="generateNPC('monday')">Generate NPC ✨</button>
+                    <div id="monday-npc-output" class="mt-4 p-3 bg-gray-700 rounded-md text-gray-200 min-h-[50px]">
+                        <span id="monday-npc-placeholder">Click 'Generate NPC' for a new character!</span>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Archive (Local Browser Only)</summary>
+                <div class="details-content">
+                    <p class="text-sm text-gray-400 mb-4">This archive is saved in your browser and will persist across sessions. For true long-term storage and version control, please copy notes to your GitHub repository.</p>
+                    <div id="monday-archive-output">
+                        <!-- Archived notes will be loaded here -->
+                    </div>
+                    <button class="archive-button" onclick="clearArchive('monday')">Clear Entire Archive</button>
+                </div>
+            </details>
+        </div>
+
+        <div id="friday-campaign" class="tab-content">
+            <h2 class="section-title">Friday Campaign: Notes & Tools</h2>
+            <p class="text-gray-300 mb-4">Use these sections to prepare and manage your Friday campaign sessions. Notes are saved automatically to your browser's local storage.</p>
+
+            <details open>
+                <summary>Current Objective/Quest Hook</summary>
+                <div class="details-content">
+                    <textarea id="friday-objective-notes" placeholder="e.g., The party is investigating disruptions in residuum trading routes for a Solvenar caravan lord, suspecting organized bandits or the Residuum Pact."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('friday-objective-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('friday-objective-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Key NPCs & Factions</summary>
+                <div class="details-content">
+                    <textarea id="friday-npc-factions-notes" placeholder="e.g., Master Elara (Solvenar) - caravan lord. The Residuum Pact - growing influence. Thalen 'Inkgut' Brost - fence, potential info source."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('friday-npc-factions-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('friday-npc-factions-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Recent Developments / Clues</summary>
+                <div class="details-content">
+                    <textarea id="friday-developments-notes" placeholder="e.g., Caravan raid left magical residue. Map fragment found with Residuum Pact symbols. Rumor: Valerius courting Aelorthal scribes for 'edits' to chronicles."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('friday-developments-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('friday-developments-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Potential Encounters</summary>
+                <div class="details-content">
+                    <textarea id="friday-encounters-notes" placeholder="e.g., Magically-equipped 'bandits'. Gnome artificers/operatives. Traps protecting residuum stashes."></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="note-button" onclick="copyContent('friday-encounters-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('friday-encounters-notes')">Clear Content</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Session Notes</summary>
+                <div class="details-content">
+                    <textarea id="friday-session-notes" placeholder="Add your freeform notes for the Friday campaign here."></textarea>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <button class="note-button" onclick="copyContent('friday-session-notes')">Copy Content to Clipboard</button>
+                        <button class="note-button" onclick="clearContent('friday-session-notes')">Clear Content</button>
+                        <button class="archive-button" onclick="addToArchive('friday')">Add to Archive</button>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Campaign Rumor Generator ✨</summary>
+                <div class="details-content">
+                    <label for="friday-rumor-context" class="block text-gray-400 text-sm font-bold mb-2">Context (optional, e.g., "about the lilies", "Valerost"):</label>
+                    <input type="text" id="friday-rumor-context" placeholder="e.g., about the lilies, Valerost">
+                    <button class="llm-button" onclick="generateRumor('friday')">Generate Rumor ✨</button>
+                    <div id="friday-rumor-output" class="mt-4 p-3 bg-gray-700 rounded-md text-gray-200 min-h-[50px] flex items-center">
+                        <span id="friday-rumor-placeholder">Click 'Generate Rumor' to get an idea!</span>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Quick NPC Generator ✨</summary>
+                <div class="details-content">
+                    <label for="friday-npc-type" class="block text-gray-400 text-sm font-bold mb-2">NPC Type (e.g., "grumpy innkeeper", "elven scout"):</label>
+                    <input type="text" id="friday-npc-type" placeholder="e.g., grumpy innkeeper, elven scout">
+                    <button class="llm-button" onclick="generateNPC('friday')">Generate NPC ✨</button>
+                    <div id="friday-npc-output" class="mt-4 p-3 bg-gray-700 rounded-md text-gray-200 min-h-[50px]">
+                        <span id="friday-npc-placeholder">Click 'Generate NPC' for a new character!</span>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Archive (Local Browser Only)</summary>
+                <div class="details-content">
+                    <p class="text-sm text-gray-400 mb-4">This archive is saved in your browser and will persist across sessions. For true long-term storage and version control, please copy notes to your GitHub repository.</p>
+                    <div id="friday-archive-output">
+                        <!-- Archived notes will be loaded here -->
+                    </div>
+                    <button class="archive-button" onclick="clearArchive('friday')">Clear Entire Archive</button>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        // --- Local Storage Management ---
+        const TEXTAREA_IDS = {
+            'monday': ['monday-objective-notes', 'monday-npc-factions-notes', 'monday-developments-notes', 'monday-encounters-notes', 'monday-session-notes'],
+            'friday': ['friday-objective-notes', 'friday-npc-factions-notes', 'friday-developments-notes', 'friday-encounters-notes', 'friday-session-notes']
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load all textarea content from local storage
+            for (const campaign in TEXTAREA_IDS) {
+                TEXTAREA_IDS[campaign].forEach(id => {
+                    const textarea = document.getElementById(id);
+                    if (textarea) {
+                        const savedContent = localStorage.getItem(id);
+                        if (savedContent) {
+                            textarea.value = savedContent;
+                        }
+                        // Add event listener for auto-saving on input
+                        textarea.addEventListener('input', (event) => {
+                            localStorage.setItem(id, event.target.value);
+                        });
+                    }
+                });
+                loadArchive(campaign); // Load archive for each campaign
+            }
+            openTab(null, 'general-dnd'); // Set the default tab to be open
+        });
+
+        // --- Tab Functionality ---
+        function openTab(event, tabName) {
+            // Remove highlights when changing tabs
+            clearGlobalHighlights();
+
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+                tabContents[i].classList.remove('active');
+            }
+
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add('active');
+            if (event) {
+                event.currentTarget.classList.add('active');
+            } else {
+                 document.querySelector(`.tab-button[onclick*="${tabName}"]`).classList.add('active');
+            }
+        }
+
+        // --- Global Search Functionality ---
+        function performGlobalSearch() {
+            clearGlobalHighlights(); // Clear previous highlights first
+            const searchTerm = document.getElementById('global-search-input').value.trim();
+            if (!searchTerm) return;
+
+            const regex = new RegExp(`(${searchTerm})`, 'gi'); // Case-insensitive, global
+
+            // Elements to search within (excluding input/textarea fields)
+            const searchableElements = document.querySelectorAll('.details-content p, .details-content li, .details-content td, summary');
+
+            searchableElements.forEach(element => {
+                // To avoid re-highlighting or issues with multiple searches, work with original text
+                // Store original text if not already done
+                if (!element.dataset.originalContent) {
+                    element.dataset.originalContent = element.innerHTML;
+                } else {
+                    element.innerHTML = element.dataset.originalContent; // Restore original before searching
+                }
+
+                if (element.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    // Highlight the text
+                    element.innerHTML = element.innerHTML.replace(regex, '<span class="highlight">$1</span>');
+
+                    // Open parent <details> if match found
+                    let parentDetails = element.closest('details');
+                    while (parentDetails) {
+                        parentDetails.open = true;
+                        parentDetails = parentDetails.parentElement.closest('details'); // Check for nested details
+                    }
+                }
+            });
+        }
+
+        function clearGlobalHighlights() {
+            document.querySelectorAll('.highlight').forEach(span => {
+                span.outerHTML = span.innerHTML; // Remove the span, keep the text
+            });
+            // Also restore original content for elements that might have been partially processed
+            document.querySelectorAll('[data-original-content]').forEach(element => {
+                element.innerHTML = element.dataset.originalContent;
+                delete element.dataset.originalContent; // Clean up the stored original content
+            });
+        }
+
+        // --- Session Notes Buttons ---
+        function copyContent(id) {
+            const textarea = document.getElementById(id);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+            alert('Content copied to clipboard!'); // Using alert as per instructions
+        }
+
+        function clearContent(id) {
+            if (confirm('Are you sure you want to clear these notes? This cannot be undone.')) { // Using confirm as per instructions
+                const textarea = document.getElementById(id);
+                textarea.value = '';
+                localStorage.removeItem(id); // Clear from local storage
+            }
+        }
+
+        // --- Archive Functions ---
+        function addToArchive(campaign) {
+            const sessionNotesTextarea = document.getElementById(`${campaign}-session-notes`);
+            const notes = sessionNotesTextarea.value.trim();
+
+            if (!notes) {
+                alert("Session notes are empty. Nothing to archive.");
+                return;
+            }
+
+            const timestamp = new Date().toLocaleString();
+            const archiveKey = `${campaign}Archive`;
+            let archive = JSON.parse(localStorage.getItem(archiveKey) || '[]');
+
+            archive.push({ timestamp: timestamp, content: notes });
+            localStorage.setItem(archiveKey, JSON.stringify(archive));
+
+            sessionNotesTextarea.value = ''; // Clear current session notes
+            localStorage.removeItem(`${campaign}-session-notes`); // Clear from local storage
+
+            loadArchive(campaign); // Refresh archive display
+            alert("Notes added to archive!");
+        }
+
+        function loadArchive(campaign) {
+            const archiveOutputDiv = document.getElementById(`${campaign}-archive-output`);
+            archiveOutputDiv.innerHTML = ''; // Clear current display
+
+            const archiveKey = `${campaign}Archive`;
+            let archive = JSON.parse(localStorage.getItem(archiveKey) || '[]');
+
+            if (archive.length === 0) {
+                archiveOutputDiv.innerHTML = '<p class="text-gray-500">No archived notes yet.</p>';
+                return;
+            }
+
+            archive.forEach((entry, index) => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'archived-entry';
+                entryDiv.innerHTML = `
+                    <span class="archived-entry-timestamp">${entry.timestamp}</span>
+                    <div class="archived-entry-content">${entry.content}</div>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <button class="note-button" onclick="copyArchivedEntry('${campaign}', ${index})">Copy Entry</button>
+                        <button class="note-button" onclick="deleteArchivedEntry('${campaign}', ${index})">Delete Entry</button>
+                    </div>
+                `;
+                archiveOutputDiv.prepend(entryDiv); // Add newest first
+            });
+        }
+
+        function copyArchivedEntry(campaign, index) {
+            const archiveKey = `${campaign}Archive`;
+            let archive = JSON.parse(localStorage.getItem(archiveKey) || '[]');
+            if (archive[index]) {
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = `ARCHIVED (${archive[index].timestamp}):\n${archive[index].content}`;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+                alert('Archived entry copied to clipboard!');
+            }
+        }
+
+        function deleteArchivedEntry(campaign, index) {
+            if (confirm('Are you sure you want to delete this archived entry? This cannot be undone.')) {
+                const archiveKey = `${campaign}Archive`;
+                let archive = JSON.parse(localStorage.getItem(archiveKey) || '[]');
+                archive.splice(index, 1); // Remove the entry
+                localStorage.setItem(archiveKey, JSON.stringify(archive));
+                loadArchive(campaign); // Refresh display
+                alert('Archived entry deleted.');
+            }
+        }
+
+        function clearArchive(campaign) {
+            if (confirm('Are you sure you want to clear the entire archive for this campaign? This cannot be undone.')) {
+                localStorage.removeItem(`${campaign}Archive`);
+                loadArchive(campaign); // Refresh display to show empty
+                alert('Archive cleared.');
+            }
+        }
+
+        // --- Gemini API Call Functions ---
+        async function callGeminiAPI(prompt, outputId) {
+            const outputElement = document.getElementById(outputId);
+            outputElement.innerHTML = '<div class="loading-spinner"></div> Generating...'; // Show loading
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Canvas will provide this in runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    outputElement.innerText = text; // Use innerText to prevent XSS
+                } else {
+                    outputElement.innerText = 'Error: Could not generate content. Please try again.';
+                    console.error('Gemini API response structure unexpected:', result);
+                }
+            } catch (error) {
+                outputElement.innerText = 'Error: Failed to connect to the API. ' + error.message;
+                console.error('Error calling Gemini API:', error);
+            }
+        }
+
+        async function generateRumor(campaign) {
+            const contextInput = document.getElementById(`${campaign}-rumor-context`).value;
+            const outputId = `${campaign}-rumor-output`;
+            let prompt = "Generate a D&D campaign rumor for the world of Nevos. Make it mysterious, concise, and suitable for overhearing in a tavern or whispered in the streets. ";
+            if (contextInput) {
+                prompt += `The rumor should be related to: ${contextInput}.`;
+            }
+            await callGeminiAPI(prompt, outputId);
+        }
+
+        async function generateNPC(campaign) {
+            const typeInput = document.getElementById(`${campaign}-npc-type`).value;
+            const outputId = `${campaign}-npc-output`;
+            let prompt = "Generate a D&D NPC for the world of Nevos. Include a name, race, a distinct personality trait, and a simple secret or hook. Format it clearly (e.g., 'Name: [Name]\\nRace: [Race]\\nPersonality: [Trait]\\nHook: [Hook]'). "; // Use \\n for newlines in prompt
+            if (typeInput) {
+                prompt += `The NPC should be a ${typeInput}.`;
+            }
+            await callGeminiAPI(prompt, outputId);
+        }
+    </script>
+</body>
+</html>
