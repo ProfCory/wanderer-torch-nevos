@@ -28,8 +28,8 @@
         @media (min-width: 768px) { .chart-container { height: 350px; } }
         .sub-nav-button.active { background-color: #e9d5ff; color: #581c87; font-weight: 600; }
         .pc-nav-button.active { background-color: #c4b5fd; color: #4c1d95; }
-        .pc-nav-button[data-campaign="scarred-stand"].active { background-color: #fecaca; color: #991b1b; }
-        .pc-nav-button[data-campaign="twilight-thought"].active { background-color: #ccfbf1; color: #115e59; }
+        .pc-nav-button[data-campaign="scarredStand"].active { background-color: #fecaca; color: #991b1b; }
+        .pc-nav-button[data-campaign="twilightThought"].active { background-color: #ccfbf1; color: #115e59; }
     </style>
 </head>
 <body class="bg-stone-100 text-stone-800">
@@ -82,12 +82,12 @@ document.addEventListener('DOMContentLoaded', function() {
             scarredStand: { 
                 npcs:[{name:"Matriarch Vorga",title:"Patron",content:"Revered orc matriarch. Seeks to reclaim the Stand to cement orcish honor. <b>Secret:</b> The mission is deeply personal."},{name:"Lord-Commander Valerius",title:"Rival Faction",content:"Charismatic human commander. Seeks to reclaim the Stand for waning human influence. <b>Secret:</b> Cleansing his family's name from past betrayals."},{name:"Knight-Captain Dragan",title:"The Rival",content:"Fiercely loyal champion of the opposing hall. Will race the party to the Stand."},{name:"Scribe Elara",title:"The Lore Keeper",content:"A scholar from Aelorthal hired to verify historical markings."},{name:"'Old Scar' Borok",title:"The Guide",content:"Old orc scout bound by oath to guide the party. Weary of conflict."}], 
                 opening:[{title:"Scene 1: An Oath in the Keep",content:"The party is summoned by their chosen patron and swears a binding Valerostian oath."},{title:"Scene 2: The Briefing and the Guide",content:"The party meets their support team and learns of the rival expedition."},{title:"Scene 3: A Challenge at the Gates",content:"Dragan confronts the party, invoking an honor duel to prove their worthiness."}],
-                pcs: {"shaman":{name:"Shaman",classLevel:"Druid 4",classes:{Druid:4},species:"Mark of Detection Half-Elf",hp:31,ac:14,speed:"30 ft.",abilities:{STR:8,DEX:10,CON:14,INT:14,WIS:18,CHA:12},abilityMods:{STR:-1,DEX:0,CON:2,INT:2,WIS:4,CHA:1},senses:{perception:17,insight:17,darkvision:"60 ft."},attacks:[{name:"Primal Savagery",bonus:"+6",damage:"1d10 Acid"},{name:"Starry Wisp",bonus:"+6",damage:"1d8 Radiant"}],features:[{name:"Wild Shape (2/LR)"},{name:"Circle of the Moon"},{name:"Deductive Intuition"},{name:"Skill Expert"}]},"rowan":{name:"Rowan",classLevel:"Paladin 3",classes:{Paladin:3},species:"Warforged",hp:34,ac:20,speed:"30 ft.",abilities:{STR:18,DEX:10,CON:18,INT:13,WIS:16,CHA:16},abilityMods:{STR:4,DEX:0,CON:4,INT:1,WIS:3,CHA:3},senses:{perception:13,insight:13,darkvision:"None"},attacks:[{name:"Battleaxe",bonus:"+6",damage:"1d8+4 S"},{name:"Shortbow",bonus:"+2",damage:"1d6 P"}],features:[{name:"Lay On Hands (15HP)"},{name:"Divine Smite"},{name:"Channel Divinity (2/LR)"},{name:"Oath of the Ancients"},{name:"Integrated Protection"}]},"nimwick":{name:"Nimwick",classLevel:"Wizard 4",classes:{Wizard:4},species:"Gnome",hp:22,ac:12,speed:"30 ft.",abilities:{STR:8,DEX:14,CON:12,INT:17,WIS:18,CHA:13},abilityMods:{STR:-1,DEX:2,CON:1,INT:3,WIS:4,CHA:1},senses:{perception:16,insight:14,darkvision:"60 ft."},attacks:[{name:"Shocking Grasp",bonus:"+5",damage:"1d8 L"},{name:"Fire Bolt",bonus:"+6",damage:"1d10 F"}],features:[{name:"Arcane Recovery"},{name:"Arcane Ward (11 HP)"},{name:"Abjuration Savant"},{name:"Gnomish Cunning"},{name:"Sentinel"}]},"gorlag":{name:"Gorlag",classLevel:"Barbarian 4",classes:{Barbarian:4},species:"Orc",hp:45,ac:16,speed:"30 ft.",abilities:{STR:19,DEX:16,CON:17,INT:7,WIS:16,CHA:7},abilityMods:{STR:4,DEX:3,CON:3,INT:-2,WIS:3,CHA:-2},senses:{perception:15,insight:13,darkvision:"120 ft."},attacks:[{name:"Greataxe",bonus:"+6",damage:"1d12+4 S"},{name:"Handaxe",bonus:"+6",damage:"1d6+4 S"}],features:[{name:"Rage (3/LR)"},{name:"Unarmored Defense"},{name:"Danger Sense"},{name:"Reckless Attack"},{name:"Path of the World Tree"}]}}
+                pcs: {"shaman":{"name":"Shaman","classLevel":"Druid 4","classes":{"Druid":4},"species":"Mark of Detection Half-Elf","background":"Custom","hp":31,"ac":14,"speed":"30 ft. walk","abilities":{"STR":8,"DEX":10,"CON":14,"INT":14,"WIS":18,"CHA":12},"abilityMods":{"STR":-1,"DEX":0,"CON":2,"INT":2,"WIS":4,"CHA":1},"saves":["CON","WIS"],"senses":{"perception":17,"insight":17,"investigation":15,"darkvision":"60 ft."},"attacks":[{"name":"Primal Savagery","bonus":"+6","damage":"1d10 Acid"},{"name":"Starry Wisp","bonus":"+6","damage":"1d8 Radiant"}],"features":[{"name":"Wild Shape (2/LR)"},{"name":"Circle of the Moon"},{"name":"Deductive Intuition"},{"name":"Skill Expert"}]},"rowan":{"name":"Rowan","classLevel":"Paladin 3","classes":{"Paladin":3},"species":"Warforged","background":"Haunted One","hp":34,"ac":20,"speed":"30 ft. walk","abilities":{"STR":18,"DEX":10,"CON":18,"INT":13,"WIS":16,"CHA":16},"abilityMods":{"STR":4,"DEX":0,"CON":4,"INT":1,"WIS":3,"CHA":3},"saves":["WIS","CHA"],"senses":{"perception":13,"insight":13,"darkvision":"None"},"attacks":[{"name":"Battleaxe","bonus":"+6","damage":"1d8+4 S"},{"name":"Shortbow","bonus":"+2","damage":"1d6 P"}],"features":[{"name":"Lay On Hands (15HP)"},{"name":"Divine Smite"},{"name":"Channel Divinity (2/LR)"},{"name":"Oath of the Ancients"},{"name":"Integrated Protection"}]},"nimwick":{"name":"Nimwick","classLevel":"Wizard 4","classes":{"Wizard":4},"species":"Gnome","background":"Sage","hp":22,"ac":12,"speed":"30 ft. walk","abilities":{"STR":8,"DEX":14,"CON":12,"INT":17,"WIS":18,"CHA":13},"abilityMods":{"STR":-1,"DEX":2,"CON":1,"INT":3,"WIS":4,"CHA":1},"saves":["INT","WIS","CHA"],"senses":{"perception":16,"insight":14,"darkvision":"60 ft."},"attacks":[{"name":"Shocking Grasp","bonus":"+5","damage":"1d8 L"},{"name":"Fire Bolt","bonus":"+6","damage":"1d10 F"}],"features":[{"name":"Arcane Recovery"},{"name":"Arcane Ward (11 HP)"},{"name":"Abjuration Savant"},{"name":"Gnomish Cunning"},{"name":"Sentinel"}]},"gorlag":{"name":"Gorlag","classLevel":"Barbarian 4","classes":{"Barbarian":4},"species":"Orc","background":"Soldier","hp":45,"ac":16,"speed":"30 ft. walk, 30 ft. fly","abilities":{"STR":19,"DEX":16,"CON":17,"INT":7,"WIS":16,"CHA":7},"abilityMods":{"STR":4,"DEX":3,"CON":3,"INT":-2,"WIS":3,"CHA":-2},"saves":["STR","CON"],"senses":{"perception":15,"insight":13,"darkvision":"120 ft."},"attacks":[{"name":"Greataxe","bonus":"+6","damage":"1d12+4 S"},{"name":"Handaxe","bonus":"+6","damage":"1d6+4 S"}],"features":[{"name":"Rage (3/LR)"},{"name":"Unarmored Defense"},{"name":"Danger Sense"},{"name":"Reckless Attack"},{"name":"Path of the World Tree"}]}}
             },
             twilightThought: {
                 factions: [{name:"The Lumen Covenant",content:"Radiant, devout scholars of Solivane. <b>Goal:</b> Recover a celestial relic from a 'reborn' isle."}, {name:"The Hollow Trace",content:"Clandestine, dream-inked occultists. <b>Goal:</b> Investigate sealed tunnels tied to the Veilspire Eclipse."}],
                 npcs: [{name:"Thalen 'Inkgut' Brost",title:"Pale Orc Fence",content:"Trades in stolen scrolls and 'bottled dreams'. Distrusts both factions. <b>Hook:</b> Carries fragments of warforged plating that 'talk'."}, {name:"Elsin Tarell",title:"Moon Elf Rumor Broker",content:"A 'shadow cartographer' who tracks strange phenomena. <b>Hook:</b> Has obsessively mapped the shadow path of the Veilspire Eclipse."}],
-                pcs: {"wade":{name:"Wade",classLevel:"Rogue 3 / Ranger 1",classes:{Rogue:3,Ranger:1},species:"Hadozee",hp:28,ac:19,speed:"30 ft.",abilities:{STR:9,DEX:20,CON:12,INT:14,WIS:15,CHA:13},abilityMods:{STR:-1,DEX:5,CON:1,INT:2,WIS:2,CHA:1},senses:{perception:16,insight:12,darkvision:"None"},attacks:[{name:"Longbow",bonus:"+7",damage:"1d8+5 P"},{name:"Shortbow",bonus:"+7",damage:"1d6+5 P"},{name:"Shortsword",bonus:"+7",damage:"1d6+5 S"}],features:[{name:"Sneak Attack (2d6)"},{name:"Cunning Action"},{name:"Steady Aim"},{name:"Favored Enemy (Hunter's Mark)"},{name:"Glide"}]},"scarpphire":{name:"Scarpphire",classLevel:"Barbarian 2 / Fighter 2",classes:{Barbarian:2,Fighter:2},species:"Shifter",hp:43,ac:15,speed:"30 ft.",abilities:{STR:17,DEX:14,CON:16,INT:9,WIS:14,CHA:11},abilityMods:{STR:3,DEX:2,CON:3,INT:-1,WIS:2,CHA:0},senses:{perception:14,insight:12,darkvision:"60 ft."},attacks:[{name:"Silvered Maul",bonus:"+5",damage:"2d6+3 B"},{name:"Unarmed Strike",bonus:"+5",damage:"1d6+3 B"},{name:"Fangs (Bonus)",bonus:"+5",damage:"1d6+3 P"}],features:[{name:"Rage (2/LR, +2 dmg)"},{name:"Reckless Attack"},{name:"Action Surge (1/SR)"},{name:"Second Wind (2/LR)"},{name:"Shifting (Longtooth)"}]},"onya":{name:"Onya Tisslyn",classLevel:"Monk 3 / Ranger 1",classes:{Monk:3,Ranger:1},species:"Air Genasi",hp:32,ac:16,speed:"45 ft.",abilities:{STR:10,DEX:17,CON:15,INT:14,WIS:17,CHA:8},abilityMods:{STR:0,DEX:3,CON:2,INT:2,WIS:3,CHA:-1},senses:{perception:13,insight:13,darkvision:"60 ft."},attacks:[{name:"Unarmed Strike",bonus:"+5",damage:"1d6+3 B"},{name:"Flurry of Blows (1 Focus)",bonus:"+5",damage:"2 unarmed"}],features:[{name:"Focus (3 pts)"},{name:"Deflect Attacks"},{name:"Shadow Arts"},{name:"Mingle with the Wind"},{name:"Favored Enemy (Hunter's Mark)"}]},"lyarieth":{name:"Lyari'eth",classLevel:"Cleric 4",classes:{Cleric:4},species:"Astral Elf",hp:35,ac:20,speed:"30 ft.",abilities:{STR:8,DEX:14,CON:16,INT:10,WIS:20,CHA:10},abilityMods:{STR:-1,DEX:2,CON:3,INT:0,WIS:5,CHA:0},senses:{perception:22,insight:17,darkvision:"300 ft."},attacks:[{name:"Toll the Dead",bonus:"DC 15",damage:"1d8/1d12 N"},{name:"Guiding Bolt",bonus:"+7",damage:"4d6 R"},{name:"Spiritual Weapon",bonus:"+7",damage:"1d8+5 F"}],features:[{name:"War Caster"},{name:"Channel Divinity (2/LR)"},{name:"Twilight Sanctuary"},{name:"Eyes of Night (300ft)"},{name:"Vigilant Blessing"}]},"nihlium":{name:"Nihlium",classLevel:"Sorcerer 3 / Warlock 1",classes:{Sorcerer:3,Warlock:1},species:"Stygian Shade",hp:35,ac:15,speed:"30 ft.",abilities:{STR:8,DEX:14,CON:18,INT:16,WIS:12,CHA:19},abilityMods:{STR:-1,DEX:2,CON:4,INT:3,WIS:1,CHA:4},senses:{perception:13,insight:11,darkvision:"60 ft."},attacks:[{name:"Eldritch Blast",bonus:"+7",damage:"1d10 F"},{name:"Chromatic Orb",bonus:"+6",damage:"3d8 flexible"}],features:[{name:"Metamagic (3 pts)"},{name:"Favored by the Gods (1/SR)"},{name:"Ghostly Flesh (1/LR)"},{name:"Eldritch Mind"},{name:"Patron: The Great Old One"}]}}
+                pcs: {"wade":{"name":"Wade","classLevel":"Rogue 3 / Ranger 1","classes":{"Rogue":3,"Ranger":1},"species":"Hadozee","background":"Guide","hp":28,"ac":19,"speed":"30 ft. walk, 30 ft. climb","abilities":{"STR":9,"DEX":20,"CON":12,"INT":14,"WIS":15,"CHA":13},"abilityMods":{"STR":-1,"DEX":5,"CON":1,"INT":2,"WIS":2,"CHA":1},"saves":["DEX","INT"],"senses":{"perception":16,"insight":12,"darkvision":"None"},"attacks":[{"name":"Longbow","bonus":"+7","damage":"1d8+5 P"},{"name":"Shortbow","bonus":"+7","damage":"1d6+5 P"},{"name":"Shortsword","bonus":"+7","damage":"1d6+5 S"}],"features":[{"name":"Sneak Attack (2d6)"},{"name":"Cunning Action"},{"name":"Steady Aim"},{"name":"Favored Enemy (Hunter's Mark)"},{"name":"Glide"}]},"scarpphire":{"name":"Scarpphire","classLevel":"Barbarian 2 / Fighter 2","classes":{"Barbarian":2,"Fighter":2},"species":"Shifter","background":"Guide","hp":43,"ac":15,"speed":"30 ft. walk, 30 ft. fly","abilities":{"STR":17,"DEX":14,"CON":16,"INT":9,"WIS":14,"CHA":11},"abilityMods":{"STR":3,"DEX":2,"CON":3,"INT":-1,"WIS":2,"CHA":0},"saves":["STR","CON"],"senses":{"perception":14,"insight":12,"darkvision":"60 ft."},"attacks":[{"name":"Silvered Maul","bonus":"+5","damage":"2d6+3 B"},{"name":"Unarmed Strike","bonus":"+5","damage":"1d6+3 B"},{"name":"Fangs (Bonus)","bonus":"+5","damage":"1d6+3 P"}],"features":[{"name":"Rage (2/LR, +2 dmg)"},{"name":"Reckless Attack"},{"name":"Action Surge (1/SR)"},{"name":"Second Wind (2/LR)"},{"name":"Shifting (Longtooth)"}]},"onya":{"name":"Onya Tisslyn","classLevel":"Monk 3 / Ranger 1","classes":{"Monk":3,"Ranger":1},"species":"Air Genasi","background":"Custom","hp":32,"ac":16,"speed":"45 ft. walk","abilities":{"STR":10,"DEX":17,"CON":15,"INT":14,"WIS":17,"CHA":8},"abilityMods":{"STR":0,"DEX":3,"CON":2,"INT":2,"WIS":3,"CHA":-1},"saves":["STR","DEX"],"senses":{"perception":13,"insight":13,"darkvision":"60 ft."},"attacks":[{"name":"Unarmed Strike","bonus":"+5","damage":"1d6+3 B"},{"name":"Flurry of Blows (1 Focus)","bonus":"+5","damage":"2 unarmed"}],"features":[{"name":"Focus (3 pts)"},{"name":"Deflect Attacks"},{"name":"Shadow Arts"},{"name":"Mingle with the Wind"},{"name":"Favored Enemy (Hunter's Mark)"}]},"lyarieth":{"name":"Lyari'eth","classLevel":"Cleric 4","classes":{"Cleric":4},"species":"Astral Elf","background":"Sage","hp":35,"ac":20,"speed":"30 ft. walk","abilities":{"STR":8,"DEX":14,"CON":16,"INT":10,"WIS":20,"CHA":10},"abilityMods":{"STR":-1,"DEX":2,"CON":3,"INT":0,"WIS":5,"CHA":0},"saves":["WIS","CHA"],"senses":{"perception":22,"insight":17,"darkvision":"300 ft."},"attacks":[{"name":"Toll the Dead","bonus":"DC 15","damage":"1d8/1d12 N"},{"name":"Guiding Bolt","bonus":"+7","damage":"4d6 R"},{"name":"Spiritual Weapon","bonus":"+7","damage":"1d8+5 F"}],"features":[{"name":"War Caster"},{"name":"Channel Divinity (2/LR)"},{"name":"Twilight Sanctuary"},{"name":"Eyes of Night (300ft)"},{"name":"Vigilant Blessing"}]},"nihlium":{"name":"Nihlium","classLevel":"Sorcerer 3 / Warlock 1","classes":{"Sorcerer":3,"Warlock":1},"species":"Stygian Shade","background":"Investigator","hp":35,"ac":15,"speed":"30 ft. walk","abilities":{"STR":8,"DEX":14,"CON":18,"INT":16,"WIS":12,"CHA":19},"abilityMods":{"STR":-1,"DEX":2,"CON":4,"INT":3,"WIS":1,"CHA":4},"saves":["CON","CHA"],"senses":{"perception":13,"insight":11,"darkvision":"60 ft."},"attacks":[{"name":"Eldritch Blast","bonus":"+7","damage":"1d10 F"},{"name":"Chromatic Orb","bonus":"+6","damage":"3d8 flexible"}],"features":[{"name":"Metamagic (3 pts)"},{"name":"Favored by the Gods (1/SR)"},{"name":"Ghostly Flesh (1/LR)"},{"name":"Eldritch Mind"},{"name":"Patron: The Great Old One"}]}}
             }
         }
     };
@@ -95,8 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeChartInstances = {};
 
     const navButtons = document.querySelectorAll('.nav-button');
-    const navButtonLinks = document.querySelectorAll('.nav-button-link');
-    const subNavButtons = document.querySelectorAll('.sub-nav-button');
     const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modal-content');
     const modalClose = document.getElementById('modal-close');
@@ -144,20 +142,20 @@ document.addEventListener('DOMContentLoaded', function() {
          const data = masterData.campaigns[campaignId].pcs[charId];
          const abilityScoresHTML = Object.entries(data.abilities).map(([k,v])=>`<div class="text-center bg-stone-50 rounded-lg p-2 shadow-inner"><div class="font-bold text-sm">${k}</div><div class="text-2xl font-light">${v}</div><div class="text-${themeColor}-600 font-semibold">${data.abilityMods[k]>=0?'+':''}${data.abilityMods[k]}</div></div>`).join('');
          const attacksHTML = data.attacks.map(a=>`<tr class="border-b border-stone-200 last:border-b-0"><td class="py-2 pr-2"><div class="font-semibold">${a.name}</div><div class="text-xs text-stone-500">${a.damage}</div></td><td class="py-2 px-2 text-center font-mono">${a.bonus}</td></tr>`).join('');
-         const featuresHTML = data.features.map(f=>`<div class="py-2"><h4 class="font-semibold text-sm">${f.name}</h4></div>`).join('');
+         const featuresHTML = data.features.map(f=>`<div class="py-2"><h4 class="font-semibold text-sm">${f.name}</h4><p class="text-xs text-stone-600">${f.desc || ''}</p></div>`).join('');
          return `<div id="${campaignId}-${charId}-content" class="pc-pane space-y-8 hidden"><div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="lg:col-span-1 space-y-8"><div class="bg-white rounded-xl shadow-lg p-4"><h2 class="text-3xl font-bold text-${themeColor}-800">${data.name}</h2><p class="text-md text-stone-500">${data.species} ${data.classLevel}</p><div class="mt-4 grid grid-cols-3 gap-4"><div class="text-center bg-stone-100 p-3 rounded-lg"><div class="text-2xl font-light">${data.hp}</div><div class="text-sm font-semibold">HP</div></div><div class="text-center bg-stone-100 p-3 rounded-lg"><div class="text-2xl font-light">${data.ac}</div><div class="text-sm font-semibold">AC</div></div><div class="text-center bg-stone-100 p-3 rounded-lg"><div class="text-2xl font-light">${data.speed.split(' ')[0]}</div><div class="text-sm font-semibold">Speed</div></div></div><div class="mt-4 text-center text-sm text-stone-500">PP: <span class="font-bold text-stone-700">${data.senses.perception}</span> &bull; PI: <span class="font-bold text-stone-700">${data.senses.insight}</span> &bull; Darkvision: <span class="font-bold text-stone-700">${data.senses.darkvision}</span></div></div><div class="bg-white rounded-xl shadow-lg p-4"><h3 class="text-xl font-bold mb-4">Abilities</h3><div class="grid grid-cols-3 gap-2 mb-4">${abilityScoresHTML}</div><div class="chart-container h-48"><canvas id="${campaignId}-${charId}-ability-chart"></canvas></div></div><div class="bg-white rounded-xl shadow-lg p-4"><h3 class="text-xl font-bold mb-4">Class Levels</h3><div class="chart-container h-48"><canvas id="${campaignId}-${charId}-class-chart"></canvas></div></div></div><div class="lg:col-span-2 space-y-8"><div class="bg-white rounded-xl shadow-lg p-4"><h3 class="text-xl font-bold mb-4">Combat</h3><table class="w-full text-sm"><thead><tr class="bg-stone-200"><th class="px-3 py-2 text-left rounded-l-lg">Attack</th><th class="px-3 py-2 text-center rounded-r-lg">Bonus</th></tr></thead><tbody>${attacksHTML}</tbody></table></div><div class="bg-white rounded-xl shadow-lg p-4"><h3 class="text-xl font-bold mb-4">Key Features</h3><div class="grid grid-cols-2 md:grid-cols-3 gap-x-4">${featuresHTML}</div></div></div></div></div>`;
     }
 
     function createAbilityChart(campaignId, charId) {
         const canvasId=`${campaignId}-${charId}-ability-chart`;const ctx=document.getElementById(canvasId);if(!ctx)return;if(activeChartInstances[canvasId])activeChartInstances[canvasId].destroy();
-        const themeColor = campaignId === 'scarred-stand' ? 'red' : 'teal';
+        const themeColor = campaignId === 'scarredStand' ? 'red' : 'teal';
         const chartColors = {'red': { bg: 'rgba(220, 38, 38, 0.2)', border: 'rgb(185, 28, 28)' },'teal': { bg: 'rgba(13, 148, 136, 0.2)', border: 'rgb(13, 148, 136)'}};
         activeChartInstances[canvasId]=new Chart(ctx,{type:'radar',data:{labels:Object.keys(masterData.campaigns[campaignId].pcs[charId].abilities),datasets:[{label:'Scores',data:Object.values(masterData.campaigns[campaignId].pcs[charId].abilities),fill:true,backgroundColor:chartColors[themeColor].bg,borderColor:chartColors[themeColor].border,pointBackgroundColor:chartColors[themeColor].border}]},options:{maintainAspectRatio:false,scales:{r:{angleLines:{color:'rgba(100,116,139,0.2)'},grid:{color:'rgba(100,116,139,0.2)'},pointLabels:{font:{size:10}},suggestedMin:0,suggestedMax:20,ticks:{display:false}}},plugins:{legend:{display:false}}}});
     }
     function createClassChart(campaignId, charId) {
         const canvasId=`${campaignId}-${charId}-class-chart`;const ctx=document.getElementById(canvasId);if(!ctx)return;if(activeChartInstances[canvasId])activeChartInstances[canvasId].destroy();const data=masterData.campaigns[campaignId].pcs[charId].classes;const names=Object.keys(data);if(names.length<=1){ctx.parentElement.classList.add('hidden');return;}ctx.parentElement.classList.remove('hidden');
         const themeColors = {'red': { bg: ['rgba(239, 68, 68, 0.7)', 'rgba(124, 58, 237, 0.7)'], border: ['rgb(220, 38, 38)', 'rgb(109, 40, 217)'] },'teal': { bg: ['rgba(13, 148, 136, 0.7)', 'rgba(124, 58, 237, 0.7)'], border: ['rgb(15, 118, 110)', 'rgb(109, 40, 217)'] }};
-        const colors = themeColors[campaignId === 'scarred-stand' ? 'red' : 'teal'];
+        const colors = themeColors[campaignId === 'scarredStand' ? 'red' : 'teal'];
         activeChartInstances[canvasId]=new Chart(ctx,{type:'doughnut',data:{labels:names,datasets:[{data:Object.values(data),backgroundColor:colors.bg,borderColor:colors.border}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'top'}}}});
     }
 
@@ -170,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
         Object.keys(pcData).forEach(charId => {
             const char = pcData[charId];
             const button = document.createElement('button');
-            button.className = `pc-nav-button font-sans px-3 py-1 rounded-md text-sm bg-${themeColor}-50 text-${themeColor}-800 hover:bg-${themeColor}-100`;
+            button.className = `pc-nav-button font-sans px-3 py-1 rounded-md text-sm bg-${themeColor}-100 text-${themeColor}-800 hover:bg-${themeColor}-200`;
             button.textContent = char.name;
             button.dataset.char = charId;
             button.dataset.campaign = campaignId;
@@ -185,7 +183,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll(`#${campaignId}-character-content .pc-pane`).forEach(p => p.classList.add('hidden'));
         const targetPane = document.getElementById(`${campaignId}-${charId}-content`);
         if (targetPane) targetPane.classList.remove('hidden');
-        document.querySelectorAll(`#${campaignId}-character-nav .pc-nav-button`).forEach(b => b.classList.toggle('active', b.dataset.char === charId));
+        document.querySelectorAll(`#${campaignId}-character-nav .pc-nav-button`).forEach(b => {
+            b.classList.remove('active');
+            if (b.dataset.char === charId) {
+                b.classList.add('active');
+            }
+        });
         createAbilityChart(campaignId, charId); 
         createClassChart(campaignId, charId);
     }
@@ -194,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderAll() {
         // Dashboard
         document.getElementById('home').innerHTML = `<div><h2 class="text-3xl font-bold text-purple-600 mb-4 border-b-2 border-purple-200 pb-2">Welcome, Dungeon Master</h2><p class="text-lg leading-relaxed">This interactive dossier is your guide to the world of Nevos. Use the navigation above to access house rules, DM tools, world lore, or dive into campaign specifics.</p></div><div class="grid md:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">Campaign Quick-Links</h3><div class="space-y-4"><div><h4 class="font-sans font-bold text-xl text-red-700">Reclaiming the Scarred Stand</h4><p class="mt-1 text-stone-600"><strong>Status:</strong> Allied with Matriarch Vorga. Party is taking the cavern route with Old Scar.</p><button class="nav-button-link font-sans mt-2 text-purple-600 hover:underline" data-target="scarred-stand">Go to Campaign →</button></div><div class="border-t border-stone-200 pt-4"><h4 class="font-sans font-bold text-xl text-teal-700">Twilight Thought</h4><p class="mt-1 text-stone-600"><strong>Status:</strong> Sided with the Hollow Trace. The party acquired a map and proceeds alone into the caves/crypt.</p><button class="nav-button-link font-sans mt-2 text-purple-600 hover:underline" data-target="twilight-thought">Go to Campaign →</button></div></div></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">The Daily Cycle of the Torch</h3><p class="mb-4">The Torch moon waxes and wanes over a 24-hour period, dividing the day into eight distinct phases.</p><ol class="list-decimal list-inside space-y-2 text-stone-700"><li><span class="font-bold">Rest-time</span> (~12a-3a)</li> <li><span class="font-bold">Wake-time</span> (~3a-6a)</li><li><span class="font-bold">Begin-time</span> (~6a-9a)</li> <li><span class="font-bold">Bustle-time</span> (~9a-12p)</li><li><span class="font-bold">Feast-time</span> (~12p-3p)</li> <li><span class="font-bold">Finale-time</span> (~3p-6p)</li><li><span class="font-bold">Supine-time</span> (~6p-9p)</li> <li><span class="font-bold">Dim-time</span> (~9p-12a)</li></ol></div></div>`;
-        document.querySelectorAll('.nav-button-link').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.target)));
+        document.querySelectorAll('.nav-button-link').forEach(button => button.addEventListener('click', (e) => switchTab(e.currentTarget.dataset.target)));
 
         // House Rules
         document.getElementById('house-rules').innerHTML = `<h2 class="text-3xl font-bold text-purple-600 mb-4 border-b-2 border-purple-200 pb-2">House Rules & Variants</h2><div class="grid md:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">Action Economy & Criticals</h3><div class="prose max-w-none"><h4>Potion Usage</h4><ul><li><strong>Action:</strong> Max effect.</li><li><strong>Bonus Action:</strong> Rolled effect.</li><li><strong>Giving:</strong> Requires free interaction from both.</li></ul><h4>Critical Successes (Nat 20)</h4><p>Maximize damage dice + add one additional roll.</p><h4>Critical Failures (Nat 1)</h4><p>No auto-fail. May trigger situational "misfires."</p></div></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">NPC Attitude System</h3><div class="prose max-w-none"><p>NPC attitudes (Friendly, Indifferent, Hostile) shift based on player actions and social rolls.</p><table class="w-full text-left"><thead><tr class="border-b"><th class="p-2">Attitude</th><th class="p-2">Behavior</th><th class="p-2">How to Change</th></tr></thead><tbody><tr class="border-b"><td class="p-2">💚 Friendly</td><td class="p-2">Helpful</td><td class="p-2">Maintain goodwill.</td></tr><tr class="border-b"><td class="p-2">😐 Indifferent</td><td class="p-2">Needs incentive</td><td class="p-2">Persuade, bribe.</td></tr><tr><td class="p-2">👿 Hostile</td><td class="p-2">Opposes</td><td class="p-2">Diplomacy, intimidate.</td></tr></tbody></table></div></div></div><div class="bg-white p-6 rounded-xl shadow-lg mt-8"><h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">Coordinated Assault (Flanking Variant)</h3><div class="prose max-w-none"><p>Gain a bonus to melee attack rolls equal to the number of non-incapacitated allies within the target's reach (max +5).</p><h4>Exceptions</h4><ul><li>Does not apply against creatures with exceptional awareness (e.g., Beholders), the Alert feat, or if the target is Tiny.</li></ul></div></div>`;
@@ -207,34 +210,120 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // World Lore
         document.getElementById('world').innerHTML = `<div class="p-4 bg-white rounded-xl shadow-md"><div class="flex flex-wrap justify-center gap-2 md:gap-4"><button class="sub-nav-button font-sans px-3 py-1 text-sm md:px-4 md:py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200 active" data-context="world" data-target="world-cosmology">Cosmology</button><button class="sub-nav-button font-sans px-3 py-1 text-sm md:px-4 md:py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200" data-context="world" data-target="world-pantheon">Pantheon</button><button class="sub-nav-button font-sans px-3 py-1 text-sm md:px-4 md:py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200" data-context="world" data-target="world-gazetteer">Gazetteer</button><button class="sub-nav-button font-sans px-3 py-1 text-sm md:px-4 md:py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200" data-context="world" data-target="world-peoples">Peoples</button><button class="sub-nav-button font-sans px-3 py-1 text-sm md:px-4 md:py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200" data-context="world" data-target="world-history">History</button></div></div><div id="world-content-container"><div id="world-cosmology" class="sub-content-pane space-y-8"></div><div id="world-pantheon" class="sub-content-pane hidden"></div><div id="world-gazetteer" class="sub-content-pane hidden space-y-8"></div><div id="world-peoples" class="sub-content-pane hidden space-y-8"></div><div id="world-history" class="sub-content-pane hidden"></div></div>`;
-        document.querySelectorAll('.sub-nav-button[data-context="world"]').forEach(button => button.addEventListener('click', () => switchSubTab('world', button.dataset.target)));
-        setupWorldTabLoading();
+        document.querySelectorAll('.sub-nav-button[data-context="world"]').forEach(button => button.addEventListener('click', (e) => switchSubTab('world', e.currentTarget.dataset.target)));
         
         // Scarred Stand
         const ssData = masterData.campaigns.scarredStand;
-        document.getElementById('scarred-stand').innerHTML = `<header class="text-center p-6 bg-red-800 text-white rounded-xl shadow-lg"><h2 class="text-4xl font-bold">Reclaiming the Scarred Stand</h2><p class="mt-2 text-red-100 text-lg">A campaign of politics, honor, and ambition in Valerost.</p></header><div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500"><h3 class="font-sans text-xl font-bold text-red-800 mb-2">Campaign Status</h3><p>The party has sided with <strong>Matriarch Vorga</strong> and is proceeding through the cavern route with <strong>Old Scar Borok</strong>.</p></div><div class="p-4 bg-white rounded-xl shadow-md"><div class="flex flex-wrap justify-center gap-2 md:gap-4"><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-red-100 text-red-800 hover:bg-red-200 active" data-context="scarred-stand" data-target="ss-info">Intel</button><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-red-100 text-red-800 hover:bg-red-200" data-context="scarred-stand" data-target="ss-pcs">Player Characters</button></div></div><div id="scarred-stand-content-container"><div id="ss-info" class="sub-content-pane space-y-8"><div class="grid md:grid-cols-2 gap-8"><div class="space-y-8"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-red-800 mb-4">Dramatis Personae</h3><div id="scarred-stand-npcs" class="space-y-4"></div></div></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-red-800 mb-4">Opening Act</h3><div id="scarred-stand-opening" class="space-y-4"></div></div></div></div><div id="ss-pcs" class="sub-content-pane hidden space-y-4"><nav id="ss-character-nav" class="flex flex-wrap justify-center gap-2 mb-6"></nav><div id="ss-character-content"></div></div></div>`;
+        document.getElementById('scarred-stand').innerHTML = `<header class="text-center p-6 bg-red-800 text-white rounded-xl shadow-lg"><h2 class="text-4xl font-bold">Reclaiming the Scarred Stand</h2><p class="mt-2 text-red-100 text-lg">A campaign of politics, honor, and ambition in Valerost.</p></header><div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500"><h3 class="font-sans text-xl font-bold text-red-800 mb-2">Campaign Status</h3><p>The party has sided with <strong>Matriarch Vorga</strong> and is proceeding through the cavern route with <strong>Old Scar Borok</strong>.</p></div><div class="p-4 bg-white rounded-xl shadow-md"><div class="flex flex-wrap justify-center gap-2 md:gap-4"><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-red-100 text-red-800 hover:bg-red-200 active" data-context="scarred-stand" data-target="ss-info">Intel</button><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-red-100 text-red-800 hover:bg-red-200" data-context="scarred-stand" data-target="ss-pcs">Player Characters</button></div></div><div id="scarred-stand-content-container"><div id="ss-info" class="sub-content-pane space-y-8"><div class="grid md:grid-cols-2 gap-8"><div class="space-y-8"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-red-800 mb-4">Dramatis Personae</h3><div id="scarred-stand-npcs" class="space-y-4"></div></div></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-red-800 mb-4">Opening Act</h3><div id="scarred-stand-opening" class="space-y-4"></div></div></div></div><div id="ss-pcs" class="sub-content-pane hidden space-y-4"><nav id="scarredStand-character-nav" class="flex flex-wrap justify-center gap-2 mb-6"></nav><div id="scarredStand-character-content"></div></div></div>`;
         document.getElementById('scarred-stand-npcs').innerHTML = ssData.npcs.map(item => createAccordionItem(item, 'red')).join('');
         document.getElementById('scarred-stand-opening').innerHTML = ssData.opening.map(item => createAccordionItem(item, 'red')).join('');
         initAccordions('scarred-stand-content-container');
-        document.querySelectorAll('.sub-nav-button[data-context="scarred-stand"]').forEach(button => button.addEventListener('click', () => switchSubTab('scarred-stand', button.dataset.target)));
-        initPCSheets('scarred-stand', 'red', masterData.campaigns.scarredStand.pcs);
+        document.querySelectorAll('.sub-nav-button[data-context="scarred-stand"]').forEach(button => button.addEventListener('click', (e) => switchSubTab('scarred-stand', e.currentTarget.dataset.target)));
+        initPCSheets('scarredStand', 'red');
 
         // Twilight Thought
         const ttData = masterData.campaigns.twilightThought;
-        document.getElementById('twilight-thought').innerHTML = `<header class="text-center p-6 bg-teal-800 text-white rounded-xl shadow-lg"><h2 class="text-4xl font-bold">Twilight Thought</h2><p class="mt-2 text-teal-100 text-lg">A campaign of mystery and cosmic consequence in Veilspire.</p></header><div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-500"><h3 class="font-sans text-xl font-bold text-teal-800 mb-2">Campaign Status</h3><p>The party accepted the offer from the <strong>Hollow Trace</strong>. They have a map and are venturing alone into the sealed caves and crypts.</p></div><div class="p-4 bg-white rounded-xl shadow-md"><div class="flex flex-wrap justify-center gap-2 md:gap-4"><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-teal-100 text-teal-800 hover:bg-teal-200 active" data-context="twilight-thought" data-target="tt-info">Intel</button><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-teal-100 text-teal-800 hover:bg-teal-200" data-context="twilight-thought" data-target="tt-pcs">Player Characters</button></div></div><div id="twilight-thought-content-container"><div id="tt-info" class="sub-content-pane space-y-8"><div class="grid md:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-teal-800 mb-4">Factions of Veilspire</h3><div id="twilight-thought-factions" class="space-y-4"></div></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-teal-800 mb-4">Persons of Interest</h3><div id="twilight-thought-npcs" class="space-y-4"></div></div></div></div><div id="tt-pcs" class="sub-content-pane hidden space-y-4"><nav id="tt-character-nav" class="flex flex-wrap justify-center gap-2 mb-6"></nav><div id="tt-character-content"></div></div></div>`;
+        document.getElementById('twilight-thought').innerHTML = `<header class="text-center p-6 bg-teal-800 text-white rounded-xl shadow-lg"><h2 class="text-4xl font-bold">Twilight Thought</h2><p class="mt-2 text-teal-100 text-lg">A campaign of mystery and cosmic consequence in Veilspire.</p></header><div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-500"><h3 class="font-sans text-xl font-bold text-teal-800 mb-2">Campaign Status</h3><p>The party accepted the offer from the <strong>Hollow Trace</strong>. They have a map and are venturing alone into the sealed caves and crypts.</p></div><div class="p-4 bg-white rounded-xl shadow-md"><div class="flex flex-wrap justify-center gap-2 md:gap-4"><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-teal-100 text-teal-800 hover:bg-teal-200 active" data-context="twilight-thought" data-target="tt-info">Intel</button><button class="sub-nav-button font-sans px-4 py-2 rounded-lg bg-teal-100 text-teal-800 hover:bg-teal-200" data-context="twilight-thought" data-target="tt-pcs">Player Characters</button></div></div><div id="twilight-thought-content-container"><div id="tt-info" class="sub-content-pane space-y-8"><div class="grid md:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-teal-800 mb-4">Factions of Veilspire</h3><div id="twilight-thought-factions" class="space-y-4"></div></div><div class="bg-white p-6 rounded-xl shadow-lg"><h3 class="font-sans text-2xl font-bold text-teal-800 mb-4">Persons of Interest</h3><div id="twilight-thought-npcs" class="space-y-4"></div></div></div></div><div id="tt-pcs" class="sub-content-pane hidden space-y-4"><nav id="twilightThought-character-nav" class="flex flex-wrap justify-center gap-2 mb-6"></nav><div id="twilightThought-character-content"></div></div></div>`;
         document.getElementById('twilight-thought-factions').innerHTML = ttData.factions.map(item => createAccordionItem(item, 'teal')).join('');
         document.getElementById('twilight-thought-npcs').innerHTML = ttData.npcs.map(item => createAccordionItem(item, 'teal')).join('');
         initAccordions('twilight-thought-content-container');
-        document.querySelectorAll('.sub-nav-button[data-context="twilight-thought"]').forEach(button => button.addEventListener('click', () => switchSubTab('twilight-thought', button.dataset.target)));
-        initPCSheets('twilight-thought', 'teal', masterData.campaigns.twilightThought.pcs);
+        document.querySelectorAll('.sub-nav-button[data-context="twilight-thought"]').forEach(button => button.addEventListener('click', (e) => switchSubTab('twilight-thought', e.currentTarget.dataset.target)));
+        initPCSheets('twilightThought', 'teal');
+
+        // Final setup
+        renderWorldSubTabs();
+        switchTab('home');
+    }
+    
+    function renderWorldSubTabs(){
+        // Cosmology
+        document.getElementById('world-cosmology').innerHTML = `
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">Calendar & Seasons</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">The Thirteen Months</h4>
+                        <ol class="list-decimal list-inside space-y-1">${masterData.world.calendar.map(m => `<li><strong>${m.m}</strong> (${m.s})</li>`).join('')}</ol>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">The Seven Seasons</h4>
+                        <div class="space-y-2">${masterData.world.seasons.map(s => `<div><strong>${s.n}:</strong> ${s.d}</div>`).join('')}</div>
+                    </div>
+                </div>
+            </div>`;
+
+        // Pantheon
+        document.getElementById('world-pantheon').innerHTML = `
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">The Pantheon of Nevos</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${masterData.world.pantheon.map(d => `
+                        <div class="border border-stone-200 p-4 rounded-lg bg-stone-50">
+                            <h4 class="font-bold text-xl text-purple-800">${d.s} ${d.n}</h4>
+                            <p class="text-stone-600 italic">${d.t}</p>
+                            <p class="mt-2"><strong>Domains:</strong> ${d.d}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        
+        // Gazetteer
+        document.getElementById('world-gazetteer').innerHTML = `
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">Gazetteer</h3>
+                <div id="gazetteer-accordion" class="space-y-2">
+                ${Object.entries(masterData.world.regions).map(([name, data]) => `
+                    <div class="border border-stone-200 rounded-lg overflow-hidden">
+                        <button class="accordion-toggle w-full text-left p-4 bg-white hover:bg-stone-50 flex justify-between items-center">
+                            <span class="font-sans font-bold text-purple-700">${name}</span>
+                            <span class="transform transition-transform duration-300 text-purple-500">▼</span>
+                        </button>
+                        <div class="accordion-content hidden p-4 bg-stone-50 border-t border-stone-200">
+                            <p><strong>Capital:</strong> ${data.c}</p>
+                            <p><strong>Peoples:</strong> ${data.p}</p>
+                            <p><strong>Culture:</strong> ${data.cu}</p>
+                            <p><strong>Territory:</strong> ${data.t}</p>
+                            <p><strong>Neighbors:</strong> ${Object.entries(data.n).map(([n_name, n_dist]) => `${n_name} (${n_dist} days)`).join(', ')}</p>
+                        </div>
+                    </div>
+                `).join('')}
+                </div>
+            </div>`;
+        initAccordions('gazetteer-accordion');
+
+        // Peoples
+        document.getElementById('world-peoples').innerHTML = `
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">Peoples of Nevos</h3>
+                <div class="space-y-4">
+                ${masterData.world.peoples.map(p => `
+                    <div class="border-l-4 border-purple-300 pl-4">
+                        <h4 class="font-bold text-xl">${p.n}</h4>
+                        <p>${p.c}</p>
+                    </div>
+                `).join('')}
+                </div>
+            </div>`;
+
+        // History
+        document.getElementById('world-history').innerHTML = `
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="font-sans text-2xl font-bold text-purple-700 mb-4">A Brief History of Recent Times</h3>
+                <div class="relative border-l-2 border-purple-200 pl-8 space-y-8">
+                ${masterData.world.history.map(h => `
+                    <div class="timeline-item">
+                        <h4 class="font-bold text-xl">${h.t} <span class="text-stone-500 text-base font-normal">(${h.e})</span></h4>
+                        <p>${h.v}</p>
+                    </div>
+                `).join('')}
+                </div>
+            </div>`;
+
     }
 
-    // Set initial active states
+    // --- Initial Load ---
     renderAll();
-    switchTab('home');
-    switchSubTab('world', 'world-cosmology');
-    switchSubTab('scarred-stand', 'ss-info');
-    switchSubTab('twilight-thought', 'tt-info');
+
 });
 </script>
 </body>
