@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celencia Market Insights: A Chronicle of Trends & Opportunities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plotly is included but not used in the current script. Kept for potential future use. -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Narrative Plan & Visualization Justifications (Comments preserved from original) -->
+    <!--
+    Narrative Plan:
+    1. Section 1: The Emerging Market of Esoteric Knowledge (Green Tome as Niche Market)
+    - Viz: Big Number (Market Size), Line Chart (Growth Projection)
+    2. Section 2: Market Disruption & Unforeseen Risks (Havelshire Anomaly)
+    - Viz: Donut Chart (Affected Population), HTML/CSS Risk Matrix (Aberrant Impact)
+    3. Section 3: Key Influencers & Strategic Alliances (The Third Circle & Associates)
+    - Viz: Bar Chart (Influence Scores), HTML/CSS Diagram (Alliance Network)
+    4. Section 4: Competitive Landscape - Threats & Acquisitions (N'zolith & Red Dawn Heist)
+    - Viz: Radar Chart (N'zolith's Threat), Stacked Bar Chart (Heist Gains)
+    5. Section 5: Regional Market Analysis & Resource Development (Ro-Kai-Gan & Character Skills)
+    - Viz: Bubble Chart (Regional Activity), Horizontal Bar Chart (Skill Proficiency)
+    6. Section 6: Future Outlook & Emerging Innovations (Unresolved Plots & Artifacts)
+    - Viz: HTML/CSS Timeline (Potential Developments), Table (Artifact Potential)
+    -->
+    <!--
+    Visualization Choices & Justifications (Confirming NO SVG, NO MERMAID JS):
+    - Big Number (Market Size): HTML/CSS. Goal: Inform. Justification: Direct display. NO SVG.
+    - Line Chart (Growth Projection): Chart.js (Canvas). Goal: Change. Justification: Trend over time. NO SVG.
+    - Donut Chart (Affected Population): Chart.js (Canvas). Goal: Compare/Inform. Justification: Proportion. NO SVG.
+    - Risk Matrix (Aberrant Impact): HTML/CSS Table. Goal: Organize. Justification: Structured risk data. NO SVG.
+    - Bar Chart (Influence Scores): Chart.js (Canvas). Goal: Compare. Justification: Discrete value comparison. NO SVG.
+    - Alliance Network Diagram: HTML/CSS (Flexbox/Grid). Goal: Organize/Relationships. Justification: Visual connections. NO SVG, NO MERMAID JS.
+    - Radar Chart (N'zolith's Threat): Chart.js (Canvas). Goal: Compare. Justification: Multi-attribute display. NO SVG.
+    - Stacked Bar Chart (Heist Gains): Chart.js (Canvas). Goal: Compare. Justification: Composition of gains. NO SVG.
+    - Bubble Chart (Regional Activity): Chart.js (Canvas). Goal: Compare. Justification: Multi-dimensional regional comparison. NO SVG.
+    - Horizontal Bar Chart (Skill Proficiency): Chart.js (Canvas). Goal: Compare/Organize. Justification: Skill ranking. NO SVG.
+    - Timeline (Future Developments): HTML/CSS Structure. Goal: Organize/Change. Justification: Sequential events. NO SVG, NO MERMAID JS.
+    - Table (Artifact Potential): HTML/CSS. Goal: Organize/Inform. Justification: Detailed artifact data. NO SVG.
+    - NEITHER Mermaid JS NOR SVG were used anywhere in this output.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #073B4C; /* Midnight Blue/Dark Slate */
+            color: #FFFFFF;
+        }
+        .card {
+            background-color: #118AB2; /* Blue NCS */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #06D6A0; /* Caribbean Green border for cards */
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFD166; /* Sunglow Yellow */
+            margin-bottom: 1rem;
+        }
+        .card-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #E0E0E0;
+            margin-bottom: 1rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Default height */
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        /* Specific height adjustments for different charts if needed */
+        #knowledgeMarketGrowthContainer, #havelshireAffectedPopulationContainer, #factionInfluenceContainer, #nzolithThreatRadarContainer, #heistGainsContainer, #regionalActivityContainer, #characterSkillsContainer {
+             min-height: 300px; /* Minimum height for smaller screens */
+        }
+
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 350px; /* Taller charts on medium screens and up */
+            }
+             #knowledgeMarketGrowthContainer, #havelshireAffectedPopulationContainer, #factionInfluenceContainer, #nzolithThreatRadarContainer, #heistGainsContainer, #regionalActivityContainer, #characterSkillsContainer {
+                height: 400px; /* Even taller on medium screens and up */
+            }
+        }
+
+        .stat-big-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #06D6A0; /* Caribbean Green */
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 1rem;
+            color: #FFD166; /* Sunglow Yellow */
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .nav-item {
+            padding: 0.5rem 1rem;
+            color: #FFD166;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Added color transition */
+            text-decoration: none; /* Ensure links look like buttons */
+            display: inline-block; /* Better spacing and hover effect */
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #06D6A0;
+            color: #073B4C;
+        }
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(7, 59, 76, 0.95); /* Slightly more opaque */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+        }
+        .flowchart-node {
+            background-color: #FF6B6B; /* Coral Red */
+            color: #073B4C;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem;
+            text-align: center;
+            font-weight: 600;
+            min-width: 120px;
+            border: 1px solid #073B4C; /* Added border for better definition */
+        }
+        .flowchart-connector {
+            width: 2px;
+            background-color: #FFD166; /* Sunglow Yellow */
+            height: 40px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .flowchart-connector-horizontal { /* This class was defined but not used, kept for potential use */
+            height: 2px;
+            background-color: #FFD166;
+            width: 100%;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 2.5rem; /* Space for the dot and line */
+            padding-bottom: 1.5rem;
+            border-left: 2px solid #06D6A0; /* Caribbean Green */
+        }
+        .timeline-item:last-child { /* Remove border from last item for cleaner look */
+            border-left: 2px solid transparent;
+            padding-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -0.57rem; /* Adjusted for better alignment ( (Dot width / 2) + (border/2) ) */
+            top: 0.25rem; /* Adjust as needed for vertical alignment with text */
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: #FF6B6B; /* Coral Red */
+            border: 2px solid #073B4C; /* Match body background */
+        }
+        .timeline-date {
+            font-weight: 600;
+            color: #FFD166; /* Sunglow Yellow */
+            margin-bottom: 0.25rem; /* Added some space below date */
+        }
+        .table-header {
+            background-color: #FF6B6B; /* Coral Red */
+            color: #073B4C; /* Midnight Blue/Dark Slate */
+            font-weight: 700;
+        }
+        .table-cell {
+            padding: 0.75rem;
+            border: 1px solid #06D6A0; /* Caribbean Green */
+            color: #E0E0E0; /* Ensure text color contrasts with card background */
+        }
+        .table-header .table-cell { /* Specific text color for header cells */
+             color: #073B4C;
+        }
+    </style>
+</head>
+<body>
+    <header class="py-8 text-center">
+        <h1 class="text-5xl font-bold" style="color: #06D6A0;">Celencia Market Insights</h1>
+        <p class="text-xl mt-2" style="color: #FFD166;">A Chronicle of Trends, Perils, and Potent Opportunities</p>
+    </header>
+
+    <nav class="sticky-nav shadow-lg mb-8">
+        <div class="container mx-auto px-4">
+            <ul class="flex flex-wrap justify-center space-x-1 sm:space-x-2 md:space-x-4 py-3">
+                <li><a href="#section1" class="nav-item">Esoteric Knowledge</a></li>
+                <li><a href="#section2" class="nav-item">Market Disruption</a></li>
+                <li><a href="#section3" class="nav-item">Key Influencers</a></li>
+                <li><a href="#section4" class="nav-item">Competitive Landscape</a></li>
+                <li><a href="#section5" class="nav-item">Regional Analysis</a></li>
+                <li><a href="#section6" class="nav-item">Future Outlook</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4">
+        <!-- Section 1: Esoteric Knowledge -->
+        <section id="section1" class="card">
+            <h2 class="card-title">I. The Emerging Market of Esoteric Knowledge: The Green Tome's Allure</h2>
+            <p class="card-text">The initial chronicles of Celencia unveil a burgeoning and highly specialized market: the pursuit of Esoteric Knowledge Artifacts. The quest for items like "The Green Tome" signifies a high-value niche, where potent lore translates directly into influence and power. This market is characterized by scarcity, high demand from clandestine organizations like The Third Circle, and considerable risk in acquisition, as evidenced by the perilous journey from Folkstow and the unsettling discoveries at Blairwood Holdings.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <p class="stat-big-number">§75M</p>
+                    <p class="stat-label">Estimated Current Market Value (Rare Artifacts)</p>
+                    <p class="card-text mt-4">The "Esoteric Knowledge" sector, while nascent, shows immense financial potential. Artifacts of power, like the Green Tomes, are not mere trinkets but key assets in a complex economy of influence and arcane capability. Their discovery and control dictate the flow of power among various factions operating within Celencia.</p>
+                </div>
+                <div class="chart-container" id="knowledgeMarketGrowthContainer">
+                    <canvas id="knowledgeMarketGrowth"></canvas>
+                </div>
+            </div>
+            <p class="card-text mt-4">The allure of such knowledge draws diverse actors, from aspiring wizards like Thalion to seasoned warriors like Ki-Sai guarding precious consignments. The market's growth is fueled by the understanding that these artifacts hold the keys to ancient secrets and, potentially, the means to reshape destinies or even cosmic balances.</p>
+        </section>
+
+        <!-- Section 2: Market Disruption -->
+        <section id="section2" class="card">
+            <h2 class="card-title">II. Market Disruption & Unforeseen Risks: The Havelshire Anomaly</h2>
+            <p class="card-text">The seemingly tranquil market town of Havelshire became a stark case study in catastrophic market disruption. The insidious mental enchantment, the "Havelshire Aberrant," demonstrated how unforeseen, hostile forces can destabilize established communities and directly impact the well-being of its 'consumers' (citizens). Memory erasure, identity transformation (the "Waxten Brin" to "Noxk" phenomenon), and demonic manifestations stemming from cursed knowledge (Sam Perrel's fate) highlight extreme operational risks within Celencia's various 'markets'.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container" id="havelshireAffectedPopulationContainer">
+                    <canvas id="havelshireAffectedPopulation"></canvas>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2 text-center" style="color: #FFD166;">Aberrant Impact Assessment</h3>
+                    <div class="bg-red-800 p-4 rounded-lg shadow-md border border-red-600"> {/* Slightly darker red, added border */}
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="font-semibold text-red-200">Risk Factor:</div><div class="font-semibold text-red-200">Severity:</div>
+                            <div class="text-red-300">Cognitive Impairment:</div><div class="text-red-100 font-bold">High</div>
+                            <div class="text-red-300">Identity Erasure:</div><div class="text-red-100 font-bold">Critical</div>
+                            <div class="text-red-300">Demonic Manifestation:</div><div class="text-red-100 font-bold">Extreme</div>
+                            <div class="text-yellow-300">Contagion Potential:</div><div class="text-yellow-100 font-bold">Moderate</div>
+                            <div class="text-red-300">Economic Disruption:</div><div class="text-red-100 font-bold">Severe</div>
+                        </div>
+                        <p class="text-xs mt-3 text-gray-300">The "Noxk" entity represents a Class-5 Aberrant threat, requiring immediate quarantine and strategic intervention to prevent wider market collapse.</p>
+                    </div>
+                </div>
+            </div>
+            <p class="card-text mt-4">The quarantine of Havelshire underscores the severe economic and societal fallout from such Aberrant incursions. The initial investigation into the 'Colosseum' as a potential teleportation circle also suggests that even mundane-seeming locales can hide infrastructure critical to larger, unseen networks – or become focal points for disastrous events.</p>
+        </section>
+
+        <!-- Section 3: Key Influencers -->
+        <section id="section3" class="card">
+            <h2 class="card-title">III. Key Influencers & Strategic Alliances: The Third Circle & Affiliates</h2>
+            <p class="card-text">The Celencian landscape is not shaped by market forces alone, but by potent organizations and influential individuals. The Third Circle, with its pursuit of cosmic knowledge and its network of agents like Thalion and Caan, operates as a major influencer, akin to a venture capital firm investing in high-risk, high-reward 'knowledge assets.' Figures like Misty Olivier, representing established authority, and the enigmatic Lord Blackwood, demonstrate the complex web of alliances and power brokers operating, often in the shadows. Yves's integration into the party signifies the importance of factional allegiances.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container" id="factionInfluenceContainer">
+                    <canvas id="factionInfluence"></canvas>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 text-center" style="color: #FFD166;">Key Faction Network</h3>
+                    <div class="flex flex-col items-center space-y-2 p-4 bg-gray-800 bg-opacity-30 rounded-lg">
+                        <div class="flowchart-node">The Third Circle</div>
+                        <div class="flex flex-col sm:flex-row items-center sm:items-stretch space-y-2 sm:space-y-0 sm:space-x-4 mt-2 mb-2">
+                            <div class="flex flex-col items-center">
+                                <div class="flowchart-connector"></div>
+                                <div class="flowchart-node">Thalion & Caan (Agents)</div>
+                            </div>
+                            <div class="hidden sm:block border-r-2 border-ffd166 h-auto self-center mx-2"></div> <!-- Visual separator for larger screens -->
+                             <div class="sm:hidden flowchart-connector-horizontal w-1/2 mx-auto my-1"></div> <!-- Horizontal connector for smaller screens -->
+                            <div class="flex flex-col items-center">
+                                <div class="flowchart-connector"></div>
+                                <div class="flowchart-node">Lord Blackwood (Associate?)</div>
+                            </div>
+                        </div>
+                        <div class="flowchart-connector"></div>
+                        <div class="flowchart-node">Midlands Authority (Misty Olivier)</div>
+                        <div class="flowchart-connector"></div>
+                        <div class="flowchart-node">Allied Elven Factions (Yves)</div>
+                    </div>
+                    <p class="card-text mt-4 text-sm text-center">This simplified network illustrates the interconnectedness of key players. Strategic alliances are crucial for navigating the perilous 'knowledge market' and countering major threats.</p>
+                </div>
+            </div>
+            <p class="card-text mt-4">Sirus's revelations about a "third circle" of cosmic powers and the significance of naming Aberrants suggest these influencers possess unique insights and operate on a grander strategic scale. Their motives, whether purely for understanding or for control, remain a critical variable in the market's future.</p>
+        </section>
+
+        <!-- Section 4: Competitive Landscape -->
+        <section id="section4" class="card">
+            <h2 class="card-title">IV. Competitive Landscape: Threats, Acquisitions, and Market Volatility</h2>
+            <p class="card-text">The 'market' of Celencia is characterized by intense competition and high volatility, with formidable threats like N'zolith capable of eliminating key players (as seen with Ki-Sai's near-fatal encounters). Such entities represent apex predators in this ecosystem. Simultaneously, aggressive 'market acquisition' strategies, exemplified by the audacious Red Dawn Heist, demonstrate how established powers can be dismantled and their assets redistributed, often through violent and chaotic means. This heist not only enriched the party but also sent ripples through Vestille's underworld, altering the balance of power.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container" id="nzolithThreatRadarContainer">
+                    <canvas id="nzolithThreatRadar"></canvas>
+                </div>
+                <div class="chart-container" id="heistGainsContainer">
+                    <canvas id="heistGains"></canvas>
+                </div>
+            </div>
+            <p class="card-text mt-4">The presence of Aberrant-worshipping cults, like the Cult of the Forbidden Eye, adds another layer of competitive threat, vying for control over dark knowledge and potent entities. The aftermath of the Red Dawn heist, with the party escaping to a Third Circle sanctum, also highlights the importance of secure havens and powerful patronage in this cutthroat environment.</p>
+        </section>
+
+        <!-- Section 5: Regional Analysis -->
+        <section id="section5" class="card">
+            <h2 class="card-title">V. Regional Market Analysis & Resource Development</h2>
+            <p class="card-text">Celencia comprises diverse regional 'markets,' each with unique characteristics and opportunities. From the frontier town of Folkstow to the cursed Havelshire, the bustling capital of Vestille, the resort of Padith's Pond, and the traditional Dragonborn city of Ro-Kai-Gan, economic activity and available resources vary significantly. The development of 'human capital'—the skills and abilities of individuals like Ki-Sai, Thalion, Myran, Yves, and Vincent—is paramount for navigating these varied landscapes and overcoming sector-specific challenges, from demonic incursions to complex heists and encounters with ancient entities.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container" id="regionalActivityContainer">
+                    <canvas id="regionalActivity"></canvas>
+                </div>
+                <div class="chart-container" id="characterSkillsContainer">
+                    <canvas id="characterSkills"></canvas>
+                </div>
+            </div>
+            <p class="card-text mt-4">Ki-Sai's journey in Ro-Kai-Gan, culminating in him being named the "Sword Arm" and receiving the Great Dragon's scale, signifies a major 'asset upgrade.' Vincent's acquisition of specialized gear from Landry Brusard and Thalion's risky adoption of Mask's artifacts represent strategic investments in 'talent enhancement,' albeit with varying degrees of associated risk.</p>
+        </section>
+
+        <!-- Section 6: Future Outlook -->
+        <section id="section6" class="card">
+            <h2 class="card-title">VI. Future Outlook & Emerging Innovations: The Unwritten Chapters</h2>
+            <p class="card-text">The Celencian market is poised for significant evolution, driven by unresolved plots and emerging 'innovations' in the form of powerful artifacts and untapped knowledge. The Wriggled Scrawl in Karegal, the quest for U-Sol, the mystery of the floating island, and the true nature of the Temple Tome entity represent major 'R&D pipelines' and 'unexplored market segments' with immense potential for growth and disruption.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #FFD166;">Potential Future Market Catalysts</h3>
+                    <div class="space-y-4">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">Near Term: Karegal Expedition</div>
+                            <p class="card-text text-sm mb-0">Investigation of "The Wriggled Scrawl" could unlock new Green Tome insights or reveal a new faction/threat.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">Mid Term: U-Sol's Revelation</div>
+                            <p class="card-text text-sm mb-0">Locating the Wandering Prophet may provide critical guidance for Ki-Sai and the party's role in cosmic events.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">Ongoing: Aberrant Activities</div>
+                            <p class="card-text text-sm mb-0">The Havelshire Aberrant's lingering connection and N'zolith's presence within Ki-Sai suggest continued high-stakes confrontations.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">Wildcard: Floating Island & Temple Tome</div>
+                            <p class="card-text text-sm mb-0">These major unknowns could introduce entirely new market dynamics or powerful new 'technologies' (knowledge/magic).</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #FFD166;">Key Artifacts: R&D Pipeline</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="table-header">
+                                <tr>
+                                    <th class="table-cell">Artifact/Lead</th>
+                                    <th class="table-cell">Potential Impact</th>
+                                    <th class="table-cell">Associated Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="table-cell">Myran's Plane-Viewing Orb</td>
+                                    <td class="table-cell">High (Insight/Foresight)</td>
+                                    <td class="table-cell">Moderate (Disturbing Visions)</td>
+                                </tr>
+                                <tr>
+                                    <td class="table-cell">Mask's Artifacts (Thalion)</td>
+                                    <td class="table-cell">Very High (Knowledge/Power)</td>
+                                    <td class="table-cell">Critical (Madness)</td>
+                                </tr>
+                                <tr>
+                                    <td class="table-cell">Temple Tome Entity (Myran)</td>
+                                    <td class="table-cell">Extreme (Omniscience?)</td>
+                                    <td class="table-cell">Unknown (High)</td>
+                                </tr>
+                                <tr>
+                                    <td class="table-cell">The Squire's Influence</td>
+                                    <td class="table-cell">Moderate (Divine Aid/Mischief)</td>
+                                    <td class="table-cell">Low-Moderate</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="card-text mt-4 text-sm">The ongoing 'research and development' concerning these potent artifacts and leads will significantly shape future market trends and power balances. The "double-edged sword of knowledge" remains a primary market driver and risk factor.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 mt-12 border-t border-gray-700">
+        <p class="text-sm" style="color: #FFD166;">Celencia Market Insights &copy; Current Epoch. All data metaphorical and subject to Aberrant fluctuations.</p>
+        <p class="text-xs mt-1" style="color: #06D6A0;">Analysis based on the "Celencia's Chronicle: A Saga of Shadows, Steel, and Shifting Fates."</p>
+    </footer>
+
+    <script>
+        // Ensure Chart.js and other scripts are loaded before this executes
+        document.addEventListener('DOMContentLoaded', function () {
+            const FONT_COLOR = '#E0E0E0'; // Lightened for better readability on dark backgrounds
+            const GRID_COLOR = 'rgba(255, 255, 255, 0.15)'; // Slightly more visible grid
+            const PALETTE = {
+                coralRed: '#FF6B6B',
+                sunglowYellow: '#FFD166',
+                caribbeanGreen: '#06D6A0',
+                blueNCS: '#118AB2',
+                midnightBlue: '#073B4C',
+                darkMatter: '#2D2D2D', // A new dark color for contrast if needed
+                electricPurple: '#BF55EC' // A vibrant purple
+            };
+
+            // Helper function to wrap long labels for charts
+            function processLabel(label, maxLength = 15) {
+                if (typeof label !== 'string') return label; // Return if not a string
+                if (label.length > maxLength) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    for (const word of words) {
+                        if ((currentLine + word).length > maxLength && currentLine.length > 0) {
+                            lines.push(currentLine.trim());
+                            currentLine = '';
+                        }
+                        currentLine += word + ' ';
+                    }
+                    if (currentLine.trim().length > 0) {
+                        lines.push(currentLine.trim());
+                    }
+                    return lines;
+                }
+                return label;
+            }
+            
+            // Tooltip title callback to join array labels back for display
+            const tooltipTitleCallback = function(tooltipItems) {
+                const item = tooltipItems[0];
+                if (!item || !item.chart || !item.chart.data || !item.chart.data.labels) return '';
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                }
+                return label;
+            };
+
+            Chart.defaults.color = FONT_COLOR;
+            Chart.defaults.borderColor = GRID_COLOR;
+            Chart.defaults.font.family = "'Inter', sans-serif"; // Ensure chart font matches body
+
+            // Chart 1: Knowledge Market Growth
+            const knowledgeMarketGrowthCtx = document.getElementById('knowledgeMarketGrowth');
+            if (knowledgeMarketGrowthCtx) {
+                new Chart(knowledgeMarketGrowthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Epoch Y-3', 'Epoch Y-2', 'Epoch Y-1', 'Current Epoch', 'Epoch F+1 (proj.)', 'Epoch F+2 (proj.)'],
+                        datasets: [{
+                            label: 'Esoteric Artifact Market Growth Index',
+                            data: [20, 35, 50, 75, 110, 150],
+                            borderColor: PALETTE.caribbeanGreen,
+                            backgroundColor: 'rgba(6, 214, 160, 0.25)', // Slightly more opaque fill
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: PALETTE.caribbeanGreen,
+                            pointBorderColor: FONT_COLOR,
+                            pointHoverRadius: 7,
+                            pointHoverBackgroundColor: FONT_COLOR,
+                            pointHoverBorderColor: PALETTE.caribbeanGreen
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Market Value Index (M§)', color: PALETTE.sunglowYellow }, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } },
+                            x: { title: { display: true, text: 'Time (Epochs)', color: PALETTE.sunglowYellow }, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } }
+                        },
+                        plugins: { 
+                            legend: { display: true, labels: { color: FONT_COLOR } }, 
+                            tooltip: { 
+                                callbacks: { title: tooltipTitleCallback },
+                                titleFont: { weight: 'bold'},
+                                bodyFont: { size: 12 },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                            } 
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Havelshire Affected Population
+            const havelshireAffectedPopulationCtx = document.getElementById('havelshireAffectedPopulation');
+            if (havelshireAffectedPopulationCtx) {
+                new Chart(havelshireAffectedPopulationCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [processLabel('Cognitively Affected'), processLabel('Identity Altered'), processLabel('Demonic Manifestation'), processLabel('Unaffected (Initial)')],
+                        datasets: [{
+                            label: 'Havelshire Population Status',
+                            data: [65, 20, 5, 10],
+                            backgroundColor: [PALETTE.coralRed, PALETTE.sunglowYellow, '#A020F0', PALETTE.caribbeanGreen], // Changed demonic to purple
+                            borderColor: PALETTE.midnightBlue,
+                            borderWidth: 2,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { position: 'bottom', labels: { color: FONT_COLOR, padding: 15 } }, 
+                            tooltip: { 
+                                callbacks: { title: tooltipTitleCallback },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                             }
+                        }
+                    }
+                });
+            }
+            
+            // Chart 3: Faction Influence
+            const factionInfluenceCtx = document.getElementById('factionInfluence');
+            if (factionInfluenceCtx) {
+                new Chart(factionInfluenceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [processLabel('The Third Circle'), processLabel('Midlands Authority'), processLabel('Lord Blackwood (Est.)'), processLabel('Elven Factions (Allied)')],
+                        datasets: [{
+                            label: 'Relative Influence Score (RIS)',
+                            data: [85, 60, 70, 50],
+                            backgroundColor: [PALETTE.caribbeanGreen, PALETTE.blueNCS, PALETTE.sunglowYellow, PALETTE.electricPurple],
+                            borderColor: PALETTE.midnightBlue,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { 
+                            x: { beginAtZero: true, title: { display: true, text: 'Influence Score', color: PALETTE.sunglowYellow}, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }  },
+                            y: { ticks: { color: FONT_COLOR, autoSkip: false }, grid: { display: false } } // Ensure all labels show
+                        },
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { 
+                                callbacks: { title: tooltipTitleCallback },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                            } 
+                        }
+                    }
+                });
+            }
+
+            // Chart 4: N'zolith Threat Radar
+            const nzolithThreatRadarCtx = document.getElementById('nzolithThreatRadar');
+            if (nzolithThreatRadarCtx) {
+                 new Chart(nzolithThreatRadarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: [processLabel('Raw Power',10), processLabel('Resilience',10), processLabel('Corruption Aura',10), processLabel('Strategic Intellect',10), processLabel('Summoning Ability',10)],
+                        datasets: [{
+                            label: "N'zolith Threat Profile",
+                            data: [9, 7, 8, 6, 7],
+                            fill: true,
+                            backgroundColor: 'rgba(255, 107, 107, 0.5)', 
+                            borderColor: PALETTE.coralRed,
+                            pointBackgroundColor: PALETTE.coralRed,
+                            pointBorderColor: FONT_COLOR,
+                            pointHoverRadius: 7,
+                            pointHoverBackgroundColor: FONT_COLOR,
+                            pointHoverBorderColor: PALETTE.coralRed
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { 
+                            r: { 
+                                angleLines: { color: GRID_COLOR }, 
+                                grid: { color: GRID_COLOR }, 
+                                pointLabels: { color: FONT_COLOR, font: {size: 11}}, // Adjusted size
+                                suggestedMin: 0, 
+                                suggestedMax: 10 ,
+                                ticks: { color: FONT_COLOR, backdropColor: 'rgba(7, 59, 76, 0.5)'} // ticks color and backdrop
+                            } 
+                        },
+                        plugins: { 
+                            legend: { position: 'top', labels: {color: FONT_COLOR} }, 
+                            tooltip: { 
+                                callbacks: { title: tooltipTitleCallback },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                            } 
+                        }
+                    }
+                });
+            }
+
+            // Chart 5: Heist Gains
+            const heistGainsCtx = document.getElementById('heistGains');
+            if (heistGainsCtx) {
+                new Chart(heistGainsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [processLabel('The Bar on Baron Heist')],
+                        datasets: [
+                            { label: 'Monetary Assets (§)', data: [15000], backgroundColor: PALETTE.sunglowYellow, stack: 'Stack 0' },
+                            { label: 'Magical Artifacts (Est. Value §)', data: [25000], backgroundColor: PALETTE.caribbeanGreen, stack: 'Stack 0' },
+                            { label: 'Strategic Intel (Priceless Proxy §)', data: [5000], backgroundColor: PALETTE.coralRed, stack: 'Stack 0' } // Added Proxy value for stacking
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {    
+                            y: { beginAtZero: true, stacked: true, title: {display: true, text: 'Value in Shekels (§)', color: PALETTE.sunglowYellow}, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } },
+                            x: { stacked: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }}
+                        },
+                        plugins: { 
+                            legend: { position: 'bottom', labels: {color: FONT_COLOR, padding:15 } }, 
+                            tooltip: { 
+                                mode: 'index', // Show all items in stack
+                                callbacks: { title: tooltipTitleCallback },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                            } 
+                        }
+                    }
+                });
+            }
+
+            // Chart 6: Regional Activity Bubble Chart
+            const regionalActivityCtx = document.getElementById('regionalActivity');
+            if (regionalActivityCtx) {
+                new Chart(regionalActivityCtx, {
+                    type: 'bubble',
+                    data: {
+                        datasets: [{
+                            label: 'Folkstow', data: [{x: 2, y: 3, r: 15}], backgroundColor: PALETTE.coralRed, borderColor: FONT_COLOR, borderWidth:1
+                        }, {
+                            label: 'Havelshire (Pre-Quarantine)', data: [{x: 3, y: 2, r: 10}], backgroundColor: PALETTE.sunglowYellow, borderColor: FONT_COLOR, borderWidth:1
+                        }, {
+                            label: 'Vestille', data: [{x: 8, y: 7, r: 30}], backgroundColor: PALETTE.caribbeanGreen, borderColor: FONT_COLOR, borderWidth:1
+                        }, {
+                            label: "Padith's Pond", data: [{x: 4, y: 5, r: 12}], backgroundColor: PALETTE.blueNCS, borderColor: FONT_COLOR, borderWidth:1
+                        }, {
+                            label: 'Ro-Kai-Gan', data: [{x: 6, y: 6, r: 25}], backgroundColor: PALETTE.electricPurple, borderColor: FONT_COLOR, borderWidth:1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { title: { display: true, text: 'Stability Index', color: PALETTE.sunglowYellow }, min:0, max:10, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } },
+                            x: { title: { display: true, text: 'Economic Activity Index', color: PALETTE.sunglowYellow }, min:0, max:10, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } }
+                        },
+                        plugins: { 
+                            legend: { position: 'top', labels: {color: FONT_COLOR} }, 
+                            tooltip: { 
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.x !== null) { label += `(Econ: ${context.parsed.x}, Stab: ${context.parsed.y}, Size: ${context.raw.r})`;}
+                                        return label;
+                                    }
+                                },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Chart 7: Character Skills Horizontal Bar Chart
+            const characterSkillsCtx = document.getElementById('characterSkills');
+            if (characterSkillsCtx) {
+                new Chart(characterSkillsCtx, {
+                    type: 'bar', // Horizontal bar is achieved via indexAxis: 'y'
+                    data: {
+                        labels: [processLabel('Ki-Sai (Combat/Spiritual)', 25), processLabel('Thalion (Arcane Knowledge)', 25), processLabel('Myran (Mysticism/Healing)', 25), processLabel('Yves (Tactics/Diplomacy)', 25), processLabel('Vincent (Stealth/Unconventional)', 25)],
+                        datasets: [{
+                            label: 'Core Competency Index',
+                            data: [88, 85, 82, 78, 75],
+                            backgroundColor: [PALETTE.blueNCS, PALETTE.caribbeanGreen, PALETTE.sunglowYellow, PALETTE.coralRed, PALETTE.electricPurple],
+                            borderColor: PALETTE.midnightBlue,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', // This makes it a horizontal bar chart
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { 
+                            x: { beginAtZero: true, suggestedMax: 100, title: {display: true, text: 'Competency Index (0-100)', color: PALETTE.sunglowYellow}, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }  },
+                            y: { ticks: { color: FONT_COLOR, autoSkip: false }, grid: { display: false }} // Ensure all labels show
+                        },
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { 
+                                callbacks: { title: tooltipTitleCallback },
+                                backgroundColor: 'rgba(7, 59, 76, 0.85)',
+                                titleColor: PALETTE.sunglowYellow,
+                                bodyColor: FONT_COLOR,
+                                borderColor: PALETTE.caribbeanGreen,
+                                borderWidth: 1
+                             } 
+                        }
+                    }
+                });
+            }
+            
+            // Navigation scroll active state
+            const navLinks = document.querySelectorAll('nav a.nav-item');
+            const sections = document.querySelectorAll('main section[id]');
+
+            function changeNav() {
+                let index = sections.length;
+
+                while(--index && window.scrollY + 100 < sections[index].offsetTop) {} // 100px offset
+                
+                navLinks.forEach((link) => link.classList.remove('active'));
+                // Check if the link corresponding to the current section exists
+                if (sections[index] && sections[index].getAttribute('id')) {
+                    const activeLink = document.querySelector('nav a.nav-item[href="#' + sections[index].getAttribute('id') + '"]');
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                    }
+                } else if (window.scrollY < sections[0].offsetTop - 100 && navLinks.length > 0) {
+                     // If scrolled to the very top, before the first section, make the first nav item active
+                    navLinks[0].classList.add('active');
+                }
+            }
+
+            // Initial call to set active nav item on page load (e.g. if page is loaded scrolled or with a hash)
+            changeNav(); 
+            window.addEventListener('scroll', changeNav);
+
+             // Smooth scroll for nav links
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start' // Aligns the top of the target element to the top of the viewport
+                        });
+                    }
+                });
+            });
+
+        }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>
