@@ -8,8 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Harmony (Neutrals: beige, stone; Accents: amber, deep brown) -->
-    <!-- Application Structure Plan: A dashboard-style SPA with a top filter/search bar, a main content grid for inventory items, and an analytics section with charts. This structure allows users to quickly shift between Browse details and seeing a high-level overview, which is more intuitive than scrolling a long text document. The interactive filters make finding specific items efficient. -->
-    <!-- Visualization & Content Choices: 1. Inventory List -> Card Grid -> Filtering/Search -> Enables easy Browse of a large catalog (HTML/JS). 2. Stock Levels per Category -> Bar Chart -> Hover for details -> Provides a quick visual comparison of stock quantities (Chart.js). 3. Item Value Distribution -> Donut Chart -> Hover for value -> Shows the distribution of total value (Stock * Price) across categories, highlighting where the guild's wealth is concentrated (Chart.js). NO SVG/Mermaid used. -->
+    <!-- Application Structure Plan: A dashboard-style SPA with a top filter/search bar, and a main content grid for inventory items. This structure allows users to quickly browse details, which is intuitive. The interactive filters make finding specific items efficient. -->
+    <!-- Visualization & Content Choices: 1. Inventory List -> Card Grid -> Filtering/Search -> Enables easy Browse of a large catalog (HTML/JS). NO SVG/Mermaid used. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -62,30 +62,11 @@
                     <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Tools">Tools & Kits</button>
                     <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Packs">Ingredient Packs</button>
                     <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Magic">Magical Items</button>
+                    <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Scrolls">Scrolls</button>
+                    <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Trinkets">Trinkets</button>
                 </div>
             </div>
         </nav>
-
-        <section id="analytics-section" class="mb-12">
-            <h2 class="text-2xl font-bold text-center text-amber-900 mb-6">Inventory Overview</h2>
-             <div class="text-center text-stone-600 mb-6">
-                <p>This section provides a high-level summary of the guild's assets. The charts below visualize the distribution of our inventory by total stock count and estimated market value, helping guild members quickly grasp where our resources are concentrated. Hover over the chart segments for more details.</p>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <h3 class="text-lg font-semibold text-center mb-4">Stock Count by Category</h3>
-                    <div class="chart-container">
-                        <canvas id="stockCountChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-md">
-                    <h3 class="text-lg font-semibold text-center mb-4">Total Value by Category</h3>
-                    <div class="chart-container">
-                        <canvas id="valueDistChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <section id="inventory-display">
             <h2 class="text-2xl font-bold text-center text-amber-900 mb-6">Available Inventory</h2>
@@ -164,8 +145,6 @@
             { name: "Elixir of Health", category: "Magic", price: 1800, stock: 3 },
             { name: "Potion of Flying", category: "Magic", price: 2250, stock: 2 },
             { name: "Potion of Invisibility", category: "Magic", price: 1800, stock: 3 },
-            { name: "Spell Scroll (1st Level)", category: "Magic", price: 22.5, stock: 20 },
-            { name: "Spell Scroll (3rd Level)", category: "Magic", price: 360, stock: 10 },
             { name: "+1 Weapon", category: "Magic", price: 450, stock: 5 },
             { name: "Javelin of Lightning", category: "Magic", price: 315, stock: 5 },
             { name: "Weapon of Warning", category: "Magic", price: 360, stock: 3 },
@@ -185,6 +164,36 @@
             { name: "Heward's Handy Haversack", category: "Magic", price: 1800, stock: 2 },
             { name: "Tome of Clear Thought", category: "Magic", price: 32400, stock: 1 },
             { name: "Tome of Understanding", category: "Magic", price: 32400, stock: 1 },
+            { name: "Spell Scroll (Cantrip)", category: "Scrolls", price: 13.5, stock: 30 },
+            { name: "Spell Scroll (1st Level)", category: "Scrolls", price: 22.5, stock: 20 },
+            { name: "Spell Scroll (2nd Level)", category: "Scrolls", price: 135, stock: 15 },
+            { name: "Spell Scroll (3rd Level)", category: "Scrolls", price: 360, stock: 10 },
+            { name: "Spell Scroll (4th Level)", category: "Scrolls", price: 720, stock: 5 },
+            { name: "Spell Scroll (5th Level)", category: "Scrolls", price: 1350, stock: 3 },
+            { name: "Scroll of Protection", category: "Scrolls", price: 3150, stock: 2 },
+            { name: "Spell Scroll (6th Level)", category: "Scrolls", price: 1800, stock: 2 },
+            { name: "Spell Scroll (7th Level)", category: "Scrolls", price: 3150, stock: 1 },
+            { name: "Spell Scroll (8th Level)", category: "Scrolls", price: 4500, stock: 1 },
+            { name: "Spell Scroll (9th Level)", category: "Scrolls", price: 18000, stock: 1 },
+            { name: "Bead of Nourishment", category: "Trinkets", price: 22.5, stock: 50 },
+            { name: "Bead of Refreshment", category: "Trinkets", price: 22.5, stock: 50 },
+            { name: "Candle of the Deep", category: "Trinkets", price: 45, stock: 20 },
+            { name: "Charlatan's Die", category: "Trinkets", price: 72, stock: 15 },
+            { name: "Ear Horn of Hearing", category: "Trinkets", price: 67.5, stock: 10 },
+            { name: "Enduring Spellbook", category: "Trinkets", price: 90, stock: 5 },
+            { name: "Heward's Handy Spice Pouch", category: "Trinkets", price: 90, stock: 10 },
+            { name: "Horn of Silent Alarm", category: "Trinkets", price: 76.5, stock: 10 },
+            { name: "Lock of Trickery", category: "Trinkets", price: 45, stock: 20 },
+            { name: "Mystery Key", category: "Trinkets", price: 45, stock: 20 },
+            { name: "Orb of Direction", category: "Trinkets", price: 45, stock: 15 },
+            { name: "Orb of Time", category: "Trinkets", price: 45, stock: 15 },
+            { name: "Pipe of Smoke Monsters", category: "Trinkets", price: 45, stock: 10 },
+            { name: "Pole of Angling", category: "Trinkets", price: 45, stock: 10 },
+            { name: "Pole of Collapsing", category: "Trinkets", price: 49.5, stock: 10 },
+            { name: "Pot of Awakening", category: "Trinkets", price: 76.5, stock: 5 },
+            { name: "Rope of Mending", category: "Trinkets", price: 45, stock: 10 },
+            { name: "Talking Doll", category: "Trinkets", price: 67.5, stock: 5 },
+            { name: "Tankard of Sobriety", category: "Trinkets", price: 72, stock: 5 },
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -242,89 +251,10 @@
                 }
             });
             
-            const setupCharts = () => {
-                const categories = ['Mundane', 'Tools', 'Packs', 'Magic'];
-                const categoryData = categories.map(cat => {
-                    const items = inventoryData.filter(item => item.category === cat);
-                    return {
-                        category: cat,
-                        stock: items.reduce((sum, item) => sum + item.stock, 0),
-                        value: items.reduce((sum, item) => sum + (item.stock * item.price), 0),
-                    };
-                });
-
-                const chartColors = ['#D4A05D', '#8C6F5A', '#B8860B', '#A16207'];
-                
-                const stockCtx = document.getElementById('stockCountChart').getContext('2d');
-                new Chart(stockCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: categoryData.map(d => d.category),
-                        datasets: [{
-                            label: 'Total Stock',
-                            data: categoryData.map(d => d.stock),
-                            backgroundColor: chartColors,
-                            borderColor: chartColors.map(c => c + 'B3'),
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-
-                const valueCtx = document.getElementById('valueDistChart').getContext('2d');
-                new Chart(valueCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: categoryData.map(d => d.category),
-                        datasets: [{
-                            label: 'Total Value (GP)',
-                            data: categoryData.map(d => d.value),
-                            backgroundColor: chartColors,
-                            borderColor: '#FDFBF8',
-                            borderWidth: 3
-                        }]
-                    },
-                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed !== null) {
-                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(context.parsed).replace('$', '') + ' GP';
-                                        }
-                                        return label;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            };
+            // Charts removed as per user request.
+            // The setupCharts function and its call are no longer needed.
 
             renderInventory();
-            setupCharts();
         });
     </script>
 </body>
