@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter's Guild Quartermaster's Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Harmony (Neutrals: beige, stone; Accents: amber, deep brown) -->
+    <!-- Application Structure Plan: A dashboard-style SPA with a top filter/search bar, a main content grid for inventory items, and an analytics section with charts. This structure allows users to quickly shift between Browse details and seeing a high-level overview, which is more intuitive than scrolling a long text document. The interactive filters make finding specific items efficient. -->
+    <!-- Visualization & Content Choices: 1. Inventory List -> Card Grid -> Filtering/Search -> Enables easy Browse of a large catalog (HTML/JS). 2. Stock Levels per Category -> Bar Chart -> Hover for details -> Provides a quick visual comparison of stock quantities (Chart.js). 3. Item Value Distribution -> Donut Chart -> Hover for value -> Shows the distribution of total value (Stock * Price) across categories, highlighting where the guild's wealth is concentrated (Chart.js). NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8; /* Warm off-white */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-button.active {
+            background-color: #A16207; /* Dark Amber */
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .nav-button:not(.active):hover {
+            background-color: #FDE68A; /* Light Amber */
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-900">The Deep Vaults</h1>
+            <p class="text-stone-600 mt-2">Hunter's Guild Quartermaster's Inventory</p>
+        </header>
+
+        <nav id="filters" class="sticky top-0 bg-fdfbf8/80 backdrop-blur-sm z-10 py-4 mb-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="w-full sm:w-auto flex-grow">
+                    <input type="search" id="search-bar" placeholder="Search for an item..." class="w-full px-4 py-2 border border-stone-300 rounded-full focus:ring-2 focus:ring-amber-500 focus:outline-none transition">
+                </div>
+                <div id="category-filters" class="flex flex-wrap justify-center gap-2">
+                    <button class="nav-button active px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="all">All Items</button>
+                    <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Mundane">Mundane Essentials</button>
+                    <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Tools">Tools & Kits</button>
+                    <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Packs">Ingredient Packs</button>
+                    <button class="nav-button px-4 py-2 bg-stone-200 text-stone-700 rounded-full text-sm font-medium" data-category="Magic">Magical Items</button>
+                </div>
+            </div>
+        </nav>
+
+        <section id="analytics-section" class="mb-12">
+            <h2 class="text-2xl font-bold text-center text-amber-900 mb-6">Inventory Overview</h2>
+             <div class="text-center text-stone-600 mb-6">
+                <p>This section provides a high-level summary of the guild's assets. The charts below visualize the distribution of our inventory by total stock count and estimated market value, helping guild members quickly grasp where our resources are concentrated. Hover over the chart segments for more details.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-2xl shadow-md">
+                    <h3 class="text-lg font-semibold text-center mb-4">Stock Count by Category</h3>
+                    <div class="chart-container">
+                        <canvas id="stockCountChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md">
+                    <h3 class="text-lg font-semibold text-center mb-4">Total Value by Category</h3>
+                    <div class="chart-container">
+                        <canvas id="valueDistChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="inventory-display">
+            <h2 class="text-2xl font-bold text-center text-amber-900 mb-6">Available Inventory</h2>
+            <div class="text-center text-stone-600 mb-8">
+                <p>Browse the complete and up-to-date list of all items currently held in the Deep Vaults. Use the search bar and category filters above to narrow your results. All prices shown include the 10% guild member discount.</p>
+            </div>
+            <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            </div>
+            <p id="no-results" class="text-center text-stone-500 py-12 hidden">No items match your search.</p>
+        </section>
+
+    </div>
+
+    <template id="item-card-template">
+        <div class="bg-white rounded-2xl shadow-md p-5 flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <h3 class="font-bold text-lg text-amber-800 flex-grow" data-name>Item Name</h3>
+            <p class="text-sm text-stone-500 mb-3" data-category>Category</p>
+            <div class="mt-auto pt-3 border-t border-stone-200 flex justify-between items-baseline">
+                <div>
+                    <p class="text-sm text-stone-600">Stock</p>
+                    <p class="font-semibold text-xl" data-stock>0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-stone-600 text-right">Price (GP)</p>
+                    <p class="font-semibold text-xl text-green-700" data-price>0</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const inventoryData = [
+            { name: "Rations (5-day)", category: "Mundane", price: 2.7, stock: 500 },
+            { name: "Hardtack & Dried Meat (30-day)", category: "Mundane", price: 4.5, stock: 200 },
+            { name: "Water Skins (empty)", category: "Mundane", price: 0.9, stock: 150 },
+            { name: "Purification Tablets (50 uses)", category: "Mundane", price: 4.5, stock: 100 },
+            { name: "Salted Provisions (60-day)", category: "Mundane", price: 9, stock: 80 },
+            { name: "Explorer's Tents (2-person)", category: "Mundane", price: 1.8, stock: 50 },
+            { name: "Winter Tents (insulated)", category: "Mundane", price: 4.5, stock: 20 },
+            { name: "Bedrolls (weather-resistant)", category: "Mundane", price: 0.9, stock: 100 },
+            { name: "Flint & Steel Kits", category: "Mundane", price: 0.45, stock: 200 },
+            { name: "Torch (long-burning)", category: "Mundane", price: 0.09, stock: 1000 },
+            { name: "Lanterns (Hooded)", category: "Mundane", price: 4.5, stock: 75 },
+            { name: "Lamp Oil (10-hour)", category: "Mundane", price: 0.9, stock: 300 },
+            { name: "Compass", category: "Mundane", price: 3.6, stock: 50 },
+            { name: "Parchment Rolls", category: "Mundane", price: 0.45, stock: 200 },
+            { name: "Ink Vials & Quills", category: "Mundane", price: 0.9, stock: 100 },
+            { name: "Signal Whistles", category: "Mundane", price: 0.9, stock: 100 },
+            { name: "Climber's Kits", category: "Mundane", price: 2.25, stock: 30 },
+            { name: "Rope (Hemp, 50 ft)", category: "Mundane", price: 0.9, stock: 200 },
+            { name: "Rope (Silk, 50 ft)", category: "Mundane", price: 9, stock: 50 },
+            { name: "Grappling Hooks", category: "Mundane", price: 1.8, stock: 40 },
+            { name: "Shovels (folding)", category: "Mundane", price: 1.8, stock: 25 },
+            { name: "Crowbars", category: "Mundane", price: 1.8, stock: 25 },
+            { name: "Sacks (heavy duty)", category: "Mundane", price: 0.09, stock: 500 },
+            { name: "Backpacks", category: "Mundane", price: 1.8, stock: 100 },
+            { name: "Adventurer's Kits", category: "Tools", price: 2.7, stock: 50 },
+            { name: "Burglar's Packs", category: "Tools", price: 13.5, stock: 20 },
+            { name: "Dungeoneer's Packs", category: "Tools", price: 10.8, stock: 30 },
+            { name: "Explorer's Packs", category: "Tools", price: 9, stock: 40 },
+            { name: "Alchemist's Supplies", category: "Tools", price: 45, stock: 10 },
+            { name: "Cartographer's Tools", category: "Tools", price: 13.5, stock: 10 },
+            { name: "Herbalism Kit", category: "Tools", price: 4.5, stock: 20 },
+            { name: "Thieves' Tools", category: "Tools", price: 22.5, stock: 15 },
+            { name: "Basic Healing Potion Kit", category: "Packs", price: 22.5, stock: 50 },
+            { name: "Fire Breath Potion Kit", category: "Packs", price: 31.5, stock: 20 },
+            { name: "Invisibility Potion Kit", category: "Packs", price: 180, stock: 10 },
+            { name: "Antitoxin Crafting Pack", category: "Packs", price: 4.5, stock: 30 },
+            { name: "Smokepowder Satchel", category: "Packs", price: 29.25, stock: 15 },
+            { name: "Basic Poison Kit", category: "Packs", price: 9, stock: 25 },
+            { name: "Potion of Healing (Common)", category: "Magic", price: 45, stock: 50 },
+            { name: "Potion of Healing (Uncommon)", category: "Magic", price: 270, stock: 20 },
+            { name: "Potion of Healing (Rare)", category: "Magic", price: 675, stock: 10 },
+            { name: "Potion of Climbing", category: "Magic", price: 27, stock: 15 },
+            { name: "Potion of Fire Breath", category: "Magic", price: 315, stock: 10 },
+            { name: "Elixir of Health", category: "Magic", price: 1800, stock: 3 },
+            { name: "Potion of Flying", category: "Magic", price: 2250, stock: 2 },
+            { name: "Potion of Invisibility", category: "Magic", price: 1800, stock: 3 },
+            { name: "Spell Scroll (1st Level)", category: "Magic", price: 22.5, stock: 20 },
+            { name: "Spell Scroll (3rd Level)", category: "Magic", price: 360, stock: 10 },
+            { name: "+1 Weapon", category: "Magic", price: 450, stock: 5 },
+            { name: "Javelin of Lightning", category: "Magic", price: 315, stock: 5 },
+            { name: "Weapon of Warning", category: "Magic", price: 360, stock: 3 },
+            { name: "Flame Tongue", category: "Magic", price: 4500, stock: 1 },
+            { name: "Sun Blade", category: "Magic", price: 1800, stock: 1 },
+            { name: "+1 Shield", category: "Magic", price: 405, stock: 3 },
+            { name: "Sentinel Shield", category: "Magic", price: 270, stock: 2 },
+            { name: "Immovable Rod", category: "Magic", price: 450, stock: 3 },
+            { name: "Ring of Mind Shielding", category: "Magic", price: 405, stock: 2 },
+            { name: "Goggles of Night", category: "Magic", price: 270, stock: 5 },
+            { name: "Cloak of Elvenkind", category: "Magic", price: 225, stock: 3 },
+            { name: "Bag of Holding", category: "Magic", price: 450, stock: 10 },
+            { name: "Decanter of Endless Water", category: "Magic", price: 270, stock: 2 },
+            { name: "Lantern of Revealing", category: "Magic", price: 450, stock: 2 },
+            { name: "Sending Stones", category: "Magic", price: 450, stock: 3 },
+            { name: "Portable Hole", category: "Magic", price: 4500, stock: 1 },
+            { name: "Heward's Handy Haversack", category: "Magic", price: 1800, stock: 2 },
+            { name: "Tome of Clear Thought", category: "Magic", price: 32400, stock: 1 },
+            { name: "Tome of Understanding", category: "Magic", price: 32400, stock: 1 },
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inventoryGrid = document.getElementById('inventory-grid');
+            const itemCardTemplate = document.getElementById('item-card-template');
+            const searchBar = document.getElementById('search-bar');
+            const categoryFilters = document.getElementById('category-filters');
+            const noResults = document.getElementById('no-results');
+
+            let currentCategory = 'all';
+            let searchTerm = '';
+            
+            const formatPrice = (price) => {
+                if (price >= 1000) {
+                    return (price / 1000).toFixed(1) + 'k';
+                }
+                return price.toLocaleString();
+            }
+
+            const renderInventory = () => {
+                inventoryGrid.innerHTML = '';
+                const filteredData = inventoryData.filter(item => {
+                    const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    return matchesCategory && matchesSearch;
+                });
+
+                if (filteredData.length === 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    noResults.classList.add('hidden');
+                }
+
+                filteredData.forEach(item => {
+                    const card = itemCardTemplate.content.cloneNode(true);
+                    card.querySelector('[data-name]').textContent = item.name;
+                    card.querySelector('[data-category]').textContent = item.category;
+                    card.querySelector('[data-stock]').textContent = item.stock;
+                    card.querySelector('[data-price]').textContent = formatPrice(item.price);
+                    inventoryGrid.appendChild(card);
+                });
+            };
+
+            searchBar.addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                renderInventory();
+            });
+
+            categoryFilters.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    document.querySelector('#category-filters .active').classList.remove('active');
+                    e.target.classList.add('active');
+                    currentCategory = e.target.dataset.category;
+                    renderInventory();
+                }
+            });
+            
+            const setupCharts = () => {
+                const categories = ['Mundane', 'Tools', 'Packs', 'Magic'];
+                const categoryData = categories.map(cat => {
+                    const items = inventoryData.filter(item => item.category === cat);
+                    return {
+                        category: cat,
+                        stock: items.reduce((sum, item) => sum + item.stock, 0),
+                        value: items.reduce((sum, item) => sum + (item.stock * item.price), 0),
+                    };
+                });
+
+                const chartColors = ['#D4A05D', '#8C6F5A', '#B8860B', '#A16207'];
+                
+                const stockCtx = document.getElementById('stockCountChart').getContext('2d');
+                new Chart(stockCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: categoryData.map(d => d.category),
+                        datasets: [{
+                            label: 'Total Stock',
+                            data: categoryData.map(d => d.stock),
+                            backgroundColor: chartColors,
+                            borderColor: chartColors.map(c => c + 'B3'),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                const valueCtx = document.getElementById('valueDistChart').getContext('2d');
+                new Chart(valueCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoryData.map(d => d.category),
+                        datasets: [{
+                            label: 'Total Value (GP)',
+                            data: categoryData.map(d => d.value),
+                            backgroundColor: chartColors,
+                            borderColor: '#FDFBF8',
+                            borderWidth: 3
+                        }]
+                    },
+                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(context.parsed).replace('$', '') + ' GP';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            renderInventory();
+            setupCharts();
+        });
+    </script>
+</body>
+</html>
