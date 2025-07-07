@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EP Leveling Calculator & Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Slate -->
+    <!-- Application Structure Plan: A task-oriented dashboard structure is chosen over a simple static page. It consists of three main interactive components accessible via tabs: a "Level-Up Calculator" for immediate progress tracking, an "Encounter Planner" for adventure design, and a "Full Progression Chart" for reference. This structure directly serves the primary needs of a Dungeon Master: quickly checking progress during a session and planning future sessions. It transforms the static data table into a dynamic, usable tool, which is more effective than just re-displaying the report. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification -> Library/Method. (1) EP Needed/Level -> Visualize progression curve -> Bar Chart -> Hover tooltips -> Clearly shows increasing difficulty -> Chart.js/Canvas. (2) Full Table -> Provide detailed reference -> Interactive HTML Table -> JS sorting -> Familiar format with enhanced usability -> Vanilla JS. (3) Leveling Logic -> Live progress tracking -> HTML inputs & CSS progress bar -> Real-time updates on input change -> Transforms static rule into an active tool -> Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { 
+            border-color: #475569; /* slate-600 */
+            background-color: #f1f5f9; /* slate-100 */
+            color: #1e293b; /* slate-800 */
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #475569; /* slate-600 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-slate-800 antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Encounter Point System</h1>
+            <p class="mt-2 text-lg text-slate-600">An interactive toolkit for tracking character advancement.</p>
+        </header>
+
+        <div class="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-2 mb-8">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-100">
+                <div class="text-center px-2">
+                    <p class="font-bold text-slate-800 text-lg">1 EP</p>
+                    <p class="text-sm text-slate-500">Basic</p>
+                </div>
+                <div class="h-8 w-px bg-slate-300"></div>
+                <div class="text-center px-2">
+                    <p class="font-bold text-slate-800 text-lg">2 EP</p>
+                    <p class="text-sm text-slate-500">Intermediate</p>
+                </div>
+                <div class="h-8 w-px bg-slate-300"></div>
+                <div class="text-center px-2">
+                    <p class="font-bold text-slate-800 text-lg">3 EP</p>
+                    <p class="text-sm text-slate-500">Hard</p>
+                </div>
+                <div class="h-8 w-px bg-slate-300"></div>
+                <div class="text-center px-2">
+                    <p class="font-bold text-slate-800 text-lg">4 EP</p>
+                    <p class="text-sm text-slate-500">Deadly</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="bg-white rounded-2xl shadow-2xl shadow-slate-300/30">
+            <nav class="flex border-b border-slate-200">
+                <button data-tab="calculator" class="tab-button flex-1 p-4 text-center border-b-2 transition-all duration-300 tab-active">Calculator</button>
+                <button data-tab="planner" class="tab-button flex-1 p-4 text-center border-b-2 transition-all duration-300 tab-inactive">Planner</button>
+                <button data-tab="data" class="tab-button flex-1 p-4 text-center border-b-2 transition-all duration-300 tab-inactive">Data</button>
+            </nav>
+
+            <div id="calculator" class="tab-content p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Level-Up Calculator</h2>
+                    <p class="text-slate-500 mt-1">Track a character's progress in real-time. Set their current level and EP to see how close they are to leveling up.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 items-center">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="currentLevel" class="block text-sm font-medium text-slate-700 mb-1">Current Level</label>
+                            <select id="currentLevel" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition"></select>
+                        </div>
+                        <div>
+                            <label for="currentEP" class="block text-sm font-medium text-slate-700 mb-1">Current EP in this Level</label>
+                            <input type="number" id="currentEP" value="0" min="0" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-100 rounded-xl p-6 text-center">
+                        <p class="text-sm font-medium text-slate-500">Progress to Level <span id="nextLevelDisplay">2</span></p>
+                        <p class="text-5xl font-bold text-slate-800 my-3"><span id="epNeededDisplay">3</span> EP</p>
+                        <p class="text-sm font-medium text-slate-500">more needed</p>
+
+                        <div class="w-full bg-slate-300 rounded-full h-4 mt-6 overflow-hidden">
+                            <div id="progress-bar" class="bg-slate-600 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                         <p class="text-xs text-slate-500 mt-2"><span id="progress-text">0 / 3 EP</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="planner" class="tab-content p-6 md:p-8 hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Encounter Planner</h2>
+                    <p class="text-slate-500 mt-1">Need to award a specific amount of EP? Enter the target and see some possible encounter combinations.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
+                    <label for="targetEP" class="font-medium text-slate-700">Plan encounters for</label>
+                    <input type="number" id="targetEP" value="10" min="1" class="w-48 p-3 text-center bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition">
+                    <label for="targetEP" class="font-medium text-slate-700">EP</label>
+                </div>
+                
+                <div id="plannerResults" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                </div>
+            </div>
+
+            <div id="data" class="tab-content p-6 md:p-8 hidden">
+                 <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Progression Data</h2>
+                    <p class="text-slate-500 mt-1">Visualize the leveling curve and view the complete progression table.</p>
+                </div>
+                
+                <div class="chart-container mb-8">
+                    <canvas id="epChart"></canvas>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Level</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">EP for this Level</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Total EP to Reach</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Total XP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="epTableBody" class="bg-white divide-y divide-slate-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+         <footer class="text-center mt-8 text-sm text-slate-400">
+            <p>An interactive tool based on a homebrew D&D 5e rule system.</p>
+        </footer>
+    </div>
+
+    <script>
+        const levelData = [
+            { level: 1, totalXP: 0, totalEP: 0, epForLevel: 0 },
+            { level: 2, totalXP: 300, totalEP: 3, epForLevel: 3 },
+            { level: 3, totalXP: 900, totalEP: 9, epForLevel: 6 },
+            { level: 4, totalXP: 2700, totalEP: 27, epForLevel: 18 },
+            { level: 5, totalXP: 6500, totalEP: 65, epForLevel: 38 },
+            { level: 6, totalXP: 14000, totalEP: 140, epForLevel: 75 },
+            { level: 7, totalXP: 23000, totalEP: 230, epForLevel: 90 },
+            { level: 8, totalXP: 34000, totalEP: 340, epForLevel: 110 },
+            { level: 9, totalXP: 48000, totalEP: 480, epForLevel: 140 },
+            { level: 10, totalXP: 64000, totalEP: 640, epForLevel: 160 },
+            { level: 11, totalXP: 85000, totalEP: 850, epForLevel: 210 },
+            { level: 12, totalXP: 100000, totalEP: 1000, epForLevel: 150 },
+            { level: 13, totalXP: 120000, totalEP: 1200, epForLevel: 200 },
+            { level: 14, totalXP: 140000, totalEP: 1400, epForLevel: 200 },
+            { level: 15, totalXP: 165000, totalEP: 1650, epForLevel: 250 },
+            { level: 16, totalXP: 195000, totalEP: 1950, epForLevel: 300 },
+            { level: 17, totalXP: 225000, totalEP: 2250, epForLevel: 300 },
+            { level: 18, totalXP: 265000, totalEP: 2650, epForLevel: 400 },
+            { level: 19, totalXP: 305000, totalEP: 3050, epForLevel: 400 },
+            { level: 20, totalXP: 355000, totalEP: 3550, epForLevel: 500 }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentLevelSelect = document.getElementById('currentLevel');
+            const currentEPInput = document.getElementById('currentEP');
+            
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+
+            const targetEPInput = document.getElementById('targetEP');
+            
+            function setup() {
+                populateLevelSelect();
+                populateTable();
+                createChart();
+                updateCalculator();
+                updatePlanner();
+
+                currentLevelSelect.addEventListener('change', updateCalculator);
+                currentEPInput.addEventListener('input', updateCalculator);
+                targetEPInput.addEventListener('input', updatePlanner);
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => {
+                            t.classList.remove('tab-active');
+                            t.classList.add('tab-inactive');
+                        });
+                        tab.classList.add('tab-active');
+                        tab.classList.remove('tab-inactive');
+
+                        contents.forEach(content => {
+                            if (content.id === tab.dataset.tab) {
+                                content.classList.remove('hidden');
+                            } else {
+                                content.classList.add('hidden');
+                            }
+                        });
+                    });
+                });
+            }
+
+            function populateLevelSelect() {
+                for (let i = 1; i < 20; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    currentLevelSelect.appendChild(option);
+                }
+            }
+            
+            function updateCalculator() {
+                const level = parseInt(currentLevelSelect.value);
+                let currentEP = parseInt(currentEPInput.value) || 0;
+                
+                if (level >= 20) {
+                    document.getElementById('nextLevelDisplay').textContent = 'Max';
+                    document.getElementById('epNeededDisplay').textContent = '-';
+                    document.getElementById('progress-bar').style.width = '100%';
+                    document.getElementById('progress-text').textContent = 'Max Level';
+                    return;
+                }
+                
+                const nextLevelInfo = levelData.find(ld => ld.level === level + 1);
+                const epForThisLevel = nextLevelInfo.epForLevel;
+                
+                if (currentEP < 0) {
+                    currentEP = 0;
+                    currentEPInput.value = 0;
+                }
+                if (currentEP > epForThisLevel) {
+                    currentEP = epForThisLevel;
+                    currentEPInput.value = epForThisLevel;
+                }
+
+                const epNeeded = epForThisLevel - currentEP;
+                const progressPercentage = (currentEP / epForThisLevel) * 100;
+
+                document.getElementById('nextLevelDisplay').textContent = level + 1;
+                document.getElementById('epNeededDisplay').textContent = epNeeded;
+                document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+                document.getElementById('progress-text').textContent = `${currentEP} / ${epForThisLevel} EP`;
+            }
+
+            function populateTable() {
+                const tableBody = document.getElementById('epTableBody');
+                tableBody.innerHTML = '';
+                levelData.filter(d => d.level > 1).forEach(data => {
+                    const row = `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${data.level}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${data.epForLevel}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${data.totalEP}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${data.totalXP.toLocaleString()}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            }
+            
+            function createChart() {
+                const ctx = document.getElementById('epChart').getContext('2d');
+                const chartData = levelData.filter(d => d.level > 1);
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.map(d => `Level ${d.level}`),
+                        datasets: [{
+                            label: 'EP Needed for this Level',
+                            data: chartData.map(d => d.epForLevel),
+                            backgroundColor: '#475569',
+                            borderColor: '#1e293b',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: (context) => context[0].label,
+                                    label: (context) => ` ${context.parsed.y} EP needed`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#e2e8f0'
+                                },
+                                ticks: {
+                                    color: '#475569'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#475569'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updatePlanner() {
+                const target = parseInt(targetEPInput.value) || 0;
+                const resultsContainer = document.getElementById('plannerResults');
+                resultsContainer.innerHTML = '';
+
+                if (target <= 0) return;
+                
+                const combinations = [];
+
+                // Simple combinations
+                if (target % 4 === 0) combinations.push({ deadly: target / 4 });
+                if (target % 3 === 0) combinations.push({ hard: target / 3 });
+                if (target % 2 === 0) combinations.push({ intermediate: target / 2 });
+                if (target % 1 === 0) combinations.push({ basic: target });
+
+                // Mixed combinations
+                for (let d = Math.floor(target / 4); d >= 0; d--) {
+                    for (let h = Math.floor((target - d * 4) / 3); h >= 0; h--) {
+                        for (let i = Math.floor((target - d * 4 - h * 3) / 2); i >= 0; i--) {
+                            let b = target - d * 4 - h * 3 - i * 2;
+                            if (b >= 0) {
+                                if (d > 0 || h > 0 || i > 0 || b > 0) {
+                                    const combo = { deadly: d, hard: h, intermediate: i, basic: b };
+                                    if (!combinations.some(c => JSON.stringify(c) === JSON.stringify(combo))) {
+                                        combinations.push(combo);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Display a limited number of diverse results
+                const diverseSelection = combinations
+                    .sort((a,b) => Object.values(b).reduce((s,x)=>s+x,0) - Object.values(a).reduce((s,x)=>s+x,0)) // prefer fewer encounters
+                    .slice(0, 6); 
+
+                if (diverseSelection.length === 0) {
+                     resultsContainer.innerHTML = `<p class="text-slate-500 col-span-full text-center">No simple combinations found.</p>`;
+                     return;
+                }
+                
+                diverseSelection.forEach(combo => {
+                    let html = `<div class="bg-slate-50 rounded-lg p-4 border border-slate-200">`;
+                    html += `<div class="flex flex-wrap gap-x-4 gap-y-2">`
+                    if (combo.deadly > 0) html += `<span class="font-semibold text-red-700">${combo.deadly}x Deadly</span>`;
+                    if (combo.hard > 0) html += `<span class="font-semibold text-orange-600">${combo.hard}x Hard</span>`;
+                    if (combo.intermediate > 0) html += `<span class="font-semibold text-yellow-600">${combo.intermediate}x Intermediate</span>`;
+                    if (combo.basic > 0) html += `<span class="font-semibold text-green-700">${combo.basic}x Basic</span>`;
+                    html += `</div></div>`
+                    resultsContainer.innerHTML += html;
+                });
+            }
+
+            setup();
+        });
+    </script>
+</body>
+</html>
