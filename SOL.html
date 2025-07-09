@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Drifting Compass</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0e8d9; /* A warm, parchment-like color */
+        }
+        .header-font {
+            font-family: 'Merriweather', serif;
+        }
+        .card {
+            background-color: #faf6f0;
+            border: 1px solid #dcd3c4;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .price-original {
+            text-decoration: line-through;
+            color: #9a8c78;
+        }
+        .price-discounted {
+            color: #b45309; /* A rich, amber color */
+            font-weight: 700;
+        }
+        .category-button.active {
+            background-color: #8c6d46;
+            color: #ffffff;
+            border-color: #8c6d46;
+        }
+        .category-button {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-cover bg-center" style="background-image: url('https://placehold.co/1200x400/3d2c1d/f0e8d9?text=The+Drifting+Compass')">
+        <div class="bg-black bg-opacity-50 py-12 px-4 md:px-8 text-center">
+            <h1 class="header-font text-5xl font-bold text-white mb-2">The Drifting Compass</h1>
+            <p class="text-xl text-gray-200">Caravanrest, Solvenar – "May your sails be full and your dice be true."</p>
+            <p class="text-lg text-yellow-300 mt-4">A special 25% discount for all registered adventurers!</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+        <!-- Search and Filter Controls -->
+        <div class="mb-8 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-md sticky top-4 z-10">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="searchInput" placeholder="Search for items..." class="w-full md:w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent transition">
+                <div id="categoryFilters" class="flex flex-wrap gap-2">
+                    <button class="category-button active px-4 py-2 bg-white border border-gray-300 rounded-full hover:bg-yellow-100" data-category="all">All</button>
+                    <button class="category-button px-4 py-2 bg-white border border-gray-300 rounded-full hover:bg-yellow-100" data-category="gear">Adventuring Gear</button>
+                    <button class="category-button px-4 py-2 bg-white border border-gray-300 rounded-full hover:bg-yellow-100" data-category="crafting">Crafting & Alchemical</button>
+                    <button class="category-button px-4 py-2 bg-white border border-gray-300 rounded-full hover:bg-yellow-100" data-category="potions">Potions & Oils</button>
+                    <button class="category-button px-4 py-2 bg-white border border-gray-300 rounded-full hover:bg-yellow-100" data-category="oddities">Oddities & Curios</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Sections -->
+        <div id="inventoryContainer">
+            <!-- Items will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <script>
+        const inventory = [
+            // From The Drifting Compass & The Crimson Horn
+            { name: "Wayfinder's Compass", description: "A brass compass that doesn't point north. Once a day, its needle will point toward the safest path to a destination you name.", price: 75, stock: 1, weight: 1, category: 'gear' },
+            { name: "Navigator's Scrimshaw Dice", description: "A pair of dice carved from whalebone. Said to favor their owner and feel warm when a choice involving risk is made.", price: 40, stock: 3, weight: 0.1, category: 'oddities' },
+            { name: "Tide-Reader's Charm", description: "A string of polished sea-glass and shark teeth that rattles softly when the weather at sea is about to turn for the worse.", price: 20, stock: 5, weight: 0.5, category: 'oddities' },
+            { name: "Mosswater Canteen", description: "Purifies stagnant pools of water over one hour, removing parasites and slime.", price: 25, stock: 4, weight: 1, category: 'gear' },
+            { name: "Crimson Hill Rope (50 ft)", description: "A coil of tough, deep red rope from Valerost. Disadvantage on being cut (DC 15).", price: 3, stock: 3, weight: 10, category: 'gear' },
+            { name: "Fogbreather Mask", description: "Filtered mask with replaceable veilmoss petals. Reduces inhaled toxins and spores. Filter lasts one week.", price: 35, stock: 4, weight: 1, category: 'gear' },
+            { name: "Folded Spire-Kit", description: "A collapsible hammock ledge with hooks and spikes, rated for 400 lbs. Essential for resting on cliff faces.", price: 60, stock: 2, weight: 8, category: 'gear' },
+            { name: "Echo-Mesh Tarp", description: "A black silken tarp that muffles sound and blocks light, ideal for concealing a camp.", price: 18, stock: 3, weight: 5, category: 'gear' },
+            { name: "Stonebiter Stakes (6)", description: "Enchanted iron pitons that twist to anchor themselves into sheer rock (DC 20 to pull free).", price: 5, stock: 6, weight: 1.5, category: 'gear' },
+            { name: "Signal Ash", description: "A palm-sized sachet that, when tossed into a fire, creates a column of crimson smoke visible from two miles away.", price: 12, stock: 5, weight: 0.2, category: 'gear' },
+            { name: "Blood-Oath Vial", description: "One-use crystal vial; mix two drops of blood -> glows if either party breaks contract (shatters & screams).", price: 35, stock: 5, weight: 0.1, category: 'oddities' },
+            
+            // Crafting Tools & Ingredients
+            { name: "Alchemist's Supplies", description: "A kit including beakers, flasks, and other tools needed for alchemy.", price: 50, stock: 3, weight: 8, category: 'crafting' },
+            { name: "Herbalism Kit", description: "A kit containing pouches, clippers, and vials used to identify and preserve herbs.", price: 5, stock: 5, weight: 3, category: 'crafting' },
+            { name: "Poisoner's Kit", description: "A kit with vials, gloves, and specialized tools for handling and applying poisons.", price: 50, stock: 2, weight: 2, category: 'crafting' },
+            { name: "Crimson Coagulant Kit", description: "Crafts a basic healing potion (2d4+2). Contains dried bloodleaf petals, powdered ironroot, vial of duel-sap.", price: 18, stock: 4, weight: 0.5, category: 'crafting' },
+            { name: "Stonegrit Poultice Pack", description: "Crafts a bruise-mending salve (+1 AC vs bludgeon for 1 hr). Contains crushed granite spores, beeswax plug, shred of troll-moss.", price: 22, stock: 3, weight: 0.75, category: 'crafting' },
+            { name: "Shadowlily Venom Satchel", description: "Crafts an injury/contact poison (1d6/round, 3 rds, DC 12). Contains pressed shadowlily paste, bone-ash carrier, glass needle tube.", price: 30, stock: 2, weight: 0.25, category: 'crafting' },
+            { name: "Ironhide Resin Pouch", description: "Crafts a harden-skin salve (+1 Nat AC, 1 hr). Contains sticky ironbark pitch, ground chitin flecks, amber oil.", price: 28, stock: 3, weight: 0.75, category: 'crafting' },
+            { name: "Mireblossom Purge Pack", description: "Crafts an antidote for disease/poison. Contains distilled mireblossom dew, stonemarrow root, mint sprig.", price: 20, stock: 5, weight: 0.5, category: 'crafting' },
+            { name: "Dreamseeker Sachet", description: "Crafts a sleep potion or lucid-dream ink. Contains crushed skullcap herb, veil-moth dust, drop of moon-honey.", price: 15, stock: 4, weight: 0.25, category: 'crafting' },
+            { name: "Universal Solvent", description: "A legendary substance that can dissolve any adhesive or bonding agent.", price: 5000, stock: 1, weight: 0.1, category: 'crafting' },
+            { name: "Sovereign Glue", description: "A legendary adhesive that can bond any two substances together permanently.", price: 5000, stock: 1, weight: 0.1, category: 'crafting' },
+
+            // Potions & Oils from Price Guide
+            { name: "Potion of Climbing", description: "Grants the drinker a climbing speed equal to their walking speed for 1 hour.", price: 30, stock: 4, weight: 0.5, category: 'potions' },
+            { name: "Potion of Healing", description: "Restores 2d4 + 2 hit points.", price: 50, stock: 10, weight: 0.5, category: 'potions' },
+            { name: "Oil of Slipperiness", description: "Covers a creature or object in a slippery oil, granting advantage on checks to escape grapples or restraints.", price: 250, stock: 2, weight: 1, category: 'potions' },
+            { name: "Philter of Love", description: "Causes the drinker to become charmed by the first person they see.", price: 150, stock: 1, weight: 0.5, category: 'potions' },
+            { name: "Potion of Animal Friendship", description: "The drinker can cast the Animal Friendship spell (DC 13) for 1 hour at will.", price: 200, stock: 3, weight: 0.5, category: 'potions' },
+            { name: "Potion of Fire Breath", description: "The drinker can exhale fire in a 30-foot cone (3d6 fire damage, DC 13 Dex save for half) up to three times.", price: 350, stock: 2, weight: 0.5, category: 'potions' },
+            { name: "Potion of Growth", description: "The drinker gains the 'enlarge' effect of the Enlarge/Reduce spell for 1d4 hours.", price: 300, stock: 2, weight: 0.5, category: 'potions' },
+            { name: "Potion of Waterbreathing", description: "The drinker can breathe underwater for 1 hour.", price: 400, stock: 3, weight: 0.5, category: 'potions' },
+            { name: "Elixir of Health", description: "Cures any disease, blindness, deafness, and poisoning, and removes exhaustion.", price: 2000, stock: 1, weight: 0.5, category: 'potions' },
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilters = document.getElementById('categoryFilters');
+        const inventoryContainer = document.getElementById('inventoryContainer');
+        const adventurerDiscount = 0.75; // 25% discount
+
+        let currentCategory = 'all';
+
+        function renderInventory() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            // Filter items based on search term and category
+            const filteredItems = inventory.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm) || item.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Group items by category
+            const groupedItems = filteredItems.reduce((acc, item) => {
+                (acc[item.category] = acc[item.category] || []).push(item);
+                return acc;
+            }, {});
+            
+            inventoryContainer.innerHTML = ''; // Clear current inventory
+
+            if (filteredItems.length === 0) {
+                inventoryContainer.innerHTML = `<p class="text-center text-gray-500 text-lg col-span-full">Corbin doesn't seem to have that in stock. Try another search?</p>`;
+                return;
+            }
+
+            // Define the order of categories
+            const categoryOrder = ['gear', 'crafting', 'potions', 'oddities'];
+            const categoryTitles = {
+                gear: 'Adventuring Gear & Tools',
+                crafting: 'Crafting & Alchemical Supplies',
+                potions: 'Potions & Oils',
+                oddities: 'Oddities & Curios'
+            };
+
+            // Render categories in a specific order
+            for (const category of categoryOrder) {
+                if (groupedItems[category] && groupedItems[category].length > 0) {
+                    const section = document.createElement('section');
+                    section.className = 'mb-12';
+                    
+                    const title = document.createElement('h2');
+                    title.className = 'header-font text-3xl font-bold text-gray-700 mb-6 pb-2 border-b-2 border-yellow-700/50';
+                    title.textContent = categoryTitles[category];
+                    section.appendChild(title);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+                    
+                    groupedItems[category].forEach(item => {
+                        const discountedPrice = (item.price * adventurerDiscount).toFixed(2);
+                        const card = document.createElement('div');
+                        card.className = 'card rounded-lg shadow-lg p-6 flex flex-col';
+                        card.innerHTML = `
+                            <h3 class="text-xl font-bold header-font text-gray-800 mb-2">${item.name}</h3>
+                            <p class="text-gray-600 mb-4 flex-grow">${item.description}</p>
+                            <div class="mt-auto pt-4 border-t border-gray-200">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold">Price:</span>
+                                    <div>
+                                        <span class="price-original">${item.price} gp</span>
+                                        <span class="price-discounted text-lg ml-2">${discountedPrice} gp</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-sm text-gray-500">
+                                    <span>Stock: ${item.stock}</span>
+                                    <span>Weight: ${item.weight} lbs</span>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                    section.appendChild(grid);
+                    inventoryContainer.appendChild(section);
+                }
+            }
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', renderInventory);
+
+        categoryFilters.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                currentCategory = e.target.dataset.category;
+                // Update active button style
+                document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                renderInventory();
+            }
+        });
+
+        // Initial render
+        document.addEventListener('DOMContentLoaded', renderInventory);
+    </script>
+
+</body>
+</html>
