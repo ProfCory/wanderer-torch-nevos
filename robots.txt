@@ -1,0 +1,18 @@
+# robots.txt for https://profcory.github.io/wanderer-torch-nevos/
+
+# Allow all search engines to crawl everything
+User-agent: *
+Allow: /
+
+# Optional: Specify crawl-delay for very busy sites (not needed for most static sites)
+# Crawl-delay: 5
+
+# Optional: Point to a sitemap if you have one
+# Sitemap: https://profcory.github.io/wanderer-torch-nevos/sitemap.xml
+
+# No disallow rules - everything is open to bots
+
+# Comments:
+# - This file makes your GitHub Pages site accessible to all search engines (Google, Bing, etc).
+# - You can add Disallow: /folder/ or Disallow: /file.html lines below to hide specific content if needed.
+# - Make sure to share or link your site elsewhere for Google to discover it faster!
