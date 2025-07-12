@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Wanderer &amp; The Torch</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wanderer & The Torch</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet" />
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: "Inter", sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: #111827;
-            color: #e5e7eb;
+            color: #E5E7EB;
         }
         .font-cinzel {
-            font-family: "Cinzel Decorative", cursive;
+            font-family: 'Cinzel Decorative', cursive;
         }
         .card {
-            background-color: #1f2937;
+            background-color: #1F2937;
             border: 1px solid #374151;
             border-radius: 0.75rem;
             padding: 1.5rem;
@@ -34,7 +31,7 @@
             filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.7));
         }
         .section-title {
-            border-bottom: 2px solid #4b5563;
+            border-bottom: 2px solid #4B5563;
             padding-bottom: 0.5rem;
             margin-bottom: 1.5rem;
         }
@@ -59,19 +56,18 @@
         .accordion-header.active .accordion-arrow {
             transform: rotate(90deg);
         }
-        /* Date‑picker inputs */
         .date-selector-input {
             background-color: #374151;
-            border: 1px solid #4b5563;
+            border: 1px solid #4B5563;
             border-radius: 0.375rem;
-            color: #e5e7eb;
+            color: #E5E7EB;
             padding: 0.5rem;
             width: 100%;
         }
         .date-selector-input:focus {
             outline: none;
-            border-color: #fbbf24;
-            box-shadow: 0 0 0 2px #fbbf24;
+            border-color: #FBBF24;
+            box-shadow: 0 0 0 2px #FBBF24;
         }
     </style>
 </head>
@@ -129,20 +125,49 @@
 
         <!-- Footer -->
         <footer class="mt-12 pt-8 border-t border-gray-700 text-center">
-            <h3 class="font-cinzel text-xl text-amber-400 mb-6">"What is remembered becomes story; what is forgotten, legend. Yet the stars remember all."</h3>
-            <nav>
-                <h4 class="font-cinzel text-lg text-gray-300 mb-3">Explore Other Pages</h4>
-                <div class="flex justify-center gap-x-6 gap-y-2 flex-wrap">
-                    <a href="Giant_kin.html" class="text-amber-400 hover:text-amber-300 hover:underline">Giant‑Kin Details</a>
-                    <a href="calendar.html" class="text-amber-400 hover:text-amber-300 hover:underline">Full Calendar</a>
-                    <a href="wanderer-and-torch.html" class="text-amber-400 hover:text-amber-300 hover:underline">Original Almanac</a>
-                    <a href="celestial_elves_solivane.html" class="text-amber-400 hover:text-amber-300 hover:underline">Celestial Elves</a>
-                </div>
-                <!-- Auto‑generated repo file list -->
-                <ul id="files" class="flex flex-wrap gap-x-6 gap-y-2 justify-center mt-8"></ul>
-            </nav>
-        </footer>
-    </div>
+    <h3 class="font-cinzel text-xl text-amber-400 mb-6">"What is remembered becomes story; what is forgotten, legend. Yet the stars remember all."</h3>
+    <nav>
+        <h4 class="font-cinzel text-lg text-gray-300 mb-3">Files on GitHub</h4>
+        <div id="github-file-list" class="flex justify-center gap-x-6 gap-y-2 flex-wrap text-amber-400">
+            <span>Loading file list...</span>
+        </div>
+    </nav>
+</footer>
+
+<script>
+    async function fetchGitHubFiles() {
+        const apiUrl = 'https://api.github.com/repos/profcory/wanderer-torch-nevos/contents/';
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('GitHub API error');
+            const files = await response.json();
+            const fileListDiv = document.getElementById('github-file-list');
+            fileListDiv.innerHTML = '';
+            files.filter(file => file.type === 'file').forEach(file => {
+                const link = document.createElement('a');
+                link.href = `https://profcory.github.io/wanderer-torch-nevos/${file.name}`;
+                link.textContent = formatFileName(file.name);
+                link.className = 'hover:text-amber-300 hover:underline';
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                fileListDiv.appendChild(link);
+            });
+            if (fileListDiv.innerHTML.trim() === '') {
+                fileListDiv.textContent = 'No files found.';
+            }
+        } catch (err) {
+            document.getElementById('github-file-list').textContent = 'Could not load files from GitHub.';
+        }
+    }
+
+    function formatFileName(filename) {
+        // Remove extension, replace _/- with spaces, capitalize
+        let base = filename.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+        return base.charAt(0).toUpperCase() + base.slice(1);
+    }
+
+    fetchGitHubFiles();
+</script>
 
     <!-- === World‑Logic & UI Scripts === -->
     <script>
