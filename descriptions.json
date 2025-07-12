@@ -1,11 +1,15 @@
 {
-  "index.html": "Main landing page for the site.",
+  "Emoji DC.html": "Emoji-based Difficulty Check (DC) quick reference for players.",
+  "Encounterpoints.html": "Encounter point calculator and guidelines.",
+  "Giant kin.html": "Lore and stats for Giant‑kin ancestry.",
+  "Nevos main.png": "Map of the world of Nevos.",
+  "README.md": "Project overview and info for developers.",
+  "SOL.html": "Overview of the Solar pantheon and faith.",
+  "The Fog & the Feather.html": "Short story or adventure element PDF.",
   "calendar.html": "Nevosian calendar and moon phase tracker.",
-  "general.html": "DM utility index — this page.",
-  "Encounterpoints.html": "Point system for encounters.",
-  "SOL.html": "Solar faith overview.",
-  "guildshop.html": "General item shop.",
-  "Giant kin.html": "Details on Giant-kin ancestry.",
-  "README.md": "",
-  "Nevo main.png": "World map."
+  "celestial elves solivane.html": "Lore and details on Celestial Elves of Solivane.",
+  "crimson horn shop.html": "Item list and prices from Crimson Horn Shop.",
+  "general.html": "DM file index — this page.",
+  "guildshop.html": "General guild shop rules and items.",
+  "index.html": "Main landing page and navigation."
 }
