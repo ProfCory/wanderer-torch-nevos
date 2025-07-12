@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wayfinder Class</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{font-family:'Open Sans',Arial,sans-serif;margin:0;background:#f7fbfc;color:#1d2a33;line-height:1.6}
+  header{background:#074a63;color:#fff;padding:1rem 1.5rem}
+  header h1{margin:0;font-family:'Merriweather',serif;font-size:1.9rem}
+  nav{margin-top:.5rem}
+  nav a{color:#d1ecf1;margin-right:1rem;text-decoration:none;font-weight:600}
+  nav a:hover{text-decoration:underline}
+  main{padding:1.5rem 2rem;max-width:1100px;margin:auto}
+  h2{color:#074a63;font-family:'Merriweather',serif;border-bottom:2px solid #bddfe6;padding-bottom:.25rem;margin-top:2.2rem}
+  h3{color:#0f617a;margin-top:1.4em}
+  h4{margin:.9em 0 .4em;color:#0f617a}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.95rem}
+  th,td{border:1px solid #bddfe6;padding:6px 8px;text-align:left}
+  thead{background:#e6f4f8}
+  ul{margin:.3rem 0 1rem 1.25rem}
+  li{margin-bottom:.4rem}
+  details{background:#eef7fa;border-left:4px solid #4ea1c7;padding:.5rem .75rem;margin-bottom:.8rem}
+  details summary{font-weight:600;cursor:pointer;color:#074a63}
+  .tip{border-bottom:1px dotted #074a63;cursor:help}
+  @media (prefers-color-scheme:dark){body{background:#121c24;color:#d4e4ec}header{background:#042f3d}nav a{color:#9dd6e3}h2{color:#9bd8ec;border-bottom-color:#275b6d}h3,h4{color:#72c3d8}table,th,td{border-color:#275b6d}thead{background:#1f3640}details{background:#1a2a32;border-left-color:#1f6b8d}}
+</style>
+</head>
+<body>
+<header>
+  <h1>The Wayfinder</h1>
+  <nav>
+    <a href="#core">Core</a>
+    <a href="#features">Class Features</a>
+    <a href="#callings">Callings</a>
+    <a href="#expansion">Future</a>
+  </nav>
+</header>
+
+<main>
+<!-- ================================= CORE TABLE ================================= -->
+<section id="core">
+<h2>Core Chassis</h2>
+<table>
+<thead><tr><th>Lvl</th><th>Prof</th><th>Features</th><th>Cantrips</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th><th>5th</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>+2</td><td>Seafarer’s Cunning; Weapon Mastery</td><td>0</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>2</td><td>+2</td><td>Spellcasting; Fighting Style</td><td>0</td><td>2</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>3</td><td>+2</td><td>Wayfinding Calling; Ship‑Borne Combatant</td><td>2</td><td>3</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>4</td><td>+2</td><td>Ability Score Improvement</td><td>2</td><td>3</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>5</td><td>+3</td><td><strong>Listen to the Sea</strong>; Extra Attack</td><td>2</td><td>4</td><td>2</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>6</td><td>+3</td><td>Guidance of the Two Moons</td><td>3</td><td>4</td><td>2</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>7</td><td>+3</td><td>Calling feature</td><td>3</td><td>4</td><td>3</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>8</td><td>+3</td><td>Ability Score Improvement</td><td>3</td><td>4</td><td>3</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>9</td><td>+4</td><td>Expertise</td><td>4</td><td>4</td><td>3</td><td>2</td><td>—</td><td>—</td></tr>
+<tr><td>10</td><td>+4</td><td>Master Mariner</td><td>4</td><td>4</td><td>3</td><td>2</td><td>—</td><td>—</td></tr>
+<tr><td>11</td><td>+4</td><td>Calling feature</td><td>4</td><td>4</td><td>3</td><td>3</td><td>—</td><td>—</td></tr>
+<tr><td>12</td><td>+4</td><td>Ability Score Improvement</td><td>5</td><td>4</td><td>3</td><td>3</td><td>—</td><td>—</td></tr>
+<tr><td>13</td><td>+5</td><td>Maritime Ingenuity</td><td>5</td><td>4</td><td>3</td><td>3</td><td>1</td><td>—</td></tr>
+<tr><td>14</td><td>+5</td><td>Chart the Unseen Paths</td><td>5</td><td>4</td><td>3</td><td>3</td><td>1</td><td>—</td></tr>
+<tr><td>15</td><td>+5</td><td>Calling feature</td><td>6</td><td>4</td><td>3</td><td>3</td><td>2</td><td>—</td></tr>
+<tr><td>16</td><td>+5</td><td>Ability Score Improvement</td><td>6</td><td>4</td><td>3</td><td>3</td><td>2</td><td>—</td></tr>
+<tr><td>17</td><td>+6</td><td>Aura of the Sea</td><td>6</td><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td></tr>
+<tr><td>18</td><td>+6</td><td>Expanded Horizon</td><td>7</td><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td></tr>
+<tr><td>19</td><td>+6</td><td>Ability Score Improvement</td><td>7</td><td>4</td><td>3</td><td>3</td><td>3</td><td>2</td></tr>
+<tr><td>20</td><td>+6</td><td>Celestial Avatar</td><td>7</td><td>4</td><td>3</td><td>3</td><td>3</td><td>2</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ================================= CLASS FEATURES ================================= -->
+<section id="features">
+<h2>Class Features</h2>
+<h3>1 – Seafarer’s Cunning</h3>
+<p>Add your Wisdom modifier to checks with Navigator’s tools or to control a water vehicle, and you may use Wisdom instead of Dexterity for Initiative.</p>
+
+<h3>1 – Weapon Mastery</h3>
+<p>Choose one proficient weapon (scimitar, trident, hand crossbow, or spear). You gain that weapon’s <em>Mastery</em> property; you can change it after a long rest.</p>
+
+<h3>2 – Spellcasting</h3>
+<p>You are a half‑caster. You prepare spells each day from the Wayfinder list using your <strong>Navigator’s Logbook</strong>. Intelligence is your spellcasting ability.</p>
+<details><summary>Prepared Spells Formula</summary><p>You can prepare a number of Wayfinder spells equal to your <span class="tip" title="Apply any magic‑item bonuses after calculating your Intelligence score">Intelligence modifier</span> + half your Wayfinder level (minimum 1).</p></details>
+<p>You can cast any prepared spell that has the ritual tag as a ritual using the Logbook.</p>
+
+<h3>2 – Fighting Style</h3>
+<ul>
+<li><strong>Archery.</strong> +2 bonus to attack rolls with ranged weapons.</li>
+<li><strong>Dueling.</strong> +2 damage with a one‑handed melee weapon while wielding no other weapons.</li>
+<li><strong>Mariner.</strong> +1 AC and swim speed equal to walking speed while not wearing heavy armor or a shield.</li>
+<li><strong>Close‑Quarters Shooter.</strong> Ignore half and three‑quarters cover within 30 ft; no disadvantage on ranged attacks within 5 ft.</li>
+<li><strong>Thrown Weapon Fighting.</strong> Draw a thrown weapon as part of the attack and gain +2 damage with thrown weapons.</li>
+<li><strong>Blind Fighting.</strong> Blindsight to 10 ft.</li>
+<li><strong>Two‑Weapon Fighting.</strong> Add ability mod to off‑hand damage.</li>
+<li><strong>Artificer Engineering (Custom).</strong> Gain proficiency with one artisan’s tool, learn one artificer cantrip (INT spellcasting).</li>
+<li><strong>Gish Special (Custom).</strong> Learn two wizard cantrips (INT spellcasting).</li>
+</ul>
+
+<h3>3 – Ship‑Borne Combatant</h3>
+<p>You have advantage on checks or saves to avoid being knocked prone on a vessel’s deck, and you may use Intelligence instead of Dexterity for siege‑weapon attacks.</p>
+
+<h3>5 – Listen to the Sea</h3>
+<p>During a short rest you may spend Hit Dice to regain spell slots (one slot per die, slot level ≤ half your proficiency bonus).</p>
+<details><summary>Slots Recovered Per Rest</summary><ul><li>5th level: 1 slot</li><li>10th level: 2 slots</li><li>15th level: 3 slots</li><li>20th level: 4 slots</li></ul></details>
+
+<h3>6 – Guidance of the Two Moons</h3>
+<p>Allies within 10 ft (entire vessel if aboard) have advantage on saving throws against being frightened.</p>
+
+<h3>9 – Expertise</h3>
+<p>Choose two Wayfinder skills. Double your proficiency bonus for those skills.</p>
+
+<h3>10 – Master Mariner</h3>
+<p>You can maintain two Weapon Masteries simultaneously.</p>
+
+<h3>13 – Maritime Ingenuity</h3>
+<p>Wis mod per long rest, spend 10 minutes aboard a vessel/dockyard to perform one of the following:</p>
+<ul><li><strong>Repair:</strong> restore HP to hull or ship weapon equal to 5 × Wayfinder level.</li>
+<li><strong>Provision:</strong> create nautical rations & water for up to 8 Medium creatures for 24 hrs.</li>
+<li><strong>Brew:</strong> craft a mundane maritime concoction worth up to 25 gp.</li></ul>
+
+<h3>14 – Chart the Unseen Paths</h3>
+<p>Cast <em>find the path</em> once per long rest without expending a spell slot.</p>
+
+<h3>17 – Aura of the Sea</h3>
+<p>While on a seafaring vessel or within 120 ft of open sea, emanate a 10‑ft aura (30 ft at 18th). Allies add your Wis mod to Dexterity saves and to Acrobatics/Athletics checks to maintain footing.</p>
+
+<h3>18 – Expanded Horizon</h3>
+<p>At 18–20 level, whenever you would add a spell to your Logbook, you may add <strong>two</strong> spells of a level you can cast from any class list.</p>
+
+<h3>20 – Celestial Avatar</h3>
+<p>For 1 minute you gain 60‑ft fly speed, resistance to all damage, and regain 10 HP at the start of each turn (1×/long rest).</p>
+</section>
+
+<!-- ================================= CALLINGS ================================= -->
+<section id="callings">
+<h2>Wayfinding Callings</h2>
+<nav>
+ <a href="#stormcaller">Storm‑Caller</a> ·
+ <a href="#tidebound">Tidebound</a> ·
+ <a href="#ironkeel">Iron Keel</a> ·
+ <a href="#siren">Siren’s Voice</a> ·
+ <a href="#reaver">Reaver</a>
+</nav>
+
+<!-- Storm-Caller -->
+<h3 id="stormcaller">Calling of the Storm‑Caller</h3>
+<p><em>You ride the gale and strike like lightning.</em></p>
+<p><strong>Always Prepared Spells:</strong> 3rd – <em>fog cloud, thunderwave</em>; 5th – <em>gust of wind, shatter</em>; 9th – <em>lightning bolt, sleet storm</em>; 13th – <em>ice storm, storm sphere</em>; 17th – <em>control winds, cone of cold</em></p>
+<ul>
+<li><strong>3 – Wrath of the Gale.</strong> When you cast a Wayfinder spell of 1st level or higher, you can make one weapon attack as a bonus action.</li>
+<li><strong>7 – Ride the Wind.</strong> Reaction to impose disadvantage on a ranged attack within 30 ft (Wis mod uses/long rest).</li>
+<li><strong>11 – Arcane Fulmination.</strong> Once per turn when you hit with a weapon attack, deal an extra 1d8 lightning or thunder damage.</li>
+<li><strong>15 – Eye of the Storm.</strong> Gain resistance to lightning & thunder; cast <em>control weather</em> 1×/long rest.</li>
+</ul>
+
+<!-- Tidebound -->
+<h3 id="tidebound">Calling of the Tidebound</h3>
+<p><em>You are the tide: you rise, and they fall.</em></p>
+<p><strong>Always Prepared Spells:</strong> 3rd – <em>create or destroy water, thunderwave</em>; 5th – <em>gust of wind, misty step</em>; 9th – <em>tidal wave, lightning bolt</em>; 13th – <em>control water, water walk</em>; 17th – <em>maelstrom, commune with nature</em></p>
+<ul>
+<li><strong>3 – Brine‑Touched.</strong> Swim speed equal to walking speed, breathe underwater; while submerged, advantage on initiative and Con saves.</li>
+<li><strong>7 – Sea’s Retaliation.</strong> Reaction: 1d10 cold damage and push 10 ft on failed Str save when a creature hits you (<span class="tip" title="Uses = Wisdom modifier per long rest">limited uses</span>).</li>
+<li><strong>11 – Flow as One.</strong> Cast <em>water walk</em> 1×/long rest without a slot.</li>
+<li><strong>15 – Living Riptide.</strong> Cast <em>tsunami</em> 1×/long rest and are immune to its effects.</li>
+</ul>
+
+<!-- Iron Keel -->
+<h3 id="ironkeel">Calling of the Iron Keel</h3>
+<p><em>The hull may groan, but it will not break.</em></p>
+<p><strong>Always Prepared Spells:</strong> 3rd – <em>shield, absorb elements</em>; 5th – <em>warding bond, enhance ability</em>; 9th – <em>counterspell, beacon of hope</em>; 13th – <em>stoneskin, freedom of movement</em>; 17th – <em>wall of force, greater restoration</em></p>
+<ul>
+<li><strong>3 – Shipwright’s Instinct.</strong> Gain carpenter’s tools proficiency; when you cast a spell that heals, target gains advantage on next Str save.</li>
+<li><strong>7 – Keep Her Afloat.</strong> Reaction to reduce damage to a vehicle/structure by 5 + Wayfinder level (Wis mod uses/long rest).</li>
+<li><strong>11 – Bulkhead Shielding.</strong> Allies within 10 ft resist thunder & force; once per long rest extend to entire vessel for 1 minute.</li>
+<li><strong>15 – Against All Storms.</strong> Reaction: grant automatic success on Str, Con, or Dex save (once/short rest).</li>
+</ul>
+
+<!-- Siren's Voice -->
+<h3 id="siren">Calling of the Siren’s Voice</h3>
+<p><em>You sing the sea’s secrets, and your enemies drown in them.</em></p>
+<p><strong>Always Prepared Spells:</strong> 3rd – <em>dissonant whispers, hex</em>; 5th – <em>suggestion, mirror image</em>; 9th – <em>enemies abound, hypnotic pattern</em>; 13th – <em>greater invisibility, phantasmal killer</em>; 17th – <em>dominate person, mislead</em></p>
+<ul>
+<li><strong>3 – Song of the Deep.</strong> Gain Performance proficiency & one instrument; once per turn when you cast a Wayfinder spell, impose disadvantage on its first save.</li>
+<li><strong>7 – Echoing Curse.</strong> Reaction to deal 1d6 psychic damage to a creature already affected by one of your conditions.</li>
+<li><strong>11 – Siren’s Mantle.</strong> Resistance to psychic; immunity to charmed.</li>
+<li><strong>15 – Voice Without End.</strong> Cast <em>dominate person</em> or <em>geas</em> 1×/long rest without a slot.</li>
+</ul>
+
+<!-- Reaver -->
+<h3 id="reaver">Calling of the Reaver</h3>
+<p><em>A ruthless predator of the waves—mercy inverted.</em></p>
+<p><strong>Theme:</strong> Necrotic brutality and battlefield control.</p>
+<ul>
+<li><strong>3 – Black Mercy.</strong> Pool of necrotic energy = 5 × Wayfinder level. As an action, touch to deal that much necrotic damage (ignores resistance).</li>
+<li><strong>7 – Predator’s Cunning.</strong> When you take the Attack action, you may Dash or Disengage as a bonus action.</li>
+<li><strong>11 – Famine’s Mark.</strong> Bonus action: mark creature for 1 min; it cannot regain HP (Wis mod uses/long rest).</li>
+<li><strong>15 – Scent of Desperation.</strong> Advantage on Insight vs fearful/exhausted and Intimidation against them; when you drop a creature to 0 HP frighten another within 30 ft (Wis save).</li>
+</ul>
+</section>
+
+<!-- ================================= FUTURE ================================= -->
+<section id="expansion">
+<h2>Future Additions & Playtest Notes</h2>
+<p>This space will collect new spells, feats, magic items, and optional modules as playtesting evolves. Submit feedback on balance, clarity, and thematic cohesion via the project repository or our feedback form.</p>
+<details><summary>Playtest Guidance</summary>
+<p>When providing feedback please include:</p>
+<ul><li>Level & subclass of the Wayfinder PC</li><li>Encounter context (shipboard, land, underwater, etc.)</li><li>Any notable synergies or edge‑cases encountered</li><li>Whether Listen to the Sea felt <em>too</em> restrictive or generous</li></ul>
+</details>
+</section>
+
+</main>
+</body>
+</html>
