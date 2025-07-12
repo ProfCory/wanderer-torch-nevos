@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DM File Index — Wanderer & The Torch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #1a202c; color: #fbbf24; }
+        table { width: 100%; }
+        th, td { padding: 0.5rem 1rem; }
+        th { background: #374151; color: #fbbf24; }
+        td { background: #111827; color: #fbbf24; border-bottom: 1px solid #374151; }
+        tr:last-child td { border-bottom: none; }
+        .container { max-width: 900px; margin: 3rem auto; }
+        .file-link { color: #fbbf24; font-weight: 600; }
+        .file-link:hover { text-decoration: underline; color: #fde68a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold mb-6 text-center">DM File Index</h1>
+        <p class="mb-4 text-center text-gray-300">All files in the root directory of your GitHub Pages site are listed below. This updates every time you open the page.</p>
+        <table class="rounded-lg shadow-lg">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody id="file-list">
+                <tr><td colspan="2">Loading...</td></tr>
+            </tbody>
+        </table>
+        <div class="mt-8 text-center">
+            <a href="index.html" class="file-link text-lg">Back to Main Page</a>
+        </div>
+    </div>
+    <script>
+        async function loadFiles() {
+            const repoOwner = "profcory";
+            const repoName = "wanderer-torch-nevos";
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const fileList = document.getElementById('file-list');
+            try {
+                const res = await fetch(apiUrl);
+                if (!res.ok) throw new Error('GitHub API error');
+                const files = await res.json();
+                let html = '';
+                files.filter(f => f.type === 'file').forEach(file => {
+                    // You can filter out files like README.md if you want: if(file.name === "README.md") return;
+                    const cleanName = file.name.replace(/[_-]/g, ' ');
+                    html += `<tr>
+                        <td>${cleanName}</td>
+                        <td><a href="https://profcory.github.io/wanderer-torch-nevos/${encodeURIComponent(file.name)}" target="_blank" rel="noopener" class="file-link">View/Download</a></td>
+                    </tr>`;
+                });
+                if (!html) html = `<tr><td colspan="2">No files found.</td></tr>`;
+                fileList.innerHTML = html;
+            } catch (e) {
+                fileList.innerHTML = `<tr><td colspan="2">Could not load files from GitHub. (${e})</td></tr>`;
+            }
+        }
+        loadFiles();
+    </script>
+</body>
+</html>
