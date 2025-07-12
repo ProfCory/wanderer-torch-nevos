@@ -25,11 +25,12 @@
             <thead>
                 <tr>
                     <th>File Name</th>
+                    <th>Note</th>
                     <th>Link</th>
                 </tr>
             </thead>
             <tbody id="file-list">
-                <tr><td colspan="2">Loading...</td></tr>
+                <tr><td colspan="3">Loading...</td></tr>
             </tbody>
         </table>
         <div class="mt-8 text-center">
@@ -41,24 +42,34 @@
             const repoOwner = "profcory";
             const repoName = "wanderer-torch-nevos";
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const descUrl = `https://profcory.github.io/wanderer-torch-nevos/descriptions.json`;
             const fileList = document.getElementById('file-list');
+            let descriptions = {};
+            try {
+                // Load descriptions if available
+                const descRes = await fetch(descUrl);
+                if (descRes.ok) descriptions = await descRes.json();
+            } catch (e) {
+                // Fail silently, no notes
+            }
             try {
                 const res = await fetch(apiUrl);
                 if (!res.ok) throw new Error('GitHub API error');
                 const files = await res.json();
                 let html = '';
                 files.filter(f => f.type === 'file').forEach(file => {
-                    // You can filter out files like README.md if you want: if(file.name === "README.md") return;
                     const cleanName = file.name.replace(/[_-]/g, ' ');
+                    const note = descriptions[file.name] || "";
                     html += `<tr>
                         <td>${cleanName}</td>
+                        <td>${note}</td>
                         <td><a href="https://profcory.github.io/wanderer-torch-nevos/${encodeURIComponent(file.name)}" target="_blank" rel="noopener" class="file-link">View/Download</a></td>
                     </tr>`;
                 });
-                if (!html) html = `<tr><td colspan="2">No files found.</td></tr>`;
+                if (!html) html = `<tr><td colspan="3">No files found.</td></tr>`;
                 fileList.innerHTML = html;
             } catch (e) {
-                fileList.innerHTML = `<tr><td colspan="2">Could not load files from GitHub. (${e})</td></tr>`;
+                fileList.innerHTML = `<tr><td colspan="3">Could not load files from GitHub. (${e})</td></tr>`;
             }
         }
         loadFiles();
