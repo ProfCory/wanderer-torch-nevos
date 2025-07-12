@@ -380,8 +380,25 @@
             renderSpeciesAccordion();
             renderTimelineAccordion();
             addAccordionListeners();
-        });
-    </script>
+<ul id="files"></ul>
+                                  <script type="module">
+const repo   = 'ProfCory/wanderer-torch-nevos';
+const branch = 'main';
+const url    = `https://api.github.com/repos/${repo}/git/trees/${branch}?recursive=1`;
+
+const exts   = ['html','md','png','pdf'];          // whitelist what you want linked
+const list   = document.getElementById('files');
+
+const { tree } = await (await fetch(url)).json();
+tree
+  .filter(e => e.type === 'blob' && exts.some(x => e.path.endsWith('.'+x)))
+  .sort((a,b) => a.path.localeCompare(b.path))
+  .forEach(({ path }) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="${path}">${path}</a>`;
+      list.appendChild(li);
+  });
+</script>
 
 </body>
 </html>
