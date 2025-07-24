@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Emporium of Arcane Wonders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        .card {
+            background-color: #162447;
+            border: 1px solid #a0a0c0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .rarity-common { border-left: 5px solid #9ca3af; }
+        .rarity-uncommon { border-left: 5px solid #22c55e; }
+        .rarity-rare { border-left: 5px solid #3b82f6; }
+        .rarity-very-rare { border-left: 5px solid #a855f7; }
+        .rarity-legendary { border-left: 5px solid #f97316; }
+        
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-content {
+            background-color: #1a1a2e;
+            border: 2px solid #a0a0c0;
+        }
+        
+        .btn-primary {
+            background-color: #e94560;
+            color: #ffffff;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #f76a82;
+        }
+        
+        .btn-secondary {
+            background-color: #1f4287;
+            color: #ffffff;
+            transition: background-color 0.3s;
+        }
+         .btn-secondary:hover {
+            background-color: #274f9e;
+        }
+
+        .input-field {
+            background-color: #162447;
+            border: 1px solid #a0a0c0;
+            color: #e0e0e0;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 2px #e94560;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #e94560;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="loading-screen" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex justify-center items-center z-50">
+        <div class="text-center">
+            <div class="loader mx-auto"></div>
+            <p class="text-white text-2xl font-cinzel mt-4">Cataloguing Arcane Tomes...</p>
+        </div>
+    </div>
+
+    <div id="app-content" class="container mx-auto max-w-7xl hidden">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-6xl font-cinzel font-bold text-white tracking-wider">The Emporium of Arcane Wonders</h1>
+            <p class="text-lg text-gray-400 mt-2">Where legends are bought and sold.</p>
+        </header>
+
+        <!-- Controls -->
+        <div class="mb-8 p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col md:flex-row gap-4 items-center">
+            <div class="w-full md:w-1/3">
+                <input type="text" id="search-bar" class="w-full p-3 rounded-md input-field" placeholder="Search for an item...">
+            </div>
+            <div class="w-full md:w-1/3">
+                <select id="rarity-filter" class="w-full p-3 rounded-md input-field">
+                    <option value="all">All Rarities</option>
+                    <option value="Common">Common</option>
+                    <option value="Uncommon">Uncommon</option>
+                    <option value="Rare">Rare</option>
+                    <option value="Very Rare">Very Rare</option>
+                    <option value="Legendary">Legendary</option>
+                </select>
+            </div>
+             <div class="w-full md:w-1/3 flex justify-center md:justify-end">
+                <div class="flex rounded-md bg-gray-700 p-1">
+                    <button id="buy-mode-btn" class="px-4 py-2 text-sm font-medium text-white rounded-md btn-primary">Buy from Shop</button>
+                    <button id="sell-mode-btn" class="px-4 py-2 text-sm font-medium text-gray-300 rounded-md">Sell to Shop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Grid -->
+        <div id="item-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Item cards will be injected here by JavaScript -->
+        </div>
+        <div id="no-results" class="text-center py-16 hidden">
+            <p class="text-2xl font-cinzel">No matching items found.</p>
+            <p class="text-gray-400">Perhaps the archives are incomplete...</p>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div id="item-modal" class="fixed inset-0 z-50 items-center justify-center hidden">
+        <div class="modal-bg fixed inset-0"></div>
+        <div class="relative m-4 w-full max-w-lg mx-auto mt-20">
+            <div class="modal-content rounded-lg shadow-2xl p-6">
+                <div class="flex justify-between items-start">
+                    <h2 id="modal-item-name" class="text-3xl font-cinzel font-bold">Item Name</h2>
+                    <button id="close-modal-btn" class="text-2xl font-bold text-gray-400 hover:text-white">&times;</button>
+                </div>
+                <p id="modal-item-rarity" class="text-lg mb-4 capitalize"></p>
+                <div class="space-y-4 text-lg">
+                    <p id="modal-item-desc" class="text-gray-300">A detailed description of this wondrous item, its history, and its potent enchantments would appear here.</p>
+                    <div class="p-4 bg-gray-800 rounded-lg">
+                        <p class="font-bold text-white">Valuation</p>
+                        <p id="modal-base-value" class="text-gray-400"></p>
+                        <p id="modal-sell-price" class="text-green-400 font-semibold"></p>
+                        <p id="modal-buy-price" class="text-yellow-400 font-semibold"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const itemGrid = document.getElementById('item-grid');
+            const searchBar = document.getElementById('search-bar');
+            const rarityFilter = document.getElementById('rarity-filter');
+            const noResults = document.getElementById('no-results');
+            const buyModeBtn = document.getElementById('buy-mode-btn');
+            const sellModeBtn = document.getElementById('sell-mode-btn');
+            const modal = document.getElementById('item-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalBg = document.querySelector('.modal-bg');
+
+            let allItems = [];
+            let currentMode = 'buy'; // 'buy' or 'sell'
+
+            // --- DATA FETCHING AND PROCESSING ---
+            async function fetchAndProcessData() {
+                // In a real scenario, you'd fetch the PDF text. Here we use a hardcoded string for demonstration.
+                // This data is a small, parsed sample from the provided PDF.
+                const rawData = `
+                    Perfume of Bewitching,Common,75
+                    Potion of Climbing,Common,30
+                    Potion of Healing (Common),Common,50
+                    Bottled Breath,Uncommon,350
+                    Oil of Slipperiness,Uncommon,250
+                    Philter of Love,Uncommon,150
+                    Elixir of Health,Rare,2000
+                    Oil of Etherealness,Rare,2000
+                    Potion of Clairvoyance,Rare,900
+                    Oil of Sharpness,Very Rare,2200
+                    Potion of Flying,Very Rare,2500
+                    Potion of Giant Strength (Cloud),Very Rare,1800
+                    Potion of Giant Size,Legendary,11000
+                    Potion of Giant Strength (Storm),Legendary,8000
+                    +1 Weapon (any),Uncommon,500
+                    Dragon Slayer (any sword),Rare,4800
+                    Flame Tongue (any sword),Rare,5000
+                    Dancing Sword (any sword),Very Rare,10000
+                    Frost Brand (any sword),Very Rare,11000
+                    Holy Avenger (any sword),Legendary,65000
+                    Vorpal Sword (slashing swords),Legendary,75000
+                    Bag of Holding,Uncommon,500
+                    Boots of Striding and Springing,Uncommon,200
+                    Ring of Spell Storing,Rare,3600
+                    Boots of Speed,Rare,3000
+                    Carpet of Flying,Very Rare,44000
+                    Ring of Regeneration,Very Rare,40000
+                    Deck of Many Things,Legendary,200000
+                    Ring of Three Wishes,Legendary,97950
+                `;
+
+                const parsedItems = rawData.trim().split('\n').map(line => {
+                    const parts = line.trim().split(',');
+                    return {
+                        name: parts[0],
+                        rarity: parts[1],
+                        originalGp: parseInt(parts[2], 10)
+                    };
+                });
+
+                allItems = parsedItems.map(item => {
+                    let baseValueSp = 0;
+                    const rarity = item.rarity.toLowerCase();
+
+                    // Apply the rebalancing logic
+                    if (rarity === 'common') {
+                        baseValueSp = item.originalGp / 2;
+                    } else if (rarity === 'uncommon') {
+                        baseValueSp = item.originalGp;
+                    } else if (rarity === 'rare') {
+                        baseValueSp = item.originalGp * 2;
+                    } else if (rarity === 'very rare') {
+                        baseValueSp = item.originalGp * 5;
+                    } else if (rarity === 'legendary') {
+                        baseValueSp = item.originalGp * 10;
+                    }
+
+                    // Calculate sell and buy prices
+                    const sellPriceSp = Math.round(baseValueSp * 1.20);
+                    const buyPriceSp = Math.round(baseValueSp * 0.70);
+
+                    return {
+                        ...item,
+                        baseValueSp,
+                        sellPriceSp,
+                        buyPriceSp
+                    };
+                });
+
+                // Hide loader and show app
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+
+                renderItems();
+            }
+
+            // --- RENDERING AND UI ---
+
+            function formatCurrency(sp) {
+                if (sp >= 100) {
+                    const gp = sp / 100;
+                    const remainingSp = sp % 100;
+                    if (remainingSp > 0) {
+                        return `${gp.toLocaleString()} gp, ${remainingSp.toLocaleString()} sp`;
+                    }
+                    return `${gp.toLocaleString()} gp`;
+                }
+                if (sp < 1) {
+                     const cp = sp * 100;
+                     return `${cp.toLocaleString()} cp`;
+                }
+                return `${sp.toLocaleString()} sp`;
+            }
+
+            function renderItems() {
+                itemGrid.innerHTML = '';
+                const searchTerm = searchBar.value.toLowerCase();
+                const selectedRarity = rarityFilter.value;
+
+                const filteredItems = allItems.filter(item => {
+                    const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                    const matchesRarity = selectedRarity === 'all' || item.rarity === selectedRarity;
+                    return matchesSearch && matchesRarity;
+                });
+
+                if (filteredItems.length === 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    noResults.classList.add('hidden');
+                }
+
+                filteredItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = `card p-4 rounded-lg shadow-md cursor-pointer rarity-${item.rarity.toLowerCase().replace(' ', '-')}`;
+                    
+                    const price = currentMode === 'buy' ? item.sellPriceSp : item.buyPriceSp;
+                    const priceLabel = currentMode === 'buy' ? 'Price:' : 'Offer:';
+                    const priceColor = currentMode === 'buy' ? 'text-green-400' : 'text-yellow-400';
+
+                    card.innerHTML = `
+                        <h3 class="text-xl font-bold font-cinzel truncate">${item.name}</h3>
+                        <p class="text-gray-400 capitalize">${item.rarity}</p>
+                        <p class="mt-4 text-lg font-semibold ${priceColor}">${priceLabel} ${formatCurrency(price)}</p>
+                    `;
+                    card.addEventListener('click', () => openModal(item));
+                    itemGrid.appendChild(card);
+                });
+            }
+
+            function openModal(item) {
+                document.getElementById('modal-item-name').textContent = item.name;
+                document.getElementById('modal-item-rarity').textContent = item.rarity;
+                
+                document.getElementById('modal-base-value').textContent = `Base Value: ${formatCurrency(item.baseValueSp)}`;
+                document.getElementById('modal-sell-price').innerHTML = `Shop Sells For: <span class="font-bold">${formatCurrency(item.sellPriceSp)}</span> (+20% Markup)`;
+                document.getElementById('modal-buy-price').innerHTML = `Shop Buys For: <span class="font-bold">${formatCurrency(item.buyPriceSp)}</span> (70% of Value)`;
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            
+            function switchMode(newMode) {
+                if (currentMode === newMode) return;
+                currentMode = newMode;
+                
+                if (newMode === 'buy') {
+                    buyModeBtn.classList.add('btn-primary');
+                    buyModeBtn.classList.remove('text-gray-300');
+                    sellModeBtn.classList.remove('btn-primary');
+                    sellModeBtn.classList.add('text-gray-300');
+                } else {
+                    sellModeBtn.classList.add('btn-primary');
+                    sellModeBtn.classList.remove('text-gray-300');
+                    buyModeBtn.classList.remove('btn-primary');
+                    buyModeBtn.classList.add('text-gray-300');
+                }
+                renderItems();
+            }
+
+            // --- EVENT LISTENERS ---
+            searchBar.addEventListener('input', renderItems);
+            rarityFilter.addEventListener('change', renderItems);
+            buyModeBtn.addEventListener('click', () => switchMode('buy'));
+            sellModeBtn.addEventListener('click', () => switchMode('sell'));
+            closeModalBtn.addEventListener('click', closeModal);
+            modalBg.addEventListener('click', closeModal);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape" && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+
+            // --- INITIALIZATION ---
+            fetchAndProcessData();
+        });
+    </script>
+</body>
+</html>
