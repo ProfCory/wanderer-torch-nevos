@@ -90,12 +90,19 @@
         </div>
     </div>
 
-    <div id="app-content" class="container mx-auto max-w-7xl hidden">
+    <div id="app-content" class="container mx-auto max-w-7xl hidden relative">
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-4xl md:text-6xl font-cinzel font-bold text-white tracking-wider">The Emporium of Arcane Wonders</h1>
             <p class="text-lg text-gray-400 mt-2">Where legends are bought and sold.</p>
         </header>
+
+        <!-- Info/Settings Button -->
+        <button id="info-btn" class="absolute top-0 right-0 p-2 text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </button>
 
         <!-- Controls -->
         <div class="mb-8 p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col md:flex-row gap-4 items-center">
@@ -131,14 +138,14 @@
 
     </div>
 
-    <!-- Modal -->
+    <!-- Item Detail Modal -->
     <div id="item-modal" class="fixed inset-0 z-50 items-center justify-center hidden">
         <div class="modal-bg fixed inset-0"></div>
         <div class="relative m-4 w-full max-w-lg mx-auto mt-20">
             <div class="modal-content rounded-lg shadow-2xl p-6">
                 <div class="flex justify-between items-start">
                     <h2 id="modal-item-name" class="text-3xl font-cinzel font-bold">Item Name</h2>
-                    <button id="close-modal-btn" class="text-2xl font-bold text-gray-400 hover:text-white">&times;</button>
+                    <button id="close-item-modal-btn" class="text-2xl font-bold text-gray-400 hover:text-white">&times;</button>
                 </div>
                 <p id="modal-item-rarity" class="text-lg mb-4 capitalize"></p>
                 <div class="space-y-4 text-lg">
@@ -154,25 +161,69 @@
         </div>
     </div>
 
+    <!-- Info Modal -->
+    <div id="info-modal" class="fixed inset-0 z-50 items-center justify-center hidden">
+        <div class="modal-bg fixed inset-0"></div>
+        <div class="relative m-4 w-full max-w-2xl mx-auto mt-20">
+            <div class="modal-content rounded-lg shadow-2xl p-6">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-3xl font-cinzel font-bold">Shopkeeper's Ledger</h2>
+                    <button id="close-info-modal-btn" class="text-2xl font-bold text-gray-400 hover:text-white">&times;</button>
+                </div>
+                <div class="mt-4 space-y-6 text-gray-300">
+                    <div>
+                        <h3 class="text-xl font-cinzel font-semibold text-white mb-2">Currency Conversion</h3>
+                        <ul class="list-disc list-inside space-y-1 bg-gray-800 p-4 rounded-md">
+                            <li><span class="font-bold text-yellow-400">1 Gold Piece (gp)</span> = 100 Silver Pieces (sp)</li>
+                            <li><span class="font-bold text-gray-400">1 Silver Piece (sp)</span> = 100 Copper Pieces (cp)</li>
+                            <li><span class="font-bold text-yellow-400">1 Gold Piece (gp)</span> = 10,000 Copper Pieces (cp)</li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-cinzel font-semibold text-white mb-2">Item Valuation (Base Value)</h3>
+                        <p class="mb-2">The 'Base Value' of an item is determined by its rarity, based on its original price in a standard economy.</p>
+                        <ul class="list-none space-y-2 bg-gray-800 p-4 rounded-md">
+                            <li><span class="font-semibold rarity-common px-2 py-1 rounded-md bg-gray-700">Common:</span> Original GP ÷ 2 = Base Value in SP</li>
+                            <li><span class="font-semibold rarity-uncommon px-2 py-1 rounded-md bg-gray-700">Uncommon:</span> Original GP = Base Value in SP</li>
+                            <li><span class="font-semibold rarity-rare px-2 py-1 rounded-md bg-gray-700">Rare:</span> Original GP × 2 = Base Value in SP</li>
+                            <li><span class="font-semibold rarity-very-rare px-2 py-1 rounded-md bg-gray-700">Very Rare:</span> Original GP × 5 = Base Value in SP</li>
+                            <li><span class="font-semibold rarity-legendary px-2 py-1 rounded-md bg-gray-700">Legendary:</span> Original GP × 10 = Base Value in SP</li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-cinzel font-semibold text-white mb-2">Shop Pricing</h3>
+                        <ul class="list-none space-y-2 bg-gray-800 p-4 rounded-md">
+                            <li><span class="font-semibold text-green-400">Shop Sells For:</span> Base Value × 1.20 (+20% Markup)</li>
+                            <li><span class="font-semibold text-yellow-400">Shop Buys For:</span> Base Value × 0.70 (70% of Value)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENT SELECTORS ---
             const itemGrid = document.getElementById('item-grid');
             const searchBar = document.getElementById('search-bar');
             const rarityFilter = document.getElementById('rarity-filter');
             const noResults = document.getElementById('no-results');
             const buyModeBtn = document.getElementById('buy-mode-btn');
             const sellModeBtn = document.getElementById('sell-mode-btn');
-            const modal = document.getElementById('item-modal');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            const modalBg = document.querySelector('.modal-bg');
+            
+            const itemModal = document.getElementById('item-modal');
+            const closeItemModalBtn = document.getElementById('close-item-modal-btn');
+            
+            const infoBtn = document.getElementById('info-btn');
+            const infoModal = document.getElementById('info-modal');
+            const closeInfoModalBtn = document.getElementById('close-info-modal-btn');
 
             let allItems = [];
             let currentMode = 'buy'; // 'buy' or 'sell'
 
             // --- DATA FETCHING AND PROCESSING ---
             async function fetchAndProcessData() {
-                // In a real scenario, you'd fetch the PDF text. Here we use a hardcoded string for demonstration.
-                // This data is a small, parsed sample from the provided PDF.
                 const rawData = `
                     Perfume of Bewitching,Common,75
                     Potion of Climbing,Common,30
@@ -207,62 +258,35 @@
 
                 const parsedItems = rawData.trim().split('\n').map(line => {
                     const parts = line.trim().split(',');
-                    return {
-                        name: parts[0],
-                        rarity: parts[1],
-                        originalGp: parseInt(parts[2], 10)
-                    };
+                    return { name: parts[0], rarity: parts[1], originalGp: parseInt(parts[2], 10) };
                 });
 
                 allItems = parsedItems.map(item => {
                     let baseValueSp = 0;
                     const rarity = item.rarity.toLowerCase();
-
-                    // Apply the rebalancing logic
-                    if (rarity === 'common') {
-                        baseValueSp = item.originalGp / 2;
-                    } else if (rarity === 'uncommon') {
-                        baseValueSp = item.originalGp;
-                    } else if (rarity === 'rare') {
-                        baseValueSp = item.originalGp * 2;
-                    } else if (rarity === 'very rare') {
-                        baseValueSp = item.originalGp * 5;
-                    } else if (rarity === 'legendary') {
-                        baseValueSp = item.originalGp * 10;
-                    }
-
-                    // Calculate sell and buy prices
-                    const sellPriceSp = Math.round(baseValueSp * 1.20);
-                    const buyPriceSp = Math.round(baseValueSp * 0.70);
-
-                    return {
-                        ...item,
-                        baseValueSp,
-                        sellPriceSp,
-                        buyPriceSp
-                    };
+                    if (rarity === 'common') baseValueSp = item.originalGp / 2;
+                    else if (rarity === 'uncommon') baseValueSp = item.originalGp;
+                    else if (rarity === 'rare') baseValueSp = item.originalGp * 2;
+                    else if (rarity === 'very rare') baseValueSp = item.originalGp * 5;
+                    else if (rarity === 'legendary') baseValueSp = item.originalGp * 10;
+                    
+                    return { ...item, baseValueSp, sellPriceSp: Math.round(baseValueSp * 1.20), buyPriceSp: Math.round(baseValueSp * 0.70) };
                 });
 
-                // Hide loader and show app
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
-
                 renderItems();
             }
 
             // --- RENDERING AND UI ---
-
             function formatCurrency(sp) {
                 if (sp >= 100) {
-                    const gp = sp / 100;
+                    const gp = Math.floor(sp / 100);
                     const remainingSp = sp % 100;
-                    if (remainingSp > 0) {
-                        return `${gp.toLocaleString()} gp, ${remainingSp.toLocaleString()} sp`;
-                    }
-                    return `${gp.toLocaleString()} gp`;
+                    return remainingSp > 0 ? `${gp.toLocaleString()} gp, ${remainingSp.toLocaleString()} sp` : `${gp.toLocaleString()} gp`;
                 }
-                if (sp < 1) {
-                     const cp = sp * 100;
+                if (sp < 1 && sp > 0) {
+                     const cp = Math.round(sp * 100);
                      return `${cp.toLocaleString()} cp`;
                 }
                 return `${sp.toLocaleString()} sp`;
@@ -273,68 +297,56 @@
                 const searchTerm = searchBar.value.toLowerCase();
                 const selectedRarity = rarityFilter.value;
 
-                const filteredItems = allItems.filter(item => {
-                    const matchesSearch = item.name.toLowerCase().includes(searchTerm);
-                    const matchesRarity = selectedRarity === 'all' || item.rarity === selectedRarity;
-                    return matchesSearch && matchesRarity;
-                });
+                const filteredItems = allItems.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm) && (selectedRarity === 'all' || item.rarity === selectedRarity)
+                );
 
-                if (filteredItems.length === 0) {
-                    noResults.classList.remove('hidden');
-                } else {
-                    noResults.classList.add('hidden');
-                }
+                noResults.classList.toggle('hidden', filteredItems.length > 0);
 
                 filteredItems.forEach(item => {
                     const card = document.createElement('div');
                     card.className = `card p-4 rounded-lg shadow-md cursor-pointer rarity-${item.rarity.toLowerCase().replace(' ', '-')}`;
-                    
                     const price = currentMode === 'buy' ? item.sellPriceSp : item.buyPriceSp;
                     const priceLabel = currentMode === 'buy' ? 'Price:' : 'Offer:';
                     const priceColor = currentMode === 'buy' ? 'text-green-400' : 'text-yellow-400';
-
-                    card.innerHTML = `
-                        <h3 class="text-xl font-bold font-cinzel truncate">${item.name}</h3>
-                        <p class="text-gray-400 capitalize">${item.rarity}</p>
-                        <p class="mt-4 text-lg font-semibold ${priceColor}">${priceLabel} ${formatCurrency(price)}</p>
-                    `;
-                    card.addEventListener('click', () => openModal(item));
+                    card.innerHTML = `<h3 class="text-xl font-bold font-cinzel truncate">${item.name}</h3><p class="text-gray-400 capitalize">${item.rarity}</p><p class="mt-4 text-lg font-semibold ${priceColor}">${priceLabel} ${formatCurrency(price)}</p>`;
+                    card.addEventListener('click', () => openItemModal(item));
                     itemGrid.appendChild(card);
                 });
             }
 
-            function openModal(item) {
+            function openItemModal(item) {
                 document.getElementById('modal-item-name').textContent = item.name;
                 document.getElementById('modal-item-rarity').textContent = item.rarity;
-                
                 document.getElementById('modal-base-value').textContent = `Base Value: ${formatCurrency(item.baseValueSp)}`;
                 document.getElementById('modal-sell-price').innerHTML = `Shop Sells For: <span class="font-bold">${formatCurrency(item.sellPriceSp)}</span> (+20% Markup)`;
                 document.getElementById('modal-buy-price').innerHTML = `Shop Buys For: <span class="font-bold">${formatCurrency(item.buyPriceSp)}</span> (70% of Value)`;
-
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+                itemModal.classList.remove('hidden');
+                itemModal.classList.add('flex');
             }
 
-            function closeModal() {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
+            function closeItemModal() {
+                itemModal.classList.add('hidden');
+                itemModal.classList.remove('flex');
+            }
+
+            function openInfoModal() {
+                infoModal.classList.remove('hidden');
+                infoModal.classList.add('flex');
+            }
+
+            function closeInfoModal() {
+                infoModal.classList.add('hidden');
+                infoModal.classList.remove('flex');
             }
             
             function switchMode(newMode) {
                 if (currentMode === newMode) return;
                 currentMode = newMode;
-                
-                if (newMode === 'buy') {
-                    buyModeBtn.classList.add('btn-primary');
-                    buyModeBtn.classList.remove('text-gray-300');
-                    sellModeBtn.classList.remove('btn-primary');
-                    sellModeBtn.classList.add('text-gray-300');
-                } else {
-                    sellModeBtn.classList.add('btn-primary');
-                    sellModeBtn.classList.remove('text-gray-300');
-                    buyModeBtn.classList.remove('btn-primary');
-                    buyModeBtn.classList.add('text-gray-300');
-                }
+                buyModeBtn.classList.toggle('btn-primary');
+                buyModeBtn.classList.toggle('text-gray-300');
+                sellModeBtn.classList.toggle('btn-primary');
+                sellModeBtn.classList.toggle('text-gray-300');
                 renderItems();
             }
 
@@ -343,11 +355,18 @@
             rarityFilter.addEventListener('change', renderItems);
             buyModeBtn.addEventListener('click', () => switchMode('buy'));
             sellModeBtn.addEventListener('click', () => switchMode('sell'));
-            closeModalBtn.addEventListener('click', closeModal);
-            modalBg.addEventListener('click', closeModal);
+            
+            closeItemModalBtn.addEventListener('click', closeItemModal);
+            itemModal.querySelector('.modal-bg').addEventListener('click', closeItemModal);
+
+            infoBtn.addEventListener('click', openInfoModal);
+            closeInfoModalBtn.addEventListener('click', closeInfoModal);
+            infoModal.querySelector('.modal-bg').addEventListener('click', closeInfoModal);
+
             document.addEventListener('keydown', (e) => {
-                if (e.key === "Escape" && !modal.classList.contains('hidden')) {
-                    closeModal();
+                if (e.key === "Escape") {
+                    if (!itemModal.classList.contains('hidden')) closeItemModal();
+                    if (!infoModal.classList.contains('hidden')) closeInfoModal();
                 }
             });
 
