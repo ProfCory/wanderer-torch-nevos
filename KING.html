@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guild Price Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark Gray */
+        }
+        .rarity-common { border-color: #9ca3af; color: #9ca3af; }
+        .rarity-uncommon { border-color: #22c55e; color: #22c55e; }
+        .rarity-rare { border-color: #3b82f6; color: #3b82f6; }
+        .rarity-very-rare { border-color: #a855f7; color: #a855f7; }
+        .rarity-legendary { border-color: #f97316; color: #f97316; }
+        .table-header-bg { background-color: #1f2937; }
+        .table-row-bg { background-color: #374151; }
+        .search-bg { background-color: #1f2937; }
+        .category-button-active { background-color: #4f46e5; color: white; }
+        .category-button-inactive { background-color: #374151; color: #d1d5db; }
+    </style>
+</head>
+<body class="text-gray-200 p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl font-bold text-white mb-2">The Guild's Price Ledger</h1>
+            <p class="text-lg text-gray-400">Your guide to sane magical item prices and crafting supplies.</p>
+        </header>
+
+        <!-- Search and Filter Controls -->
+        <div class="mb-8 p-6 rounded-lg shadow-lg search-bg">
+            <div class="flex flex-col md:flex-row gap-4 items-center">
+                <input type="text" id="searchInput" placeholder="Search for an item..." class="w-full md:w-1/2 p-3 rounded-md border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white transition">
+                <select id="rarityFilter" class="w-full md:w-1/4 p-3 rounded-md border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white transition">
+                    <option value="all">All Rarities</option>
+                    <option value="Common">Common</option>
+                    <option value="Uncommon">Uncommon</option>
+                    <option value="Rare">Rare</option>
+                    <option value="Very Rare">Very Rare</option>
+                    <option value="Legendary">Legendary</option>
+                </select>
+                <button id="clearFilters" class="w-full md:w-auto p-3 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold transition">Clear</button>
+            </div>
+            <div id="categoryFilters" class="mt-6 flex flex-wrap gap-2 justify-center">
+                <!-- Category buttons will be injected here by JS -->
+            </div>
+        </div>
+
+        <!-- Main Content Table -->
+        <div class="overflow-x-auto rounded-lg shadow-lg">
+            <table class="w-full min-w-full text-left">
+                <thead class="table-header-bg">
+                    <tr>
+                        <th class="p-4 font-semibold text-white tracking-wider">Item Name</th>
+                        <th class="p-4 font-semibold text-white tracking-wider text-right">Price (gp)</th>
+                        <th class="p-4 font-semibold text-white tracking-wider text-center">Rarity</th>
+                        <th class="p-4 font-semibold text-white tracking-wider">Category</th>
+                    </tr>
+                </thead>
+                <tbody id="item-table-body">
+                    <!-- Item rows will be injected here -->
+                </tbody>
+            </table>
+            <div id="no-results" class="hidden text-center p-8 table-row-bg">
+                <p class="text-xl text-gray-400">No items found matching your search.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA ---
+        // This data is parsed from the provided "Sane Magical Prices.pdf"
+        const itemData = [
+            // Consumables
+            { name: "Spell Scroll (Cantrip)", price: 10, rarity: "Common", category: "Consumable" },
+            { name: "Ammunition, +1 (each)", price: 25, rarity: "Uncommon", category: "Consumable" },
+            { name: "Potion of Healing", price: 50, rarity: "Common", category: "Consumable" },
+            { name: "Quaal's Feather Token (Anchor)", price: 50, rarity: "Rare", category: "Consumable" },
+            { name: "Spell Scroll (1st level)", price: 60, rarity: "Common", category: "Consumable" },
+            { name: "Philter of Love", price: 90, rarity: "Uncommon", category: "Consumable" },
+            { name: "Ammunition, +2 (each)", price: 100, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Poison", price: 100, rarity: "Uncommon", category: "Consumable" },
+            { name: "Dust of Dryness (1 pellet)", price: 120, rarity: "Uncommon", category: "Consumable" },
+            { name: "Elixir of Health", price: 120, rarity: "Rare", category: "Consumable" },
+            { name: "Keoghtom's Ointment (per dose)", price: 120, rarity: "Uncommon", category: "Consumable" },
+            { name: "Spell Scroll (2nd level)", price: 120, rarity: "Uncommon", category: "Consumable" },
+            { name: "Potion of Fire Breath", price: 150, rarity: "Uncommon", category: "Consumable" },
+            { name: "Potion of Greater Healing", price: 150, rarity: "Uncommon", category: "Consumable" },
+            { name: "Potion of Climbing", price: 180, rarity: "Common", category: "Consumable" },
+            { name: "Potion of Heroism", price: 180, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Invisibility", price: 180, rarity: "Very Rare", category: "Consumable" },
+            { name: "Potion of Mind Reading", price: 180, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Water Breathing", price: 180, rarity: "Uncommon", category: "Consumable" },
+            { name: "Scroll of Protection", price: 180, rarity: "Rare", category: "Consumable" },
+            { name: "Nolzur's Marvelous Pigments", price: 200, rarity: "Very Rare", category: "Consumable" },
+            { name: "Potion of Animal Friendship", price: 200, rarity: "Uncommon", category: "Consumable" },
+            { name: "Spell Scroll (3rd level)", price: 200, rarity: "Uncommon", category: "Consumable" },
+            { name: "Quaal's Feather Token (Fan)", price: 250, rarity: "Rare", category: "Consumable" },
+            { name: "Quaal's Feather Token (Whip)", price: 250, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Diminution", price: 270, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Growth", price: 270, rarity: "Uncommon", category: "Consumable" },
+            { name: "Dust of Disappearance", price: 300, rarity: "Uncommon", category: "Consumable" },
+            { name: "Necklace of Fireballs (1 bead)", price: 300, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Gaseous Form", price: 300, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Resistance", price: 300, rarity: "Uncommon", category: "Consumable" },
+            { name: "Universal Solvent", price: 300, rarity: "Legendary", category: "Consumable" },
+            { name: "Spell Scroll (4th level)", price: 320, rarity: "Rare", category: "Consumable" },
+            { name: "Ammunition, +3 (each)", price: 400, rarity: "Very Rare", category: "Consumable" },
+            { name: "Potion of Speed", price: 400, rarity: "Very Rare", category: "Consumable" },
+            { name: "Sovereign Glue", price: 400, rarity: "Legendary", category: "Consumable" },
+            { name: "Horn of Blasting", price: 450, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Superior Healing", price: 450, rarity: "Very Rare", category: "Consumable" },
+            { name: "Dust of Sneezing and Choking", price: 480, rarity: "Uncommon", category: "Consumable" },
+            { name: "Necklace of Fireballs (2 beads)", price: 480, rarity: "Rare", category: "Consumable" },
+            { name: "Oil of Slipperiness", price: 480, rarity: "Uncommon", category: "Consumable" },
+            { name: "Potion of Flying", price: 500, rarity: "Very Rare", category: "Consumable" },
+            { name: "Arrow of Slaying (each)", price: 600, rarity: "Very Rare", category: "Consumable" },
+            { name: "Spell Scroll (5th level)", price: 640, rarity: "Rare", category: "Consumable" },
+            { name: "Bead of Force", price: 960, rarity: "Rare", category: "Consumable" },
+            { name: "Elemental Gem", price: 960, rarity: "Uncommon", category: "Consumable" },
+            { name: "Necklace of Fireballs (3 beads)", price: 960, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Clairvoyance", price: 960, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Vitality", price: 960, rarity: "Very Rare", category: "Consumable" },
+            { name: "Spell Scroll (6th level)", price: 1280, rarity: "Very Rare", category: "Consumable" },
+            { name: "Potion of Supreme Healing", price: 1350, rarity: "Very Rare", category: "Consumable" },
+            { name: "Chime of Opening", price: 1500, rarity: "Rare", category: "Consumable" },
+            { name: "Necklace of Fireballs (4 beads)", price: 1600, rarity: "Rare", category: "Consumable" },
+            { name: "Oil of Etherealness", price: 1920, rarity: "Rare", category: "Consumable" },
+            { name: "Ioun Stone (Absorption)", price: 2400, rarity: "Very Rare", category: "Consumable" },
+            { name: "Spell Scroll (7th level)", price: 2560, rarity: "Very Rare", category: "Consumable" },
+            { name: "Quaal's Feather Token (Bird)", price: 3000, rarity: "Rare", category: "Consumable" },
+            { name: "Quaal's Feather Token (Swan Boat)", price: 3000, rarity: "Rare", category: "Consumable" },
+            { name: "Oil of Sharpness", price: 3200, rarity: "Very Rare", category: "Consumable" },
+            { name: "Necklace of Fireballs (5 beads)", price: 3840, rarity: "Rare", category: "Consumable" },
+            { name: "Potion of Invulnerability", price: 3840, rarity: "Rare", category: "Consumable" },
+            { name: "Gem of Brightness", price: 5000, rarity: "Uncommon", category: "Consumable" },
+            { name: "Spell Scroll (8th level)", price: 5120, rarity: "Very Rare", category: "Consumable" },
+            { name: "Deck of Illusions", price: 6120, rarity: "Uncommon", category: "Consumable" },
+            { name: "Necklace of Fireballs (6 beads)", price: 7680, rarity: "Rare", category: "Consumable" },
+            { name: "Spell Scroll (9th level)", price: 10240, rarity: "Legendary", category: "Consumable" },
+            { name: "Ioun Stone (Greater Absorption)", price: 31000, rarity: "Legendary", category: "Consumable" },
+            { name: "Rod of Absorption", price: 50000, rarity: "Very Rare", category: "Consumable" },
+            { name: "Talisman of Ultimate Evil", price: 61440, rarity: "Legendary", category: "Consumable" },
+            { name: "Talisman of Pure Good", price: 71680, rarity: "Legendary", category: "Consumable" },
+            { name: "Robe of Useful Items", price: 0, rarity: "Uncommon", category: "Consumable" },
+            // Combat
+            { name: "Vicious Weapon", price: 350, rarity: "Rare", category: "Combat" },
+            { name: "Adamantine Armor", price: 500, rarity: "Uncommon", category: "Combat" },
+            { name: "Mithral Armor", price: 800, rarity: "Uncommon", category: "Combat" },
+            { name: "Weapon, +1", price: 1000, rarity: "Uncommon", category: "Combat" },
+            { name: "Sword of Life Stealing", price: 1000, rarity: "Rare", category: "Combat" },
+            { name: "Ioun Stone (Protection)", price: 1200, rarity: "Rare", category: "Combat" },
+            { name: "Wand of the War Mage, +1", price: 1200, rarity: "Uncommon", category: "Combat" },
+            { name: "Bracers of Archery", price: 1500, rarity: "Uncommon", category: "Combat" },
+            { name: "Circlet of Blasting", price: 1500, rarity: "Uncommon", category: "Combat" },
+            { name: "Javelin of Lightning", price: 1500, rarity: "Uncommon", category: "Combat" },
+            { name: "Prayer Bead (Smiting)", price: 1500, rarity: "Rare", category: "Combat" },
+            { name: "Wind Fan", price: 1500, rarity: "Uncommon", category: "Combat" },
+            { name: "Sword of Sharpness", price: 1700, rarity: "Rare", category: "Combat" },
+            { name: "Staff of the Adder", price: 1800, rarity: "Uncommon", category: "Combat" },
+            { name: "Dancing Sword", price: 2000, rarity: "Very Rare", category: "Combat" },
+            { name: "Glamoured Studded Leather", price: 2000, rarity: "Rare", category: "Combat" },
+            { name: "Pipes of the Sewers", price: 2000, rarity: "Uncommon", category: "Combat" },
+            { name: "Prayer Bead (Bless)", price: 2000, rarity: "Rare", category: "Combat" },
+            { name: "Saddle of the Cavalier", price: 2000, rarity: "Uncommon", category: "Combat" },
+            { name: "Sword of Wounding", price: 2000, rarity: "Rare", category: "Combat" },
+            { name: "Frost Brand", price: 2200, rarity: "Very Rare", category: "Combat" },
+            { name: "Dagger of Venom", price: 2500, rarity: "Rare", category: "Combat" },
+            { name: "Gloves of Missile Snaring", price: 3000, rarity: "Uncommon", category: "Combat" },
+            { name: "Ioun Stone (Agility)", price: 3000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ioun Stone (Fortitude)", price: 3000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ioun Stone (Insight)", price: 3000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ioun Stone (Intellect)", price: 3000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ioun Stone (Leadership)", price: 3000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ioun Stone (Strength)", price: 3000, rarity: "Very Rare", category: "Combat" },
+            { name: "Staff of Withering", price: 3000, rarity: "Rare", category: "Combat" },
+            { name: "Cloak of Protection", price: 3500, rarity: "Uncommon", category: "Combat" },
+            { name: "Oathbow", price: 3500, rarity: "Very Rare", category: "Combat" },
+            { name: "Ring of Protection", price: 3500, rarity: "Rare", category: "Combat" },
+            { name: "Weapon, +2", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Boots of Speed", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Dragon Scale Mail", price: 4000, rarity: "Very Rare", category: "Combat" },
+            { name: "Elven Chain", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Ioun Stone (Regeneration)", price: 4000, rarity: "Legendary", category: "Combat" },
+            { name: "Iron Bands of Bilarro", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Prayer Bead (Curing)", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Rope of Entanglement", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Wand of Enemy Detection", price: 4000, rarity: "Rare", category: "Combat" },
+            { name: "Luckstone", price: 4200, rarity: "Uncommon", category: "Combat" },
+            { name: "Wand of the War Mage, +2", price: 4800, rarity: "Rare", category: "Combat" },
+            { name: "Flame Tongue", price: 5000, rarity: "Rare", category: "Combat" },
+            { name: "Periapt of Wound Closure", price: 5000, rarity: "Uncommon", category: "Combat" },
+            { name: "Ring of Evasion", price: 5000, rarity: "Rare", category: "Combat" },
+            { name: "Ring of the Ram", price: 5000, rarity: "Rare", category: "Combat" },
+            { name: "Tentacle Rod", price: 5000, rarity: "Rare", category: "Combat" },
+            { name: "Animated Shield", price: 6000, rarity: "Very Rare", category: "Combat" },
+            { name: "Armor of Resistance", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Arrow-Catching Shield", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Belt of Dwarvenkind", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Bracers of Defense", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Ioun Stone (Reserve)", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Pearl of Power", price: 6000, rarity: "Uncommon", category: "Combat" },
+            { name: "Pipes of Haunting", price: 6000, rarity: "Uncommon", category: "Combat" },
+            { name: "Ring of Resistance", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Robe of Scintillating Colors", price: 6000, rarity: "Very Rare", category: "Combat" },
+            { name: "Scimitar of Speed", price: 6000, rarity: "Very Rare", category: "Combat" },
+            { name: "Shield of Missile Attraction", price: 6000, rarity: "Rare", category: "Combat" },
+            { name: "Giant Slayer", price: 7000, rarity: "Rare", category: "Combat" },
+            { name: "Mace of Smiting", price: 7000, rarity: "Rare", category: "Combat" },
+            { name: "Brooch of Shielding", price: 7500, rarity: "Uncommon", category: "Combat" },
+            { name: "Amulet of Health", price: 8000, rarity: "Rare", category: "Combat" },
+            { name: "Dragon Slayer", price: 8000, rarity: "Rare", category: "Combat" },
+            { name: "Gauntlets of Ogre Power", price: 8000, rarity: "Uncommon", category: "Combat" },
+            { name: "Headband of Intellect", price: 8000, rarity: "Uncommon", category: "Combat" },
+            { name: "Mace of Disruption", price: 8000, rarity: "Rare", category: "Combat" },
+            { name: "Mace of Terror", price: 8000, rarity: "Rare", category: "Combat" },
+            { name: "Nine Lives Stealer", price: 8000, rarity: "Very Rare", category: "Combat" },
+            { name: "Wand of Magic Missiles", price: 8000, rarity: "Uncommon", category: "Combat" },
+            { name: "Wand of Web", price: 8000, rarity: "Uncommon", category: "Combat" },
+            { name: "Staff of Thunder and Lightning", price: 10000, rarity: "Very Rare", category: "Combat" },
+            { name: "Wand of Binding", price: 10000, rarity: "Rare", category: "Combat" },
+            { name: "Wand of Fear", price: 10000, rarity: "Rare", category: "Combat" },
+            { name: "Ioun Stone (Awareness)", price: 12000, rarity: "Rare", category: "Combat" },
+            { name: "Rod of the Pact Keeper, +1", price: 12000, rarity: "Rare", category: "Combat" },
+            { name: "Staff of Charming", price: 12000, rarity: "Rare", category: "Combat" },
+            { name: "Sunblade", price: 12000, rarity: "Rare", category: "Combat" },
+            { name: "Staff of Healing", price: 13000, rarity: "Rare", category: "Combat" },
+            { name: "Ring of Shooting Stars", price: 14000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ioun Stone (Mastery)", price: 15000, rarity: "Legendary", category: "Combat" },
+            { name: "Weapon, +3", price: 16000, rarity: "Very Rare", category: "Combat" },
+            { name: "Hammer of Thunderbolts", price: 16000, rarity: "Legendary", category: "Combat" },
+            { name: "Rod of the Pact Keeper, +2", price: 16000, rarity: "Rare", category: "Combat" },
+            { name: "Staff of Fire", price: 16000, rarity: "Very Rare", category: "Combat" },
+            { name: "Staff of Swarming Insects", price: 16000, rarity: "Rare", category: "Combat" },
+            { name: "Wand of Paralysis", price: 16000, rarity: "Rare", category: "Combat" },
+            { name: "Ring of Fire Elemental Command", price: 17000, rarity: "Legendary", category: "Combat" },
+            { name: "Dwarven Thrower", price: 18000, rarity: "Very Rare", category: "Combat" },
+            { name: "Wand of the War Mage, +3", price: 19200, rarity: "Very Rare", category: "Combat" },
+            { name: "Efreeti Chain", price: 20000, rarity: "Legendary", category: "Combat" },
+            { name: "Ring of Free Action", price: 20000, rarity: "Rare", category: "Combat" },
+            { name: "Sentinel Shield", price: 20000, rarity: "Uncommon", category: "Combat" },
+            { name: "Staff of Striking", price: 21000, rarity: "Very Rare", category: "Combat" },
+            { name: "Ring of Spell Storing", price: 24000, rarity: "Rare", category: "Combat" },
+            { name: "Vorpal Sword", price: 24000, rarity: "Legendary", category: "Combat" },
+            { name: "Ring of Water Elemental Command", price: 25000, rarity: "Legendary", category: "Combat" },
+            { name: "Rod of Alertness", price: 25000, rarity: "Very Rare", category: "Combat" },
+            { name: "Staff of Frost", price: 26000, rarity: "Very Rare", category: "Combat" },
+            { name: "Rod of Lordly Might", price: 28000, rarity: "Legendary", category: "Combat" },
+            { name: "Rod of the Pact Keeper, +3", price: 28000, rarity: "Very Rare", category: "Combat" },
+            { name: "Mantle of Spell Resistance", price: 30000, rarity: "Rare", category: "Combat" },
+            { name: "Ring of Spell Turning", price: 30000, rarity: "Legendary", category: "Combat" },
+            { name: "Prayer Bead (Favor)", price: 32000, rarity: "Rare", category: "Combat" },
+            { name: "Wand of Fireballs", price: 32000, rarity: "Rare", category: "Combat" },
+            { name: "Wand of Lightning Bolts", price: 32000, rarity: "Rare", category: "Combat" },
+            { name: "Wand of Polymorph", price: 32000, rarity: "Very Rare", category: "Combat" },
+            { name: "Scarab of Protection", price: 36000, rarity: "Legendary", category: "Combat" },
+            { name: "Sword of Answering", price: 36000, rarity: "Legendary", category: "Combat" },
+            { name: "Staff of the Woodlands", price: 44000, rarity: "Rare", category: "Combat" },
+            { name: "Spellguard Shield", price: 50000, rarity: "Very Rare", category: "Combat" },
+            { name: "Cloak of Displacement", price: 60000, rarity: "Rare", category: "Combat" },
+            { name: "Robe of Stars", price: 60000, rarity: "Very Rare", category: "Combat" },
+            { name: "Weapon of Warning", price: 60000, rarity: "Uncommon", category: "Combat" },
+            { name: "Prayer Bead (Wind Walking)", price: 96000, rarity: "Rare", category: "Combat" },
+            { name: "Prayer Bead (Summons)", price: 128000, rarity: "Rare", category: "Combat" },
+            { name: "Holy Avenger", price: 165000, rarity: "Legendary", category: "Combat" },
+            // Non-Combat
+            { name: "Helm of Comprehend Languages", price: 500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Driftglobe", price: 750, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Trident of Fish Command", price: 800, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Cap of Water Breathing", price: 1000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Eversmoking Bottle", price: 1000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Quiver of Ehlonna", price: 1000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Ioun Stone (Sustenance)", price: 1000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Ring of Warmth", price: 1000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Goggles of Night", price: 1500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Horseshoes of the Zephyr", price: 1500, rarity: "Very Rare", category: "Non-Combat" },
+            { name: "Mariner's Armor", price: 1500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Necklace of Adaptation", price: 1500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Ring of Water Walking", price: 1500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Wand of Magic Detection", price: 1500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Wand of Secrets", price: 1500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Gloves of Swimming and Climbing", price: 2000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Heward's Handy Haversack", price: 2000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Rope of Climbing", price: 2000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Ring of Feather Falling", price: 2000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Boots of Elvenkind", price: 2500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Eyes of Minute Seeing", price: 2500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Eyes of the Eagle", price: 2500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Ring of Jumping", price: 2500, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Dimensional Shackles", price: 3000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Eyes of Charming", price: 3000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Medallion of Thoughts", price: 3000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Ring of Swimming", price: 3000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Bag of Holding", price: 4000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Boots of Levitation", price: 4000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Ring of Animal Influence", price: 4000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Boots of Striding and Springing", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Cloak of Arachnida", price: 5000, rarity: "Very Rare", category: "Non-Combat" },
+            { name: "Cloak of Elvenkind", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Gloves of Thievery", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Hat of Disguise", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Horseshoes of Speed", price: 5000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Immovable Rod", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Lantern of Revealing", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Periapt of Health", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Periapt of Proof against Poison", price: 5000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Slippers of Spider Climbing", price: 5000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Cloak of the Bat", price: 6000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Cloak of the Manta Ray", price: 6000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Ring of X-ray Vision", price: 6000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Cape of the Mountebank", price: 8000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Portable Hole", price: 8000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Apparatus of Kwalish", price: 10000, rarity: "Legendary", category: "Non-Combat" },
+            { name: "Boots of the Winterlands", price: 10000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Folding Boat", price: 10000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Ring of Invisibility", price: 10000, rarity: "Legendary", category: "Non-Combat" },
+            { name: "Helm of Telepathy", price: 12000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Cube of Force", price: 16000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Ring of Mind Shielding", price: 16000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Rod of Rulership", price: 16000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Mirror of Life Trapping", price: 18000, rarity: "Very Rare", category: "Non-Combat" },
+            { name: "Amulet of Proof against Detection and Location", price: 20000, rarity: "Uncommon", category: "Non-Combat" },
+            { name: "Robe of Eyes", price: 30000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Gem of Seeing", price: 32000, rarity: "Rare", category: "Non-Combat" },
+            { name: "Plate Armor of Etherealness", price: 48000, rarity: "Legendary", category: "Non-Combat" },
+            // Summoning
+            { name: "Figurine of Wondrous Power (Ivory Goat of Travail)", price: 400, rarity: "Rare", category: "Summoning" },
+            { name: "Figurine of Wondrous Power (Golden Lion)", price: 600, rarity: "Rare", category: "Summoning" },
+            { name: "Figurine of Wondrous Power (Ivory Goat of Traveling)", price: 1000, rarity: "Rare", category: "Summoning" },
+            { name: "Staff of the Python", price: 2000, rarity: "Uncommon", category: "Summoning" },
+            { name: "Figurine of Wondrous Power (Onyx Dog)", price: 3000, rarity: "Rare", category: "Summoning" },
+            { name: "Figurine of Wondrous Power (Silver Raven)", price: 5000, rarity: "Uncommon", category: "Summoning" },
+            { name: "Horn of Valhalla (Silver)", price: 5600, rarity: "Rare", category: "Summoning" },
+            { name: "Figurine of Wondrous Power (Marble Elephant)", price: 6000, rarity: "Rare", category: "Summoning" },
+            { name: "Bowl of Commanding Water Elementals", price: 8000, rarity: "Rare", category: "Summoning" },
+            { name: "Brazier of Commanding Fire Elementals", price: 8000, rarity: "Rare", category: "Summoning" },
+            { name: "Censer of Controlling Air Elementals", price: 8000, rarity: "Rare", category: "Summoning" },
+            { name: "Stone of Controlling Earth Elementals", price: 8000, rarity: "Rare", category: "Summoning" },
+            { name: "Horn of Valhalla (Brass)", price: 8400, rarity: "Rare", category: "Summoning" },
+            { name: "Horn of Valhalla (Bronze)", price: 11200, rarity: "Very Rare", category: "Summoning" },
+            { name: "Horn of Valhalla (Iron)", price: 14000, rarity: "Legendary", category: "Summoning" },
+            { name: "Figurine of Wondrous Power (Ivory Goat of Terror)", price: 20000, rarity: "Rare", category: "Summoning" },
+            // Gamebreaking
+            { name: "Armor, +1", price: 1500, rarity: "Rare", category: "Game-Changing" },
+            { name: "Shield, +1", price: 1500, rarity: "Uncommon", category: "Game-Changing" },
+            { name: "Sending Stones", price: 2000, rarity: "Uncommon", category: "Game-Changing" },
+            { name: "Wings of Flying", price: 5000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Alchemy Jug", price: 6000, rarity: "Uncommon", category: "Game-Changing" },
+            { name: "Armor, +2", price: 6000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Shield, +2", price: 6000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Figurine of Wondrous Power (Ebony Fly)", price: 6000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Figurine of Wondrous Power (Bronze Griffon)", price: 8000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Broom of Flying", price: 8000, rarity: "Uncommon", category: "Game-Changing" },
+            { name: "Figurine of Wondrous Power (Serpentine Owl)", price: 8000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Winged Boots", price: 8000, rarity: "Uncommon", category: "Game-Changing" },
+            { name: "Dwarven Plate", price: 9000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Potion of Longevity", price: 9000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Carpet of Flying", price: 12000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Ring of Regeneration", price: 12000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Sphere of Annihilation", price: 15000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Armor of Invulnerability", price: 18000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Talisman of the Sphere", price: 20000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Armor, +3", price: 24000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Shield, +3", price: 24000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Defender", price: 24000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Ring of Earth Elemental Command", price: 31000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Robe of the Archmagi", price: 34000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Ring of Air Elemental Command", price: 35000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Cubic Gate", price: 40000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Crystal Ball", price: 50000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Helm of Teleportation", price: 64000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Daern's Instant Fortress", price: 75000, rarity: "Rare", category: "Game-Changing" },
+            { name: "Ring of Telekinesis", price: 80000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Cloak of Invisibility", price: 80000, rarity: "Legendary", category: "Game-Changing" },
+            { name: "Rod of Security", price: 90000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Staff of Power", price: 95500, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Figurine of Wondrous Power (Obsidian Steed)", price: 128000, rarity: "Very Rare", category: "Game-Changing" },
+            { name: "Decanter of Endless Water", price: 135000, rarity: "Uncommon", category: "Game-Changing" },
+            { name: "Amulet of the Planes", price: 160000, rarity: "Very Rare", category: "Game-Changing" },
+            // Crafting & Supplies (Custom Data)
+            { name: "Potion/Salve Base (Inert liquid, 1 vial)", price: 1, rarity: "N/A", category: "Crafting" },
+            { name: "Fairy Dust (pinch)", price: 25, rarity: "N/A", category: "Crafting" },
+            { name: "Dragon's Blood (vial)", price: 75, rarity: "N/A", category: "Crafting" },
+            { name: "Giant's Toe (powdered)", price: 50, rarity: "N/A", category: "Crafting" },
+            { name: "Wyvern Poison (vial)", price: 150, rarity: "N/A", category: "Crafting" },
+            { name: "Mandrake Root", price: 10, rarity: "N/A", category: "Crafting" },
+            { name: "Quicksilver (flask)", price: 100, rarity: "N/A", category: "Crafting" },
+            { name: "Glow-spore Mushrooms (cluster)", price: 5, rarity: "N/A", category: "Crafting" },
+            { name: "Arctic Creeper Vine", price: 15, rarity: "N/A", category: "Crafting" },
+            { name: "Beholder Eyestalk (dried)", price: 250, rarity: "N/A", category: "Crafting" },
+            { name: "Phoenix Ash (pinch)", price: 500, rarity: "N/A", category: "Crafting" },
+            { name: "Alchemist's Supplies", price: 50, rarity: "N/A", category: "Supplies" },
+            { name: "Herbalism Kit", price: 5, rarity: "N/A", category: "Supplies" },
+            { name: "Poisoner's Kit", price: 50, rarity: "N/A", category: "Supplies" },
+            { name: "Healer's Kit (10 uses)", price: 5, rarity: "N/A", category: "Supplies" },
+            { name: "Glass Vial", price: 1, rarity: "N/A", category: "Supplies" },
+            { name: "Mortar and Pestle", price: 2, rarity: "N/A", category: "Supplies" },
+            { name: "Distillation Coil", price: 25, rarity: "N/A", category: "Supplies" },
+        ];
+
+        // --- DOM ELEMENTS ---
+        const tableBody = document.getElementById('item-table-body');
+        const searchInput = document.getElementById('searchInput');
+        const rarityFilter = document.getElementById('rarityFilter');
+        const categoryFiltersContainer = document.getElementById('categoryFilters');
+        const noResultsDiv = document.getElementById('no-results');
+        const clearFiltersButton = document.getElementById('clearFilters');
+
+        // --- STATE ---
+        let activeCategory = 'All';
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Renders the item table based on the provided filter criteria.
+         */
+        function renderTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedRarity = rarityFilter.value;
+
+            const filteredData = itemData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesRarity = selectedRarity === 'all' || item.rarity === selectedRarity;
+                const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+                return matchesSearch && matchesRarity && matchesCategory;
+            });
+
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (filteredData.length === 0) {
+                noResultsDiv.classList.remove('hidden');
+                tableBody.classList.add('hidden');
+            } else {
+                noResultsDiv.classList.add('hidden');
+                tableBody.classList.remove('hidden');
+                filteredData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row-bg border-b border-gray-700 hover:bg-gray-600 transition-colors duration-200';
+                    
+                    const rarityClass = `rarity-${item.rarity.toLowerCase().replace(' ', '-').replace('/', '-')}`;
+                    const priceDisplay = item.price > 0 ? item.price.toLocaleString() : "Varies";
+                    
+                    row.innerHTML = `
+                        <td class="p-4 font-medium text-white">${item.name}</td>
+                        <td class="p-4 text-right text-yellow-400 font-mono">${priceDisplay}</td>
+                        <td class="p-4 text-center">
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full border-2 ${rarityClass}">${item.rarity}</span>
+                        </td>
+                        <td class="p-4 text-gray-400">${item.category}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        /**
+         * Sets up the category filter buttons.
+         */
+        function setupCategoryFilters() {
+            // Extract unique categories and add 'All'
+            const categories = ['All', ...new Set(itemData.map(item => item.category))];
+            
+            categoryFiltersContainer.innerHTML = ''; // Clear existing buttons
+            
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.dataset.category = category;
+                button.className = `px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeCategory === category ? 'category-button-active' : 'category-button-inactive'}`;
+                
+                button.addEventListener('click', () => {
+                    activeCategory = category;
+                    // Update button styles
+                    document.querySelectorAll('#categoryFilters button').forEach(btn => {
+                        btn.className = `px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${btn.dataset.category === activeCategory ? 'category-button-active' : 'category-button-inactive'}`;
+                    });
+                    renderTable(); // Re-render the table with the new category
+                });
+                
+                categoryFiltersContainer.appendChild(button);
+            });
+        }
+        
+        /**
+         * Clears all filters and resets the view.
+         */
+        function clearAllFilters() {
+            searchInput.value = '';
+            rarityFilter.value = 'all';
+            activeCategory = 'All';
+            setupCategoryFilters(); // Re-setup to reset active style
+            renderTable();
+        }
+
+        // --- INITIALIZATION ---
+        
+        // Event Listeners
+        searchInput.addEventListener('input', renderTable);
+        rarityFilter.addEventListener('change', renderTable);
+        clearFiltersButton.addEventListener('click', clearAllFilters);
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCategoryFilters();
+            renderTable();
+        });
+
+    </script>
+</body>
+</html>
