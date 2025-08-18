@@ -18,6 +18,13 @@
             color: #4f46e5;
             background-color: #eef2ff;
         }
+        .level-up-animate {
+            animation: fadeIn .5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200">
@@ -119,6 +126,7 @@
                         </div>
                          <div id="levelUpMessage" class="hidden mt-6 p-4 bg-green-800 border-green-600 rounded-lg text-center">
                             <p class="text-xl font-bold text-white">🎉 Level Up! 🎉</p>
+                            <p class="text-gray-200">You have enough EP to reach Level <span id="leveledUpTo"></span>!</p>
                         </div>
                     </div>
                 </div>
@@ -131,14 +139,14 @@
         const progressionData = [
             { level: 1, prof: 2, ep: 0, total: 0 }, { level: 2, prof: 2, ep: 4, total: 4 },
             { level: 3, prof: 2, ep: 4, total: 8 }, { level: 4, prof: 2, ep: 6, total: 14 },
-            { level: 5, prof: 3, ep: 8, total: 22 }, { level: 6, prof: 3, ep: 8, total: 30 },
-            { level: 7, prof: 3, ep: 8, total: 38 }, { level: 8, prof: 3, ep: 10, total: 48 },
-            { level: 9, prof: 4, ep: 10, total: 58 }, { level: 10, prof: 4, ep: 10, total: 68 },
-            { level: 11, prof: 4, ep: 10, total: 78 }, { level: 12, prof: 4, ep: 12, total: 90 },
-            { level: 13, prof: 5, ep: 12, total: 102 }, { level: 14, prof: 5, ep: 12, total: 114 },
-            { level: 15, prof: 5, ep: 12, total: 126 }, { level: 16, prof: 5, ep: 15, total: 141 },
-            { level: 17, prof: 6, ep: 15, total: 156 }, { level: 18, prof: 6, ep: 15, total: 171 },
-            { level: 19, prof: 6, ep: 15, total: 186 }, { level: 20, prof: 6, ep: 19, total: 205 },
+            { level: 5, prof: 3, ep: 6, total: 20 }, { level: 6, prof: 3, ep: 8, total: 28 },
+            { level: 7, prof: 3, ep: 8, total: 36 }, { level: 8, prof: 3, ep: 10, total: 46 },
+            { level: 9, prof: 4, ep: 10, total: 56 }, { level: 10, prof: 4, ep: 12, total: 68 },
+            { level: 11, prof: 4, ep: 12, total: 80 }, { level: 12, prof: 4, ep: 14, total: 94 },
+            { level: 13, prof: 5, ep: 14, total: 108 }, { level: 14, prof: 5, ep: 16, total: 124 },
+            { level: 15, prof: 5, ep: 16, total: 140 }, { level: 16, prof: 5, ep: 18, total: 158 },
+            { level: 17, prof: 6, ep: 18, total: 176 }, { level: 18, prof: 6, ep: 20, total: 196 },
+            { level: 19, prof: 6, ep: 20, total: 216 }, { level: 20, prof: 6, ep: 22, total: 238 },
         ];
 
         const rewardsByProf = {
@@ -155,6 +163,7 @@
         const progressNextEP = document.getElementById('progressNextEP');
         const progressBar = document.getElementById('progressBar');
         const levelUpMessage = document.getElementById('levelUpMessage');
+        const leveledUpTo = document.getElementById('leveledUpTo');
 
         // --- FUNCTIONS ---
         function populateTables() {
@@ -197,7 +206,7 @@
             });
         }
 
-        function updateCalculator() {
+        function updateCalculator(leveledUp = false) {
             const level = parseInt(currentLevelInput.value) || 1;
             let ep = parseInt(currentEPInput.value) || 0;
             
@@ -212,13 +221,14 @@
                 return;
             }
 
-            // Auto-level up if EP exceeds requirement
+            let originalLevel = level;
             let currentLevel = level;
             while (currentLevel < 20 && ep >= progressionData[currentLevel].ep) {
                 ep -= progressionData[currentLevel].ep;
                 currentLevel++;
+                leveledUp = true;
             }
-            if (currentLevel !== level) {
+            if (currentLevel !== originalLevel) {
                 currentLevelInput.value = currentLevel;
                 currentEPInput.value = ep;
             }
@@ -232,10 +242,13 @@
             progressBar.style.width = `${percentage}%`;
             progressBar.textContent = `${Math.floor(percentage)}%`;
 
-            if (ep >= epNeeded) {
+            if (leveledUp) {
+                leveledUpTo.textContent = currentLevel;
                 levelUpMessage.classList.remove('hidden');
+                levelUpMessage.classList.add('level-up-animate');
             } else {
                 levelUpMessage.classList.add('hidden');
+                levelUpMessage.classList.remove('level-up-animate');
             }
             updateEncounterButtons(currentLevel);
         }
@@ -249,7 +262,7 @@
             
             let currentEP = parseInt(currentEPInput.value) || 0;
             currentEPInput.value = currentEP + reward;
-            updateCalculator();
+            updateCalculator(true);
         }
 
         function updateEncounterButtons(level) {
@@ -279,8 +292,8 @@
             populateTables();
             createChart();
             updateCalculator();
-            currentLevelInput.addEventListener('input', updateCalculator);
-            currentEPInput.addEventListener('input', updateCalculator);
+            currentLevelInput.addEventListener('input', () => updateCalculator(false));
+            currentEPInput.addEventListener('input', () => updateCalculator(false));
 
             document.querySelectorAll('.encounter-btn').forEach(btn => {
                 btn.addEventListener('click', () => addEP(btn.dataset.type));
