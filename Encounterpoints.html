@@ -98,6 +98,13 @@
                                 <input type="number" id="currentEP" value="0" min="0" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                         </div>
+                        <h2 class="text-2xl font-bold mt-8 mb-4 text-white">Add Encounter EP</h2>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button data-type="b" class="encounter-btn bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Basic</button>
+                            <button data-type="i" class="encounter-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Intermediate</button>
+                            <button data-type="h" class="encounter-btn bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Hard</button>
+                            <button data-type="d" class="encounter-btn bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Deadly</button>
+                        </div>
                     </div>
                     <div class="md:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg">
                         <h2 class="text-3xl font-bold text-center text-white">Progression to Level <span id="nextLevelDisplay">2</span></h2>
@@ -192,7 +199,8 @@
 
         function updateCalculator() {
             const level = parseInt(currentLevelInput.value) || 1;
-            const ep = parseInt(currentEPInput.value) || 0;
+            let ep = parseInt(currentEPInput.value) || 0;
+            
             if (level >= 20) {
                 nextLevelDisplay.textContent = 'MAX';
                 progressCurrentEP.textContent = '---';
@@ -200,14 +208,27 @@
                 progressBar.style.width = '100%';
                 progressBar.textContent = 'MAX LEVEL';
                 levelUpMessage.classList.add('hidden');
+                updateEncounterButtons(level);
                 return;
             }
-            const epNeeded = progressionData[level].ep;
-            nextLevelDisplay.textContent = level + 1;
+
+            // Auto-level up if EP exceeds requirement
+            let currentLevel = level;
+            while (currentLevel < 20 && ep >= progressionData[currentLevel].ep) {
+                ep -= progressionData[currentLevel].ep;
+                currentLevel++;
+            }
+            if (currentLevel !== level) {
+                currentLevelInput.value = currentLevel;
+                currentEPInput.value = ep;
+            }
+
+            const epNeeded = progressionData[currentLevel].ep;
+            nextLevelDisplay.textContent = currentLevel + 1;
             progressCurrentEP.textContent = ep;
             progressNextEP.textContent = epNeeded;
             
-            const percentage = Math.min(100, (ep / epNeeded) * 100);
+            const percentage = epNeeded > 0 ? Math.min(100, (ep / epNeeded) * 100) : 0;
             progressBar.style.width = `${percentage}%`;
             progressBar.textContent = `${Math.floor(percentage)}%`;
 
@@ -216,6 +237,29 @@
             } else {
                 levelUpMessage.classList.add('hidden');
             }
+            updateEncounterButtons(currentLevel);
+        }
+
+        function addEP(type) {
+            const level = parseInt(currentLevelInput.value) || 1;
+            if (level > 20) return;
+
+            const prof = progressionData[level - 1].prof;
+            const reward = rewardsByProf[prof][type];
+            
+            let currentEP = parseInt(currentEPInput.value) || 0;
+            currentEPInput.value = currentEP + reward;
+            updateCalculator();
+        }
+
+        function updateEncounterButtons(level) {
+            if (level > 20) level = 20;
+            const prof = progressionData[level - 1].prof;
+            const rewards = rewardsByProf[prof];
+            document.querySelector('.encounter-btn[data-type="b"]').innerHTML = `Basic<br>+${rewards.b} EP`;
+            document.querySelector('.encounter-btn[data-type="i"]').innerHTML = `Intermediate<br>+${rewards.i} EP`;
+            document.querySelector('.encounter-btn[data-type="h"]').innerHTML = `Hard<br>+${rewards.h} EP`;
+            document.querySelector('.encounter-btn[data-type="d"]').innerHTML = `Deadly<br>+${rewards.d} EP`;
         }
 
         function changeTab(tabName) {
@@ -237,6 +281,10 @@
             updateCalculator();
             currentLevelInput.addEventListener('input', updateCalculator);
             currentEPInput.addEventListener('input', updateCalculator);
+
+            document.querySelectorAll('.encounter-btn').forEach(btn => {
+                btn.addEventListener('click', () => addEP(btn.dataset.type));
+            });
         });
     </script>
 </body>
