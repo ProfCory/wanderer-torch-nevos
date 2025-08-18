@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP Leveling Calculator & Planner</title>
+    <title>EP Leveling System Reference</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,25 +25,67 @@
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
         <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white">EP Leveling Calculator & Planner</h1>
-            <p class="text-lg text-indigo-300 mt-2">An interactive toolkit for your revised Encounter Point system.</p>
+            <h1 class="text-4xl font-bold text-white">Encounter Point Leveling System</h1>
+            <p class="text-lg text-indigo-300 mt-2">The complete reference for your custom progression system.</p>
         </header>
 
         <!-- Tab Navigation -->
         <div class="mb-6 border-b border-gray-700">
             <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
-                <button onclick="changeTab('calculator')" id="tab-calculator" class="tab-button tab-active text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200">Calculator & Planner</button>
-                <button onclick="changeTab('rewards')" id="tab-rewards" class="tab-button text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200 text-gray-400 hover:text-white">Encounter Rewards</button>
-                <button onclick="changeTab('progression')" id="tab-progression" class="tab-button text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200 text-gray-400 hover:text-white">Progression Data</button>
+                <button onclick="changeTab('progression')" id="tab-progression" class="tab-button tab-active text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200">Progression</button>
+                <button onclick="changeTab('rewards')" id="tab-rewards" class="tab-button text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200 text-gray-400 hover:text-white">Rewards</button>
+                <button onclick="changeTab('chart')" id="tab-chart" class="tab-button text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200 text-gray-400 hover:text-white">Chart</button>
+                <button onclick="changeTab('calculator')" id="tab-calculator" class="tab-button text-lg font-semibold border-b-2 border-transparent px-4 py-3 transition-colors duration-200 text-gray-400 hover:text-white">Calculator</button>
             </nav>
         </div>
 
         <!-- Main Content -->
         <main>
-            <!-- Calculator / Planner Section -->
-            <div id="calculator" class="tab-content">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Left Panel: Controls -->
+            <!-- Progression Tab -->
+            <div id="progression" class="tab-content bg-gray-800 p-6 rounded-xl shadow-lg overflow-x-auto">
+                <h2 class="text-3xl font-bold mb-4 text-white">Character Progression</h2>
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Prof. Mod</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">EP for this Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Total EP to Reach</th>
+                        </tr>
+                    </thead>
+                    <tbody id="progressionTableBody" class="bg-gray-800 divide-y divide-gray-700"></tbody>
+                </table>
+            </div>
+
+            <!-- Rewards Tab -->
+            <div id="rewards" class="tab-content hidden bg-gray-800 p-6 rounded-xl shadow-lg overflow-x-auto">
+                <h2 class="text-3xl font-bold mb-4 text-white">Encounter Rewards</h2>
+                <p class="mb-6 text-gray-400">Rewards are based on the party's Proficiency Modifier tier.</p>
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Level (Prof. Mod)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Basic</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Intermediate</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Hard</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Deadly</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rewardsTableBody" class="bg-gray-800 divide-y divide-gray-700"></tbody>
+                </table>
+            </div>
+
+            <!-- Chart Tab -->
+            <div id="chart" class="tab-content hidden bg-gray-800 p-6 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold mb-4 text-white">Leveling Curve</h2>
+                <div class="h-96">
+                    <canvas id="progressionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Calculator Tab -->
+            <div id="calculator" class="tab-content hidden">
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="md:col-span-1 bg-gray-800 p-6 rounded-xl shadow-lg">
                         <h2 class="text-2xl font-bold mb-4 text-white">Character Status</h2>
                         <div class="space-y-4">
@@ -55,404 +97,147 @@
                                 <label for="currentEP" class="block text-sm font-medium text-gray-400">Current EP in this Level</label>
                                 <input type="number" id="currentEP" value="0" min="0" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
-                            <button id="updateButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Update</button>
-                        </div>
-
-                        <h2 class="text-2xl font-bold mt-8 mb-4 text-white">Add Encounter EP</h2>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button id="addBasic" class="encounter-btn bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Basic</button>
-                            <button id="addIntermediate" class="encounter-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Intermediate</button>
-                            <button id="addHard" class="encounter-btn bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Hard</button>
-                            <button id="addDeadly" class="encounter-btn bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-2 rounded-lg transition-colors duration-200 text-sm">Deadly</button>
                         </div>
                     </div>
-
-                    <!-- Right Panel: Display -->
-                    <div class="md:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
-                        <div>
-                            <h2 class="text-3xl font-bold text-center text-white">Progression to Level <span id="nextLevelDisplay">2</span></h2>
-                            <div class="mt-6">
-                                <div class="flex justify-between items-center text-lg mb-1">
-                                    <span class="text-gray-400">Current Progress</span>
-                                    <span class="font-semibold text-white"><span id="progressCurrentEP">0</span> / <span id="progressNextEP">3</span> EP</span>
-                                </div>
-                                <div class="w-full bg-gray-700 rounded-full h-6">
-                                    <div id="progressBar" class="bg-indigo-500 h-6 rounded-full text-center text-white font-bold text-sm leading-6 transition-all duration-500" style="width: 0%">0%</div>
-                                </div>
+                    <div class="md:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <h2 class="text-3xl font-bold text-center text-white">Progression to Level <span id="nextLevelDisplay">2</span></h2>
+                        <div class="mt-6">
+                            <div class="flex justify-between items-center text-lg mb-1">
+                                <span class="text-gray-400">Progress</span>
+                                <span class="font-semibold text-white"><span id="progressCurrentEP">0</span> / <span id="progressNextEP">4</span> EP</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-6">
+                                <div id="progressBar" class="bg-indigo-500 h-6 rounded-full text-center text-white font-bold text-sm leading-6 transition-all duration-500" style="width: 0%">0%</div>
                             </div>
                         </div>
-                        <div class="mt-8 text-center bg-gray-900 p-4 rounded-lg">
-                             <p class="text-xl text-gray-300">Total EP Earned: <span id="totalEPDisplay" class="font-bold text-indigo-300">0</span></p>
-                        </div>
-                         <div id="levelUpMessage" class="hidden mt-6 p-4 bg-green-800 border border-green-600 rounded-lg text-center">
+                         <div id="levelUpMessage" class="hidden mt-6 p-4 bg-green-800 border-green-600 rounded-lg text-center">
                             <p class="text-xl font-bold text-white">🎉 Level Up! 🎉</p>
-                            <p class="text-gray-200">You have reached Level <span id="newLevelMessage"></span>!</p>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Encounter Rewards Table Section -->
-            <div id="rewards" class="tab-content hidden">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg overflow-x-auto">
-                    <h2 class="text-3xl font-bold mb-4 text-white">Encounter Rewards per Level</h2>
-                    <p class="mb-6 text-gray-400">EP rewards scale with character level to ensure consistent pacing.</p>
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead class="bg-gray-700">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Level</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Basic (Easy)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Intermediate (Medium)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Hard</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Deadly</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rewardsTableBody" class="bg-gray-800 divide-y divide-gray-700">
-                            <!-- JS will populate this -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Progression Data Section -->
-            <div id="progression" class="tab-content hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    <div class="lg:col-span-3 bg-gray-800 p-6 rounded-xl shadow-lg overflow-x-auto">
-                        <h2 class="text-3xl font-bold mb-4 text-white">Progression Data</h2>
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead class="bg-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Level</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">EP for this Level</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Total EP to Reach</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-300 uppercase tracking-wider">Total XP</th>
-                                </tr>
-                            </thead>
-                            <tbody id="progressionTableBody" class="bg-gray-800 divide-y divide-gray-700">
-                                <!-- JS will populate this -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg">
-                        <h2 class="text-3xl font-bold mb-4 text-white">Leveling Curve</h2>
-                        <p class="text-gray-400 mb-4">Visualizing the "EP for this Level" requirement.</p>
-                        <canvas id="progressionChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
         </main>
     </div>
 
     <script>
         // --- DATA DEFINITIONS ---
-
-        // Progression data: How much EP is needed for each level-up.
-        const progressionData = {
-            1: { epForLevel: 3, totalEP: 0 },
-            2: { epForLevel: 6, totalEP: 3 },
-            3: { epForLevel: 9, totalEP: 9 },
-            4: { epForLevel: 18, totalEP: 18 },
-            5: { epForLevel: 27, totalEP: 36 },
-            6: { epForLevel: 38, totalEP: 63 },
-            7: { epForLevel: 65, totalEP: 101 },
-            8: { epForLevel: 75, totalEP: 166 },
-            9: { epForLevel: 90, totalEP: 241 },
-            10: { epForLevel: 110, totalEP: 331 },
-            11: { epForLevel: 140, totalEP: 441 },
-            12: { epForLevel: 160, totalEP: 581 },
-            13: { epForLevel: 210, totalEP: 741 },
-            14: { epForLevel: 150, totalEP: 951 },
-            15: { epForLevel: 200, totalEP: 1101 },
-            16: { epForLevel: 200, totalEP: 1301 },
-            17: { epForLevel: 250, totalEP: 1501 },
-            18: { epForLevel: 300, totalEP: 1751 },
-            19: { epForLevel: 300, totalEP: 2051 },
-            20: { epForLevel: 400, totalEP: 2351 },
-            21: { epForLevel: 400, totalEP: 2751 },
-            22: { epForLevel: 500, totalEP: 3151 }, // sentinel value for level 20
-        };
-        
-        // Revised progression data from PDF to match expected values
-        const revisedProgression = [
-            { level: 1, epForLevel: 0, totalEP: 0 },
-            { level: 2, epForLevel: 3, totalEP: 3 },
-            { level: 3, epForLevel: 6, totalEP: 9 },
-            { level: 4, epForLevel: 18, totalEP: 27 },
-            { level: 5, epForLevel: 38, totalEP: 65 },
-            { level: 6, epForLevel: 75, totalEP: 140 },
-            { level: 7, epForLevel: 90, totalEP: 230 },
-            { level: 8, epForLevel: 110, totalEP: 340 },
-            { level: 9, epForLevel: 140, totalEP: 480 },
-            { level: 10, epForLevel: 160, totalEP: 640 },
-            { level: 11, epForLevel: 210, totalEP: 850 },
-            { level: 12, epForLevel: 150, totalEP: 1000 },
-            { level: 13, epForLevel: 200, totalEP: 1200 },
-            { level: 14, epForLevel: 200, totalEP: 1400 },
-            { level: 15, epForLevel: 250, totalEP: 1650 },
-            { level: 16, epForLevel: 300, totalEP: 1950 },
-            { level: 17, epForLevel: 300, totalEP: 2250 },
-            { level: 18, epForLevel: 400, totalEP: 2650 },
-            { level: 19, epForLevel: 400, totalEP: 3050 },
-            { level: 20, epForLevel: 500, totalEP: 3550 },
+        const progressionData = [
+            { level: 1, prof: 2, ep: 0, total: 0 }, { level: 2, prof: 2, ep: 4, total: 4 },
+            { level: 3, prof: 2, ep: 4, total: 8 }, { level: 4, prof: 2, ep: 6, total: 14 },
+            { level: 5, prof: 3, ep: 8, total: 22 }, { level: 6, prof: 3, ep: 8, total: 30 },
+            { level: 7, prof: 3, ep: 8, total: 38 }, { level: 8, prof: 3, ep: 10, total: 48 },
+            { level: 9, prof: 4, ep: 10, total: 58 }, { level: 10, prof: 4, ep: 10, total: 68 },
+            { level: 11, prof: 4, ep: 10, total: 78 }, { level: 12, prof: 4, ep: 12, total: 90 },
+            { level: 13, prof: 5, ep: 12, total: 102 }, { level: 14, prof: 5, ep: 12, total: 114 },
+            { level: 15, prof: 5, ep: 12, total: 126 }, { level: 16, prof: 5, ep: 15, total: 141 },
+            { level: 17, prof: 6, ep: 15, total: 156 }, { level: 18, prof: 6, ep: 15, total: 171 },
+            { level: 19, prof: 6, ep: 15, total: 186 }, { level: 20, prof: 6, ep: 19, total: 205 },
         ];
 
-
-        // Rewards data: EP gained from encounters, scaling by level.
-        const rewardsData = {
-            1: { b: 1, i: 1, h: 2, d: 2 }, // Level 1 is special
-            2: { b: 1, i: 2, h: 3, d: 4 },
-            3: { b: 2, i: 4, h: 6, d: 8 },
-            4: { b: 3, i: 6, h: 9, d: 12 },
-            5: { b: 4, i: 8, h: 12, d: 16 },
-            6: { b: 5, i: 10, h: 15, d: 20 },
-            7: { b: 6, i: 12, h: 18, d: 24 },
-            8: { b: 7, i: 14, h: 21, d: 28 },
-            9: { b: 8, i: 16, h: 24, d: 32 },
-            10: { b: 9, i: 18, h: 27, d: 36 },
-            11: { b: 10, i: 20, h: 30, d: 40 },
-            12: { b: 11, i: 22, h: 33, d: 44 },
-            13: { b: 12, i: 24, h: 36, d: 48 },
-            14: { b: 13, i: 26, h: 39, d: 52 },
-            15: { b: 14, i: 28, h: 42, d: 56 },
-            16: { b: 15, i: 30, h: 45, d: 60 },
-            17: { b: 16, i: 32, h: 48, d: 64 },
-            18: { b: 17, i: 34, h: 51, d: 68 },
-            19: { b: 18, i: 36, h: 54, d: 72 },
-            20: { b: 20, i: 40, h: 60, d: 80 },
+        const rewardsByProf = {
+            2: { b: 1, i: 2, h: 3, d: 4 }, 3: { b: 2, i: 3, h: 4, d: 5 },
+            4: { b: 3, i: 4, h: 5, d: 6 }, 5: { b: 4, i: 5, h: 6, d: 7 },
+            6: { b: 5, i: 6, h: 7, d: 8 },
         };
 
         // --- DOM ELEMENTS ---
         const currentLevelInput = document.getElementById('currentLevel');
         const currentEPInput = document.getElementById('currentEP');
-        const updateButton = document.getElementById('updateButton');
-        const addBasicBtn = document.getElementById('addBasic');
-        const addIntermediateBtn = document.getElementById('addIntermediate');
-        const addHardBtn = document.getElementById('addHard');
-        const addDeadlyBtn = document.getElementById('addDeadly');
         const nextLevelDisplay = document.getElementById('nextLevelDisplay');
         const progressCurrentEP = document.getElementById('progressCurrentEP');
         const progressNextEP = document.getElementById('progressNextEP');
         const progressBar = document.getElementById('progressBar');
-        const totalEPDisplay = document.getElementById('totalEPDisplay');
         const levelUpMessage = document.getElementById('levelUpMessage');
-        const newLevelMessage = document.getElementById('newLevelMessage');
-
-        // --- STATE ---
-        let state = {
-            level: 1,
-            ep: 0,
-        };
 
         // --- FUNCTIONS ---
+        function populateTables() {
+            const progressionTbody = document.getElementById('progressionTableBody');
+            progressionData.forEach(data => {
+                progressionTbody.innerHTML += `<tr class="hover:bg-gray-700"><td class="px-6 py-4 text-sm font-medium text-white">${data.level}</td><td class="px-6 py-4 text-sm text-gray-300">+${data.prof}</td><td class="px-6 py-4 text-sm text-gray-300">${data.ep}</td><td class="px-6 py-4 text-sm text-gray-300">${data.total}</td></tr>`;
+            });
 
-        function updateUI() {
-            const level = parseInt(state.level);
-            const ep = parseInt(state.ep);
+            const rewardsTbody = document.getElementById('rewardsTableBody');
+            const profTiers = [
+                { levels: '1-4', prof: 2 }, { levels: '5-8', prof: 3 },
+                { levels: '9-12', prof: 4 }, { levels: '13-16', prof: 5 },
+                { levels: '17-20', prof: 6 },
+            ];
+            profTiers.forEach(tier => {
+                const r = rewardsByProf[tier.prof];
+                rewardsTbody.innerHTML += `<tr class="hover:bg-gray-700"><td class="px-6 py-4 text-sm font-medium text-white">${tier.levels} (+${tier.prof})</td><td class="px-6 py-4 text-sm text-gray-300">${r.b}</td><td class="px-6 py-4 text-sm text-gray-300">${r.i}</td><td class="px-6 py-4 text-sm text-gray-300">${r.h}</td><td class="px-6 py-4 text-sm text-gray-300">${r.d}</td></tr>`;
+            });
+        }
 
+        function createChart() {
+            const ctx = document.getElementById('progressionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: progressionData.map(d => `Lvl ${d.level}`),
+                    datasets: [{
+                        label: 'EP For This Level',
+                        data: progressionData.map(d => d.ep),
+                        backgroundColor: progressionData.map(d => {
+                            if (d.prof === 2) return 'rgba(59, 130, 246, 0.7)';
+                            if (d.prof === 3) return 'rgba(16, 185, 129, 0.7)';
+                            if (d.prof === 4) return 'rgba(234, 179, 8, 0.7)';
+                            if (d.prof === 5) return 'rgba(239, 68, 68, 0.7)';
+                            return 'rgba(139, 92, 246, 0.7)';
+                        }),
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#4b5563' } }, x: { ticks: { color: '#9ca3af' }, grid: { display: false } } } }
+            });
+        }
+
+        function updateCalculator() {
+            const level = parseInt(currentLevelInput.value) || 1;
+            const ep = parseInt(currentEPInput.value) || 0;
             if (level >= 20) {
-                // Handle max level
                 nextLevelDisplay.textContent = 'MAX';
                 progressCurrentEP.textContent = '---';
                 progressNextEP.textContent = '---';
                 progressBar.style.width = '100%';
                 progressBar.textContent = 'MAX LEVEL';
-                totalEPDisplay.textContent = (revisedProgression[19].totalEP + ep).toLocaleString();
-                updateEncounterButtons(20);
+                levelUpMessage.classList.add('hidden');
                 return;
             }
-            
-            const nextLevelData = revisedProgression.find(p => p.level === level + 1);
-            const currentLevelTotalEP = revisedProgression.find(p => p.level === level).totalEP;
-            const epForNextLevel = nextLevelData.epForLevel;
-            
+            const epNeeded = progressionData[level].ep;
             nextLevelDisplay.textContent = level + 1;
-            progressCurrentEP.textContent = ep.toLocaleString();
-            progressNextEP.textContent = epForNextLevel.toLocaleString();
+            progressCurrentEP.textContent = ep;
+            progressNextEP.textContent = epNeeded;
             
-            const percentage = Math.min(100, (ep / epForNextLevel) * 100);
+            const percentage = Math.min(100, (ep / epNeeded) * 100);
             progressBar.style.width = `${percentage}%`;
             progressBar.textContent = `${Math.floor(percentage)}%`;
-            
-            totalEPDisplay.textContent = (currentLevelTotalEP + ep).toLocaleString();
 
-            updateEncounterButtons(level);
-        }
-
-        function updateEncounterButtons(level) {
-            const rewards = rewardsData[level];
-            if (!rewards) return;
-            addBasicBtn.innerHTML = `Basic<br>+${rewards.b} EP`;
-            addIntermediateBtn.innerHTML = `Intermediate<br>+${rewards.i} EP`;
-            addHardBtn.innerHTML = `Hard<br>+${rewards.h} EP`;
-            addDeadlyBtn.innerHTML = `Deadly<br>+${rewards.d} EP`;
-        }
-        
-        function handleManualUpdate() {
-            let level = parseInt(currentLevelInput.value);
-            let ep = parseInt(currentEPInput.value);
-
-            if (isNaN(level) || level < 1) level = 1;
-            if (isNaN(ep) || ep < 0) ep = 0;
-            if (level > 20) level = 20;
-
-            state.level = level;
-            state.ep = ep;
-            
-            // Hide level up message on manual update
-            levelUpMessage.classList.add('hidden');
-
-            checkForLevelUp();
-        }
-
-        function addEP(amount) {
-            if (state.level >= 20) return;
-            state.ep += amount;
-            
-            // Hide previous level up message
-            levelUpMessage.classList.add('hidden');
-            
-            checkForLevelUp();
-        }
-
-        function checkForLevelUp() {
-            let leveledUp = false;
-            while (state.level < 20) {
-                const nextLevelData = revisedProgression.find(p => p.level === state.level + 1);
-                const epNeeded = nextLevelData.epForLevel;
-
-                if (state.ep >= epNeeded) {
-                    state.level++;
-                    state.ep -= epNeeded;
-                    leveledUp = true;
-                } else {
-                    break;
-                }
-            }
-
-            if (leveledUp) {
-                newLevelMessage.textContent = state.level;
+            if (ep >= epNeeded) {
                 levelUpMessage.classList.remove('hidden');
+            } else {
+                levelUpMessage.classList.add('hidden');
             }
-            
-            currentLevelInput.value = state.level;
-            currentEPInput.value = state.ep;
-
-            updateUI();
-        }
-
-        function populateTables() {
-            // Populate Rewards Table
-            const rewardsTbody = document.getElementById('rewardsTableBody');
-            for (let level = 1; level <= 20; level++) {
-                const rewards = rewardsData[level];
-                const row = `
-                    <tr class="hover:bg-gray-700">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${level}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${rewards.b.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${rewards.i.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${rewards.h.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${rewards.d.toLocaleString()}</td>
-                    </tr>
-                `;
-                rewardsTbody.innerHTML += row;
-            }
-
-            // Populate Progression Table
-            const progressionTbody = document.getElementById('progressionTableBody');
-            revisedProgression.forEach((data, index) => {
-                if (index === 0) return; // Skip level 1 display row
-                const row = `
-                    <tr class="hover:bg-gray-700">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${data.level}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${data.epForLevel.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${data.totalEP.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${(data.totalEP * 100).toLocaleString()}</td>
-                    </tr>
-                `;
-                progressionTbody.innerHTML += row;
-            });
-        }
-        
-        function createChart() {
-            const ctx = document.getElementById('progressionChart').getContext('2d');
-            const chartData = revisedProgression.slice(1); // Exclude level 1
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.map(d => `Lvl ${d.level}`),
-                    datasets: [{
-                        label: 'EP For This Level',
-                        data: chartData.map(d => d.epForLevel),
-                        backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                        borderColor: 'rgba(99, 102, 241, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` ${context.raw.toLocaleString()} EP to reach Level ${context.label.split(' ')[1]}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: '#4b5563' }
-                        },
-                        x: {
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: '#4b5563' }
-                        }
-                    }
-                }
-            });
         }
 
         function changeTab(tabName) {
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.tab-button').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('text-gray-400', 'hover:text-white');
             });
-            // Deactivate all tab buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('tab-active');
-                button.classList.add('text-gray-400', 'hover:text-white');
-            });
-
-            // Show selected tab content
             document.getElementById(tabName).classList.remove('hidden');
-            // Activate selected tab button
             const activeButton = document.getElementById(`tab-${tabName}`);
             activeButton.classList.add('tab-active');
             activeButton.classList.remove('text-gray-400', 'hover:text-white');
         }
 
-        // --- EVENT LISTENERS ---
-        updateButton.addEventListener('click', handleManualUpdate);
-        addBasicBtn.addEventListener('click', () => addEP(rewardsData[state.level].b));
-        addIntermediateBtn.addEventListener('click', () => addEP(rewardsData[state.level].i));
-        addHardBtn.addEventListener('click', () => addEP(rewardsData[state.level].h));
-        addDeadlyBtn.addEventListener('click', () => addEP(rewardsData[state.level].d));
-
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             populateTables();
             createChart();
-            handleManualUpdate(); // Initial UI setup
+            updateCalculator();
+            currentLevelInput.addEventListener('input', updateCalculator);
+            currentEPInput.addEventListener('input', updateCalculator);
         });
-
     </script>
 </body>
 </html>
