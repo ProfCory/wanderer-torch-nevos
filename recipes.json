@@ -1,5 +1,0 @@
-[
-    { "name": "Healing Potion", "tools": "Alchemist's Supplies", "ingredients": "Common plant, Uncommon residuum, Water", "description": "A classic restorative. The plant and residuum are ground, mixed into water, and heated to create a potent healing draught." },
-    { "name": "Healing Salve", "tools": "Herbalism Kit", "ingredients": "Common plant, Animal fat", "description": "A topical ointment. The plant is cooked down with animal fat, creating a salve that can be applied to wounds." },
-    ...
-]
