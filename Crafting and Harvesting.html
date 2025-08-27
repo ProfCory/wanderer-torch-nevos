@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Crafting in Nevos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Marcellus&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Parchment & Ink -->
+    <!-- Application Structure Plan: A tabbed, single-page application design was chosen to manage the density of information. This structure allows users to focus on one aspect of the crafting system at a time (e.g., The Core Process, The Bestiary, Recipes) without being overwhelmed by a long, scrolling page. The navigation is persistent at the top, acting as a clear index. This thematic sectioning breaks down the complex system into logical, digestible parts, guiding the user from general concepts to specific details. Key interactions include filtering the bestiary and recipe book, and clicking on chart elements to reveal detailed information, which promotes active exploration over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Core Process Flow: Report Info -> "Find, Harvest, Craft" loop. Goal -> Organize. Viz -> HTML/CSS diagram. Interaction -> Static visual flow. Justification -> Provides a clear, immediate understanding of the system's foundation. Method -> Tailwind Flexbox.
+        - Mastery Ladder: Report Info -> Six tiers of crafting skill. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart. Interaction -> Clicking a tier's bar updates a detailed text panel. Justification -> Visually represents progression and allows for detailed exploration without cluttering the UI. Library -> Chart.js.
+        - Component Rarity: Report Info -> Creature component rarity data. Goal -> Inform. Viz -> Doughnut Chart. Interaction -> Dropdown selects a creature type, updating the chart. Justification -> Offers a quick, visual summary of what to expect from harvesting different creatures. Library -> Chart.js.
+        - Bestiary & Recipes: Report Info -> Extensive tables of components and recipes. Goal -> Organize/Explore. Viz -> Filterable HTML tables. Interaction -> Text input filters tables in real-time. Justification -> Makes large datasets searchable and user-friendly, allowing players to quickly find what they need. Method -> Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Marcellus', serif;
+            background-color: #FDF6E3;
+            color: #58483D;
+        }
+        h1, h2, h3, h4, .font-title {
+            font-family: 'IM Fell English', serif;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: #D3AF86;
+            color: #AF8C63;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: #F5EFE1;
+            border: 1px solid #EAE0C8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-6xl font-title text-[#8C6F4D]">A Player's Guide to Crafting in Nevos</h1>
+            <p class="text-lg mt-2 text-gray-600">An interactive compendium for the aspiring artisan and adventurer.</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center border-b-2 border-[#EAE0C8] mb-8">
+            <button class="tab-button active text-lg px-4 py-2" onclick="showTab('process')">The Core Process</button>
+            <button class="tab-button text-lg px-4 py-2" onclick="showTab('mastery')">Mastery & Tiers</button>
+            <button class="tab-button text-lg px-4 py-2" onclick="showTab('bestiary')">Bestiary of Components</button>
+            <button class="tab-button text-lg px-4 py-2" onclick="showTab('recipes')">The Recipe Book</button>
+            <button class="tab-button text-lg px-4 py-2" onclick="showTab('world')">Nevos Integration</button>
+        </nav>
+
+        <main>
+            <div id="process" class="tab-content active">
+                <section class="text-center">
+                    <h2 class="text-3xl font-title mb-4">The "Find, Harvest, Craft" Loop</h2>
+                    <p class="max-w-3xl mx-auto mb-8 text-base">
+                        This section introduces the fundamental cycle of crafting. Every great creation begins with an adventure. Players must first find a source, then successfully harvest its components, and finally, use their skills and tools to craft the desired item. This loop intrinsically links exploration, combat, and downtime into a rewarding gameplay experience.
+                    </p>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
+                        <div class="card p-6 rounded-lg shadow-md w-full md:w-1/4 text-center">
+                            <h3 class="text-2xl font-title mb-2">1. Find</h3>
+                            <p>Encounter a creature or unique resource in the world. Exploration and adventure are the first steps.</p>
+                        </div>
+                        <div class="text-4xl font-bold text-[#D3AF86] hidden md:block">&rarr;</div>
+                        <div class="text-4xl font-bold text-[#D3AF86] md:hidden">&darr;</div>
+                        <div class="card p-6 rounded-lg shadow-md w-full md:w-1/4 text-center">
+                            <h3 class="text-2xl font-title mb-2">2. Harvest</h3>
+                            <p>With the right tools, carefully extract valuable materials. This is a two-phase check: physical Extraction and knowledge-based Preparation.</p>
+                        </div>
+                        <div class="text-4xl font-bold text-[#D3AF86] hidden md:block">&rarr;</div>
+                        <div class="text-4xl font-bold text-[#D3AF86] md:hidden">&darr;</div>
+                        <div class="card p-6 rounded-lg shadow-md w-full md:w-1/4 text-center">
+                            <h3 class="text-2xl font-title mb-2">3. Craft</h3>
+                            <p>Use harvested materials, often with other components, to create something new during downtime.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="mastery" class="tab-content">
+                 <section class="text-center">
+                    <h2 class="text-3xl font-title mb-4">The Ladder of Skill</h2>
+                    <p class="max-w-3xl mx-auto mb-8 text-base">
+                        A crafter's ability is not static. This section visualizes the six tiers of mastery, from an unskilled novice to a legendary architect. Each tier represents a combination of innate proficiency and the quality of one's tools. Click on a bar in the chart below to see the detailed mechanics for each tier and understand how investing in proper tools is crucial for success.
+                    </p>
+                    <div class="flex flex-col lg:flex-row gap-8 items-start">
+                        <div class="w-full lg:w-2/3">
+                            <div class="chart-container">
+                                <canvas id="masteryChart"></canvas>
+                            </div>
+                        </div>
+                        <div id="tierDetail" class="w-full lg:w-1/3 card p-6 rounded-lg shadow-md">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="bestiary" class="tab-content">
+                <section>
+                    <h2 class="text-3xl font-title mb-4 text-center">Bestiary of Components</h2>
+                     <p class="max-w-3xl mx-auto mb-8 text-base text-center">
+                        Every creature in Nevos is a potential source of valuable materials. This interactive bestiary allows you to explore the components that can be harvested from different creature types. Use the dropdown to see a rarity breakdown for a specific type, or use the search bar to find specific components across all creatures.
+                    </p>
+
+                    <div class="flex flex-col md:flex-row gap-8 mb-8 items-center">
+                        <div class="w-full md:w-1/2">
+                             <div class="chart-container h-80 md:h-96">
+                                <canvas id="rarityChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2">
+                             <label for="creatureTypeSelect" class="block text-lg font-medium mb-2">Select Creature Type:</label>
+                             <select id="creatureTypeSelect" class="w-full p-2 border border-[#EAE0C8] rounded-md bg-white">
+                             </select>
+                             <p class="mt-4 text-sm text-gray-600">The chart shows the distribution of component rarities for the selected creature type. This gives a general idea of what you are likely to find when harvesting.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <input type="text" id="bestiarySearch" class="w-full p-3 border border-[#EAE0C8] rounded-md bg-white" placeholder="Search for a component (e.g., 'hide', 'venom', 'heart')...">
+                    </div>
+                    <div class="overflow-x-auto card rounded-lg shadow-md">
+                        <table class="w-full text-left">
+                            <thead class="bg-[#F5EFE1] border-b border-[#EAE0C8]">
+                                <tr>
+                                    <th class="p-4 font-title text-lg">Creature Type</th>
+                                    <th class="p-4 font-title text-lg">Common</th>
+                                    <th class="p-4 font-title text-lg">Uncommon</th>
+                                    <th class="p-4 font-title text-lg">Rare</th>
+                                    <th class="p-4 font-title text-lg">Very Rare</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bestiaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="recipes" class="tab-content">
+                <section>
+                    <h2 class="text-3xl font-title mb-4 text-center">The Recipe Book</h2>
+                    <p class="max-w-3xl mx-auto mb-8 text-base text-center">
+                        Here you will find a collection of known recipes, from simple healing salves to powerful magical infusions. This section demonstrates how various components are combined to create finished items. Use the search bar to filter recipes by name, required tools, or ingredients to quickly find what you're looking for.
+                    </p>
+                    <div class="mb-4">
+                        <input type="text" id="recipeSearch" class="w-full p-3 border border-[#EAE0C8] rounded-md bg-white" placeholder="Search for a recipe (e.g., 'Healing Potion', 'Smith's Tools')...">
+                    </div>
+                    <div id="recipeList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+                </section>
+            </div>
+
+            <div id="world" class="tab-content">
+                <section>
+                    <h2 class="text-3xl font-title mb-4 text-center">Crafting in the World of Nevos</h2>
+                    <p class="max-w-3xl mx-auto mb-8 text-base text-center">
+                       Crafting is not just a mechanic; it's a living part of the world's history, politics, and economy. This section connects the crafting system to the lore of Nevos, providing narrative context and potential quest hooks. The events and factions listed here show how a crafter's actions can have far-reaching consequences.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card p-6 rounded-lg shadow-md">
+                            <h3 class="text-2xl font-title mb-2">Discovery of Residuum (~85 Years Ago)</h3>
+                            <p>This potent magical substance, found in ancient, ley-laced battlefields, has become a cornerstone of high-level enchanting. Its discovery sparked a gold rush, and now the gnome-led <span class="font-semibold">Residuum Pact</span> fiercely controls its extraction, while <span class="font-semibold">Solvenar’s caravan lords</span> risk bloodshed over trading rights. Crafters seeking residuum will find themselves entangled in this web of commerce and conflict.</p>
+                        </div>
+                        <div class="card p-6 rounded-lg shadow-md">
+                            <h3 class="text-2xl font-title mb-2">Ashspire Collapse (~130 Years Ago)</h3>
+                            <p>When volcanic activity reshaped the outer wards of Kaelmar, it unearthed veins of rare, heat-resistant ores and unique geothermal crystals. These materials are highly sought after by master smiths and jewelers for creating items with fire resistance or elemental properties. Venturing into the unstable ruins of Ashspire is dangerous, but the rewards are immense.</p>
+                        </div>
+                        <div class="card p-6 rounded-lg shadow-md">
+                            <h3 class="text-2xl font-title mb-2">The Children of the Scale</h3>
+                            <p>This secretive dragonborn cult believes a new draconic age will rise. They hoard any and all dragon-related components—scales, teeth, bones, and especially hearts. A party that successfully harvests from a dragon will almost certainly attract the cult's attention, either as a potential ally to be recruited or a thief to be hunted.</p>
+                        </div>
+                         <div class="card p-6 rounded-lg shadow-md">
+                            <h3 class="text-2xl font-title mb-2">Whispers from Lanterndeep</h3>
+                            <p>Rumors persist of corrupted waters and strange, aberrant creatures lurking beneath the city of Lanterndeep. While dangerous, the ichor and organs from these creatures are prized by alchemists and poisoners for creating bizarre, potent, and often unstable concoctions. The risk of madness or mutation is high for those who work with such tainted materials.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+    </div>
+
+<script>
+const masteryData = [
+    { tier: 1, title: 'Unskilled Worker', proficiency: 'No Proficiency', tools: 'Improvised', check: 'Disadvantage', example: 'A fighter trying to mend a leather satchel without tools.' },
+    { tier: 2, title: 'The Apprentice', proficiency: 'Proficiency', tools: 'Improvised', check: 'Disadvantage', example: 'A herbalist trying to process a rare herb using a knife and a rock.' },
+    { tier: 3, title: 'The Handyman', proficiency: 'Proficiency', tools: 'Improvised', check: 'Straight Roll', example: 'A rogue using a hairpin and wire instead of Thieves\' Tools.' },
+    { tier: 4, title: 'The Journeyman', proficiency: 'Proficiency', tools: 'Proper Kit', check: 'Advantage', example: 'A carpenter using a saw, hammer, and lumber to build a bridge.' },
+    { tier: 5, title: 'The Master', proficiency: 'Expertise', tools: 'Improvised', check: 'Doubled Proficiency', example: 'A master alchemist using only a few basic pots to make an antidote.' },
+    { tier: 6, title: 'The Architect', proficiency: 'Expertise', tools: 'Proper Kit', check: 'Doubled Proficiency + Advantage', example: 'A legendary smith repairing a broken legendary sword at a proper forge.' },
+];
+
+const bestiaryData = [
+    { type: 'Beast', common: 'Hide, claws, fur, teeth, bones, meat.', uncommon: 'Glands, sinew, scales, venom, special oils.', rare: 'A specific organ, uniquely colored hide, a rare bone.', veryRare: 'A magical bone, a body part with natural spell-like properties.' },
+    { type: 'Aberration', common: 'Tentacles, unusual hide, teeth, a strange fluid, an eye.', uncommon: 'A crystalline or magical gland, a psychic organ, a hallucinatory fluid.', rare: 'An intact brain, a symbiotic organism, flesh warped by magic.', veryRare: 'A preserved mind or consciousness, flesh from an Outer Plane, a psychic body part.' },
+    { type: 'Celestial', common: 'Feathers, scales, hair, a golden fluid, a drop of pure light.', uncommon: 'A star shard, a preserved wing, a crystallized tear, a faint-aura heart.', rare: 'A glowing feather, a shard of an angel\'s halo, a celestial heart.', veryRare: 'A heart that can resurrect the dead, a drop of purifying blood, a fragment of a creature\'s soul.' },
+    { type: 'Construct', common: 'Metal plates, gears, wires, springs, an arcane gem.', uncommon: 'A power source, a magical gear, a memory core, a magical wire.', rare: 'A fully intact magical power source, a gear with a magical effect, a soul gem.', veryRare: 'The arcane blueprint, a perfectly preserved soul gem, a piece of the original creator\'s mind.' },
+    { type: 'Dragon', common: 'Scales, teeth, claws, bones, a drop of blood.', uncommon: 'Stomach lining, a preserved eye, a horn, a faintly beating heart.', rare: 'A perfectly preserved heart, a humming scale, a gland with breath weapon fluid.', veryRare: 'The entire soul of the dragon, an illusion-piercing eye, a heart that grants elemental power.' },
+    { type: 'Elemental', common: 'A crystal, a hardened shell, a piece of core or essence.', uncommon: 'A magical core piece, a shell for armor, essence for a spell.', rare: 'A pure piece of essence, a solidified fire heart, a magical core.', veryRare: 'A drop of elemental blood, a piece of the elemental\'s soul, a core that can summon the elemental.' },
+    { type: 'Fey', common: 'A unique leaf, a flower, a branch, a piece of bark.', uncommon: 'A piece of Fey skin, blood, hair, or heart.', rare: 'A heart turned into a gem, a piece of soul, a Fey\'s eye.', veryRare: 'A heart that grants a magical effect, a soul piece for a spell, an illusion-piercing eye.' },
+    { type: 'Fiend', common: 'A drop of blood, a piece of skin, a bone, a tooth, a horn.', uncommon: 'A preserved eye, a faintly beating heart, a piece of soul, skin for armor.', rare: 'A soul piece with a magical effect, a heart for casting, a perfectly preserved heart.', veryRare: 'A soul piece that can summon the fiend, a heart that grants elemental power.' },
+    { type: 'Giant', common: 'A tooth, a nail, a piece of skin, a bone, a piece of hair.', uncommon: 'A preserved eye, a heart piece, skin for armor.', rare: 'A perfectly preserved heart, a soul piece, skin with a magical effect.', veryRare: 'A soul piece for casting a spell, a heart that grants elemental power.' },
+    { type: 'Humanoid', common: 'A piece of skin, a bone, a piece of hair, a piece of heart.', uncommon: 'A preserved heart, a soul piece, skin for armor.', rare: 'A soul piece with a magical effect, a heart for casting, a perfectly preserved heart.', veryRare: 'A soul piece that can summon a humanoid, a heart that grants elemental power.' },
+];
+
+const recipeData = [
+    { name: 'Healing Potion', tools: 'Alchemist\'s Supplies', ingredients: 'Common plant, Uncommon residuum, Water', description: 'A classic restorative. The plant and residuum are ground, mixed into water, and heated to create a potent healing draught.' },
+    { name: 'Healing Salve', tools: 'Herbalism Kit', ingredients: 'Common plant, Animal fat', description: 'A topical ointment. The plant is cooked down with animal fat, creating a salve that can be applied to wounds.' },
+    { name: 'Contact Poison', tools: 'Poisoner\'s Kit', ingredients: 'Venom gland, Animal fat', description: 'A dangerous substance. A venom gland is heated with animal fat until dissolved. Requires careful handling and a Constitution save on mishap.' },
+    { name: 'Infused Spoon of Cleansing', tools: 'Jeweler\'s Tools', ingredients: 'Pure silver, Prestidigitation cantrip', description: 'A magical infusion. A caster channels Prestidigitation into pure silver while a Jeweler shapes it, creating a spoon that can purify food and drink.' },
+    { name: 'The Bolt Caster', tools: 'Smith\'s Tools', ingredients: 'Dragon scale (Rare), Pure gem (Rare), Magic Missile spell', description: 'A powerful single-use item. A Smith forges a bolt from a dragon scale, and a caster infuses it with a Magic Missile spell, storing one charge.' },
+    { name: 'Amulet of the Leaping Hunter', tools: 'Jeweler\'s Tools', ingredients: 'Beast heart (Very Rare), Pure gold, Jump spell', description: 'A rare magical amulet. A caster infuses a perfectly preserved beast heart with the Jump spell, allowing the wearer to cast it once per long rest.' }
+];
+
+let masteryChart, rarityChart;
+
+function showTab(tabId) {
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(button => button.classList.remove('active'));
+    document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
+}
+
+function updateTierDetail(tierIndex) {
+    const tier = masteryData[tierIndex];
+    const detailDiv = document.getElementById('tierDetail');
+    detailDiv.innerHTML = `
+        <h3 class="text-2xl font-title mb-2">Tier ${tier.tier}: ${tier.title}</h3>
+        <p class="mb-2"><strong>Proficiency:</strong> ${tier.proficiency}</p>
+        <p class="mb-2"><strong>Tools:</strong> ${tier.tools}</p>
+        <p class="mb-2"><strong>Check Roll:</strong> <span class="font-semibold text-[#8C6F4D]">${tier.check}</span></p>
+        <hr class="my-3 border-[#EAE0C8]">
+        <p class="text-sm italic text-gray-600">"${tier.example}"</p>
+    `;
+}
+
+function createMasteryChart() {
+    const ctx = document.getElementById('masteryChart').getContext('2d');
+    masteryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: masteryData.map(d => `Tier ${d.tier}: ${d.title}`),
+            datasets: [{
+                label: 'Mastery Level',
+                data: masteryData.map(d => d.tier * 10),
+                backgroundColor: '#D3AF86',
+                borderColor: '#AF8C63',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            scales: {
+                x: { display: false },
+                y: { ticks: { font: { family: "'Marcellus', serif", size: 14 } } }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    updateTierDetail(index);
+                }
+            }
+        }
+    });
+}
+
+function populateBestiaryTable(filter = '') {
+    const tableBody = document.getElementById('bestiaryTableBody');
+    tableBody.innerHTML = '';
+    const filteredData = bestiaryData.filter(item => 
+        Object.values(item).some(val => val.toLowerCase().includes(filter.toLowerCase()))
+    );
+    filteredData.forEach(item => {
+        const row = `
+            <tr class="border-b border-[#EAE0C8]">
+                <td class="p-4 font-semibold">${item.type}</td>
+                <td class="p-4">${item.common}</td>
+                <td class="p-4">${item.uncommon}</td>
+                <td class="p-4">${item.rare}</td>
+                <td class="p-4">${item.veryRare}</td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+
+function createRarityChart() {
+    const ctx = document.getElementById('rarityChart').getContext('2d');
+    rarityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Common', 'Uncommon', 'Rare', 'Very Rare'],
+            datasets: [{
+                data: [1, 1, 1, 1],
+                backgroundColor: ['#A89A81', '#D3AF86', '#AF8C63', '#8C6F4D'],
+                borderColor: '#FDF6E3',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { font: { family: "'Marcellus', serif", size: 14 } } },
+                title: { display: true, text: 'Component Rarity Distribution', font: { family: "'IM Fell English', serif", size: 18 } }
+            }
+        }
+    });
+}
+
+function updateRarityChart(creatureType) {
+    const data = bestiaryData.find(d => d.type === creatureType);
+    if (!data) return;
+
+    const count = (str) => str.split(',').length;
+    
+    rarityChart.data.datasets[0].data = [
+        count(data.common),
+        count(data.uncommon),
+        count(data.rare),
+        count(data.veryRare)
+    ];
+    rarityChart.options.plugins.title.text = `${creatureType} Component Rarity`;
+    rarityChart.update();
+}
+
+function populateRecipeList(filter = '') {
+    const recipeList = document.getElementById('recipeList');
+    recipeList.innerHTML = '';
+    const filteredData = recipeData.filter(item => 
+        Object.values(item).some(val => val.toLowerCase().includes(filter.toLowerCase()))
+    );
+    filteredData.forEach(recipe => {
+        const card = `
+            <div class="card p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-title mb-2">${recipe.name}</h3>
+                <p class="mb-1"><strong>Tools:</strong> ${recipe.tools}</p>
+                <p class="mb-3"><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                <p class="text-sm text-gray-600">${recipe.description}</p>
+            </div>
+        `;
+        recipeList.innerHTML += card;
+    });
+}
+
+window.onload = () => {
+    showTab('process');
+
+    createMasteryChart();
+    updateTierDetail(3);
+
+    const creatureSelect = document.getElementById('creatureTypeSelect');
+    bestiaryData.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.type;
+        option.textContent = item.type;
+        creatureSelect.appendChild(option);
+    });
+    creatureSelect.addEventListener('change', (e) => updateRarityChart(e.target.value));
+    
+    createRarityChart();
+    updateRarityChart('Beast');
+
+    populateBestiaryTable();
+    document.getElementById('bestiarySearch').addEventListener('input', (e) => populateBestiaryTable(e.target.value));
+
+    populateRecipeList();
+    document.getElementById('recipeSearch').addEventListener('input', (e) => populateRecipeList(e.target.value));
+};
+</script>
+</body>
+</html>
