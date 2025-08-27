@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blank Recipe Card & Best Practices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Marcellus&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Marcellus', serif;
+            background-color: #FDF6E3;
+            color: #58483D;
+        }
+        h1, h2, h3, h4, .font-title {
+            font-family: 'IM Fell English', serif;
+        }
+        .card {
+            background-color: #F5EFE1;
+            border: 1px solid #EAE0C8;
+        }
+        .input {
+            background-color: #FDF6E3;
+            border: 1px solid #EAE0C8;
+        }
+    </style>
+</head>
+<body class="antialiased p-4 md:p-8">
+
+    <div class="container mx-auto max-w-4xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-6xl font-title text-[#8C6F4D]">Recipe Card & Best Practices</h1>
+            <p class="text-lg mt-2 text-gray-600">A guide for creating new items in the world of Nevos.</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <section class="card p-6 rounded-lg shadow-md h-full">
+                <h2 class="text-3xl font-title mb-4">Blank Recipe Card</h2>
+                <p class="mb-4 text-sm text-gray-600">Use this template to document a new item for your character. Fill in the fields below with the required components and processes to craft your creation.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="recipeName" class="block text-lg font-medium mb-1">Recipe Name</label>
+                        <input type="text" id="recipeName" class="input w-full p-2 rounded-md">
+                    </div>
+                    <div>
+                        <label for="tools" class="block text-lg font-medium mb-1">Required Tools</label>
+                        <input type="text" id="tools" class="input w-full p-2 rounded-md">
+                    </div>
+                    <div>
+                        <label for="ingredients" class="block text-lg font-medium mb-1">Ingredients</label>
+                        <textarea id="ingredients" class="input w-full p-2 rounded-md h-24"></textarea>
+                    </div>
+                    <div>
+                        <label for="description" class="block text-lg font-medium mb-1">Process / Description</label>
+                        <textarea id="description" class="input w-full p-2 rounded-md h-32"></textarea>
+                    </div>
+                </div>
+                
+                <div class="mt-6 border-t pt-6 border-gray-300">
+                    <h3 class="text-xl font-title mb-2">Export to JSON</h3>
+                    <p class="mb-4 text-sm text-gray-600">Click the button below to generate a JSON object from your recipe card. You can then copy and paste this into your `recipes.json` file.</p>
+                    <div class="flex gap-4">
+                        <button id="exportBtn" class="bg-[#AF8C63] text-white px-4 py-2 rounded-md hover:bg-[#8C6F4D] transition-colors">Export to JSON</button>
+                        <button id="copyBtn" class="bg-[#A89A81] text-white px-4 py-2 rounded-md hover:bg-[#837B69] transition-colors hidden">Copy to Clipboard</button>
+                    </div>
+                    <pre id="jsonOutput" class="card p-4 mt-4 text-sm whitespace-pre-wrap break-words hidden"></pre>
+                </div>
+            </section>
+
+            <section class="card p-6 rounded-lg shadow-md h-full">
+                <h2 class="text-3xl font-title mb-4">Crafting Best Practices</h2>
+                <p class="mb-4 text-sm text-gray-600">Remember these key principles to increase your chances of success and make crafting a rewarding part of your adventure.</p>
+                <ul class="space-y-4">
+                    <li class="p-3 bg-[#FDF6E3] rounded-md border border-[#EAE0C8]">
+                        <h3 class="font-title text-xl mb-1">Work Together</h3>
+                        <p class="text-sm">Crafting is a team effort. A proficient helper can grant you advantage on one of your two checks. Look for party members who can assist in either the physical (STR/DEX) or knowledge (INT/WIS) phase of crafting.</p>
+                    </li>
+                    <li class="p-3 bg-[#FDF6E3] rounded-md border border-[#EAE0C8]">
+                        <h3 class="font-title text-xl mb-1">Get the Right Tools</h3>
+                        <p class="text-sm">Investing in a proper tool kit (Tier 4) grants you advantage on your crafting checks. Monster Harvesting Tools are essential for acquiring rare components, as they are a prerequisite for attempting to harvest them.</p>
+                    </li>
+                    <li class="p-3 bg-[#FDF6E3] rounded-md border border-[#EAE0C8]">
+                        <h3 class="font-title text-xl mb-1">Plan Your Sourcing</h3>
+                        <p class="text-sm">Think about the full "Find, Harvest, Craft" loop. The right ingredients are often tied to specific creature types or geographic locations. Use your party's knowledge and the campaign's lore to locate the materials you need.</p>
+                    </li>
+                    <li class="p-3 bg-[#FDF6E3] rounded-md border border-[#EAE0C8]">
+                        <h3 class="font-title text-xl mb-1">Time & Risk Management</h3>
+                        <p class="text-sm">Crafting is a time-consuming process. Each attempt takes a minimum of one hour, and repeated attempts without a rest can cause exhaustion. Be strategic about when and where you attempt a new project.</p>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const jsonOutput = document.getElementById('jsonOutput');
+
+    exportBtn.addEventListener('click', () => {
+        const recipe = {
+            name: document.getElementById('recipeName').value,
+            tools: document.getElementById('tools').value,
+            ingredients: document.getElementById('ingredients').value,
+            description: document.getElementById('description').value
+        };
+
+        const jsonString = JSON.stringify(recipe, null, 2);
+        jsonOutput.textContent = jsonString;
+        jsonOutput.classList.remove('hidden');
+        copyBtn.classList.remove('hidden');
+    });
+
+    copyBtn.addEventListener('click', () => {
+        const textToCopy = jsonOutput.textContent;
+        // Use modern clipboard API if available
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => alert('JSON copied to clipboard!'))
+                .catch(err => console.error('Could not copy text: ', err));
+        } else {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'JSON copied to clipboard!' : 'Failed to copy text.';
+                alert(msg);
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+                alert('Copying failed, please copy the text manually.');
+            }
+            document.body.removeChild(textarea);
+        }
+    });
+});
+</script>
+</body>
+</html>
