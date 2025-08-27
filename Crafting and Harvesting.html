@@ -10,10 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Marcellus&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Parchment & Ink -->
-    <!-- Application Structure Plan: A tabbed, single-page application design was chosen to manage the density of information. This structure allows users to focus on one aspect of the crafting system at a time (e.g., The Core Process, The Bestiary, Recipes) without being overwhelmed by a long, scrolling page. The navigation is persistent at the top, acting as a clear index. This thematic sectioning breaks down the complex system into logical, digestible parts, guiding the user from general concepts to specific details. Key interactions include filtering the bestiary and recipe book, and clicking on chart elements to reveal detailed information, which promotes active exploration over passive reading. -->
+    <!-- Application Structure Plan: A tabbed, single-page application design was chosen to manage the density of information. This structure allows users to focus on one aspect of the crafting system at a time (e.g., The Core Process, The Bestiary, Recipes) without being overwhelmed by a long, scrolling page. The navigation is persistent at the top, acting as a clear index. This thematic sectioning breaks down the complex system into logical, digestible parts, guiding the user from general concepts to specific details. Key interactions include filtering the bestiary and recipe book, and clicking on chart elements to reveal detailed information, which promotes active exploration over passive reading. This version's Mastery & Tiers section has been updated with the final, user-provided titles and mechanics. -->
     <!-- Visualization & Content Choices: 
         - Core Process Flow: Report Info -> "Find, Harvest, Craft" loop. Goal -> Organize. Viz -> HTML/CSS diagram. Interaction -> Static visual flow. Justification -> Provides a clear, immediate understanding of the system's foundation. Method -> Tailwind Flexbox.
-        - Mastery Ladder: Report Info -> Six tiers of crafting skill. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart. Interaction -> Clicking a tier's bar updates a detailed text panel. Justification -> Visually represents progression and allows for detailed exploration without cluttering the UI. Library -> Chart.js.
+        - Mastery Ladder: Report Info -> Six tiers of crafting skill. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart. Interaction -> Clicking a tier's bar updates a detailed text panel. Justification -> Visually represents progression and allows for detailed exploration without cluttering the UI. The titles and mechanics have been updated to reflect the user's final list. Library -> Chart.js.
         - Component Rarity: Report Info -> Creature component rarity data. Goal -> Inform. Viz -> Doughnut Chart. Interaction -> Dropdown selects a creature type, updating the chart. Justification -> Offers a quick, visual summary of what to expect from harvesting different creatures. Library -> Chart.js.
         - Bestiary & Recipes: Report Info -> Extensive tables of components and recipes. Goal -> Organize/Explore. Viz -> Filterable HTML tables. Interaction -> Text input filters tables in real-time. Justification -> Makes large datasets searchable and user-friendly, allowing players to quickly find what they need. Method -> Vanilla JS.
     -->
@@ -212,12 +212,12 @@
 
 <script>
 const masteryData = [
-    { tier: 1, title: 'Unskilled Worker', proficiency: 'No Proficiency', tools: 'Improvised', check: 'Disadvantage', example: 'A fighter trying to mend a leather satchel without tools.' },
-    { tier: 2, title: 'The Apprentice', proficiency: 'Proficiency', tools: 'Improvised', check: 'Disadvantage', example: 'A herbalist trying to process a rare herb using a knife and a rock.' },
-    { tier: 3, title: 'The Handyman', proficiency: 'Proficiency', tools: 'Improvised', check: 'Straight Roll', example: 'A rogue using a hairpin and wire instead of Thieves\' Tools.' },
-    { tier: 4, title: 'The Journeyman', proficiency: 'Proficiency', tools: 'Proper Kit', check: 'Advantage', example: 'A carpenter using a saw, hammer, and lumber to build a bridge.' },
-    { tier: 5, title: 'The Master', proficiency: 'Expertise', tools: 'Improvised', check: 'Doubled Proficiency', example: 'A master alchemist using only a few basic pots to make an antidote.' },
-    { tier: 6, title: 'The Architect', proficiency: 'Expertise', tools: 'Proper Kit', check: 'Doubled Proficiency + Advantage', example: 'A legendary smith repairing a broken legendary sword at a proper forge.' },
+    { tier: 1, title: 'Unskilled Worker', proficiency: 'No Proficiency', tools: 'Improvised tools', check: 'Disadvantage + 1 hour', example: 'A fighter with no tool knowledge trying to mend a leather satchel using a rock and a broken stick.' },
+    { tier: 2, title: 'Apprentice', proficiency: 'No Proficiency', tools: 'Proper tools', check: 'Advantage', example: 'A novice attempting to use a carpenter\'s saw for the first time, but a proper workbench gives them a better chance of success.' },
+    { tier: 3, title: 'Handyman/Trained', proficiency: 'Proficiency', tools: 'Improvised tools', check: 'Straight Roll', example: 'A proficient rogue using a hairpin and wire instead of Thieves\' Tools. Their skill makes up for their lack of proper equipment.' },
+    { tier: 4, title: 'Journeyman', proficiency: 'Proficiency', tools: 'Proper tools', check: 'Advantage', example: 'A carpenter using a saw, hammer, and lumber to build a bridge. Their proficiency and proper tools work together for a better result.' },
+    { tier: 5, title: 'Specialist', proficiency: 'Expertise', tools: 'Improvised tools', check: 'Doubled Proficiency', example: 'A master alchemist using only a few basic pots to make an antidote. Their mastery of the craft overcomes their limited equipment.' },
+    { tier: 6, title: 'Master', proficiency: 'Expertise', tools: 'Proper tools', check: 'Doubled Proficiency + Advantage', example: 'A legendary smith repairing a broken legendary sword at a proper forge, combining true mastery with the best equipment available.' },
 ];
 
 const bestiaryData = [
