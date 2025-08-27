@@ -233,15 +233,6 @@ const bestiaryData = [
     { type: 'Humanoid', common: 'A piece of skin, a bone, a piece of hair, a piece of heart.', uncommon: 'A preserved heart, a soul piece, skin for armor.', rare: 'A soul piece with a magical effect, a heart for casting, a perfectly preserved heart.', veryRare: 'A soul piece that can summon a humanoid, a heart that grants elemental power.' },
 ];
 
-const recipeData = [
-    { name: 'Healing Potion', tools: 'Alchemist\'s Supplies', ingredients: 'Common plant, Uncommon residuum, Water', description: 'A classic restorative. The plant and residuum are ground, mixed into water, and heated to create a potent healing draught.' },
-    { name: 'Healing Salve', tools: 'Herbalism Kit', ingredients: 'Common plant, Animal fat', description: 'A topical ointment. The plant is cooked down with animal fat, creating a salve that can be applied to wounds.' },
-    { name: 'Contact Poison', tools: 'Poisoner\'s Kit', ingredients: 'Venom gland, Animal fat', description: 'A dangerous substance. A venom gland is heated with animal fat until dissolved. Requires careful handling and a Constitution save on mishap.' },
-    { name: 'Infused Spoon of Cleansing', tools: 'Jeweler\'s Tools', ingredients: 'Pure silver, Prestidigitation cantrip', description: 'A magical infusion. A caster channels Prestidigitation into pure silver while a Jeweler shapes it, creating a spoon that can purify food and drink.' },
-    { name: 'The Bolt Caster', tools: 'Smith\'s Tools', ingredients: 'Dragon scale (Rare), Pure gem (Rare), Magic Missile spell', description: 'A powerful single-use item. A Smith forges a bolt from a dragon scale, and a caster infuses it with a Magic Missile spell, storing one charge.' },
-    { name: 'Amulet of the Leaping Hunter', tools: 'Jeweler\'s Tools', ingredients: 'Beast heart (Very Rare), Pure gold, Jump spell', description: 'A rare magical amulet. A caster infuses a perfectly preserved beast heart with the Jump spell, allowing the wearer to cast it once per long rest.' }
-];
-
 let masteryChart, rarityChart;
 
 function showTab(tabId) {
@@ -363,22 +354,36 @@ function updateRarityChart(creatureType) {
 }
 
 function populateRecipeList(filter = '') {
-    const recipeList = document.getElementById('recipeList');
-    recipeList.innerHTML = '';
-    const filteredData = recipeData.filter(item => 
-        Object.values(item).some(val => val.toLowerCase().includes(filter.toLowerCase()))
-    );
-    filteredData.forEach(recipe => {
-        const card = `
-            <div class="card p-6 rounded-lg shadow-md">
-                <h3 class="text-xl font-title mb-2">${recipe.name}</h3>
-                <p class="mb-1"><strong>Tools:</strong> ${recipe.tools}</p>
-                <p class="mb-3"><strong>Ingredients:</strong> ${recipe.ingredients}</p>
-                <p class="text-sm text-gray-600">${recipe.description}</p>
-            </div>
-        `;
-        recipeList.innerHTML += card;
-    });
+    fetch('recipes.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(recipeData => {
+            const recipeList = document.getElementById('recipeList');
+            recipeList.innerHTML = '';
+            const filteredData = recipeData.filter(item =>
+                Object.values(item).some(val => val.toLowerCase().includes(filter.toLowerCase()))
+            );
+            filteredData.forEach(recipe => {
+                const card = `
+                    <div class="card p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-title mb-2">${recipe.name}</h3>
+                        <p class="mb-1"><strong>Tools:</strong> ${recipe.tools}</p>
+                        <p class="mb-3"><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                        <p class="text-sm text-gray-600">${recipe.description}</p>
+                    </div>
+                `;
+                recipeList.innerHTML += card;
+            });
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+            const recipeList = document.getElementById('recipeList');
+            recipeList.innerHTML = '<p class="text-center text-red-500">Could not load recipes. Please ensure recipes.json exists and is accessible.</p>';
+        });
 }
 
 window.onload = () => {
