@@ -177,13 +177,23 @@
                     </div>
                     <div id="recipeList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     </div>
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-title mb-4">Add a New Recipe</h3>
+                        <p class="mb-4 text-sm text-gray-600">Paste in the details of a new recipe below. The tool will convert it into the correct JSON format for you to copy and add to your `recipes.json` file on GitHub.</p>
+                        <textarea id="recipeInput" class="w-full p-3 border border-[#EAE0C8] rounded-md bg-white" rows="5" placeholder="Paste recipe details here... e.g., Name: Potion of Speed; Tools: Alchemist's Supplies; Ingredients: ..."></textarea>
+                        <div class="flex flex-col md:flex-row gap-4 mt-4">
+                            <button id="convertBtn" class="bg-[#AF8C63] text-white px-6 py-3 rounded-md hover:bg-[#8C6F4D] transition-colors w-full md:w-auto">Convert to JSON</button>
+                            <button id="addBtn" class="bg-[#A89A81] text-white px-6 py-3 rounded-md hover:bg-[#837B69] transition-colors w-full md:w-auto">Add to List</button>
+                        </div>
+                        <pre id="jsonOutput" class="card p-4 mt-4 text-sm whitespace-pre-wrap break-words hidden"></pre>
+                    </div>
                 </section>
             </div>
 
             <div id="world" class="tab-content">
-                <section>
-                    <h2 class="text-3xl font-title mb-4 text-center">Crafting in the World of Nevos</h2>
-                    <p class="max-w-3xl mx-auto mb-8 text-base text-center">
+                <section class="text-center">
+                    <h2 class="text-3xl font-title mb-4">Crafting in the World of Nevos</h2>
+                    <p class="max-w-3xl mx-auto mb-8 text-base">
                        Crafting is not just a mechanic; it's a living part of the world's history, politics, and economy. This section connects the crafting system to the lore of Nevos, providing narrative context and potential quest hooks. The events and factions listed here show how a crafter's actions can have far-reaching consequences.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -233,7 +243,7 @@ const bestiaryData = [
     { type: 'Humanoid', common: 'A piece of skin, a bone, a piece of hair, a piece of heart.', uncommon: 'A preserved heart, a soul piece, skin for armor.', rare: 'A soul piece with a magical effect, a heart for casting, a perfectly preserved heart.', veryRare: 'A soul piece that can summon a humanoid, a heart that grants elemental power.' },
 ];
 
-let masteryChart, rarityChart;
+let allRecipes = [];
 
 function showTab(tabId) {
     const contents = document.querySelectorAll('.tab-content');
@@ -354,44 +364,100 @@ function updateRarityChart(creatureType) {
 }
 
 function populateRecipeList(filter = '') {
-    fetch('recipes.json')
+    const recipeList = document.getElementById('recipeList');
+    recipeList.innerHTML = '';
+    const filteredData = allRecipes.filter(item =>
+        Object.values(item).some(val => val.toLowerCase().includes(filter.toLowerCase()))
+    );
+    filteredData.forEach(recipe => {
+        const card = `
+            <div class="card p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-title mb-2">${recipe.name}</h3>
+                <p class="mb-1"><strong>Tools:</strong> ${recipe.tools}</p>
+                <p class="mb-3"><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                <p class="text-sm text-gray-600">${recipe.description}</p>
+            </div>
+        `;
+        recipeList.innerHTML += card;
+    });
+}
+
+function loadRecipes() {
+    fetch('https://raw.githubusercontent.com/profcory/wanderer-torch-nevos/recipes/recipes.json')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
-        .then(recipeData => {
-            const recipeList = document.getElementById('recipeList');
-            recipeList.innerHTML = '';
-            const filteredData = recipeData.filter(item =>
-                Object.values(item).some(val => val.toLowerCase().includes(filter.toLowerCase()))
-            );
-            filteredData.forEach(recipe => {
-                const card = `
-                    <div class="card p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-title mb-2">${recipe.name}</h3>
-                        <p class="mb-1"><strong>Tools:</strong> ${recipe.tools}</p>
-                        <p class="mb-3"><strong>Ingredients:</strong> ${recipe.ingredients}</p>
-                        <p class="text-sm text-gray-600">${recipe.description}</p>
-                    </div>
-                `;
-                recipeList.innerHTML += card;
-            });
+        .then(data => {
+            allRecipes = data;
+            populateRecipeList();
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
             const recipeList = document.getElementById('recipeList');
-            recipeList.innerHTML = '<p class="text-center text-red-500">Could not load recipes. Please ensure recipes.json exists and is accessible.</p>';
+            recipeList.innerHTML = '<p class="text-center text-red-500">Could not load recipes. Please ensure recipes.json exists and is accessible from the recipes branch.</p>';
         });
+}
+
+function handleRecipeConversion() {
+    const input = document.getElementById('recipeInput').value;
+    const jsonOutput = document.getElementById('jsonOutput');
+    jsonOutput.classList.add('hidden');
+    jsonOutput.textContent = '';
+
+    const lines = input.split('\n');
+    const recipe = {};
+    lines.forEach(line => {
+        const parts = line.split(':');
+        if (parts.length > 1) {
+            const key = parts[0].trim().toLowerCase().replace(/ /g, '');
+            const value = parts.slice(1).join(':').trim();
+            if (['name', 'tools', 'ingredients', 'description'].includes(key)) {
+                recipe[key] = value;
+            }
+        }
+    });
+
+    if (Object.keys(recipe).length > 0) {
+        try {
+            const jsonString = JSON.stringify(recipe, null, 2);
+            jsonOutput.textContent = jsonString;
+            jsonOutput.classList.remove('hidden');
+        } catch (e) {
+            jsonOutput.textContent = 'Error converting to JSON. Please check your input format.';
+            jsonOutput.classList.remove('hidden');
+        }
+    }
+}
+
+function handleAddRecipe() {
+    const input = document.getElementById('recipeInput').value;
+    const lines = input.split('\n');
+    const recipe = {};
+    lines.forEach(line => {
+        const parts = line.split(':');
+        if (parts.length > 1) {
+            const key = parts[0].trim().toLowerCase().replace(/ /g, '');
+            const value = parts.slice(1).join(':').trim();
+            if (['name', 'tools', 'ingredients', 'description'].includes(key)) {
+                recipe[key] = value;
+            }
+        }
+    });
+
+    if (Object.keys(recipe).length > 0) {
+        allRecipes.push(recipe);
+        populateRecipeList(document.getElementById('recipeSearch').value);
+        document.getElementById('recipeInput').value = '';
+    }
 }
 
 window.onload = () => {
     showTab('process');
-
     createMasteryChart();
     updateTierDetail(3);
-
     const creatureSelect = document.getElementById('creatureTypeSelect');
     bestiaryData.forEach(item => {
         const option = document.createElement('option');
@@ -400,14 +466,13 @@ window.onload = () => {
         creatureSelect.appendChild(option);
     });
     creatureSelect.addEventListener('change', (e) => updateRarityChart(e.target.value));
-    
     createRarityChart();
     updateRarityChart('Beast');
-
     populateBestiaryTable();
     document.getElementById('bestiarySearch').addEventListener('input', (e) => populateBestiaryTable(e.target.value));
-
-    populateRecipeList();
+    document.getElementById('convertBtn').addEventListener('click', handleRecipeConversion);
+    document.getElementById('addBtn').addEventListener('click', handleAddRecipe);
+    loadRecipes();
     document.getElementById('recipeSearch').addEventListener('input', (e) => populateRecipeList(e.target.value));
 };
 </script>
