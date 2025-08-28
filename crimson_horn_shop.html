@@ -1,271 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Crimson Horn — Valerost Shop Catalogue</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Crimson Horn — Overhead Storefront</title>
   <style>
-    :root {
-      --bg:#111111;
-      --fg:#e5e5e5;
-      --accent:#b91c1c;
-      --table-bg:#1a1a1a;
-      --table-alt:#151515;
-      --border:#333333;
-      --header-bg:#222222;
-      --font-main: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    :root{
+      --bg:#0f1014; --panel:#171922; --muted:#99a1b3; --text:#e7eaf1; --accent:#c06bff; --accent2:#57e389; --warn:#ffb86b; --danger:#ff6b6b;
+      --tile:#1c2030; --tile-hover:#272c41; --grid:#0c0e13; --badge:#2a2f45; --good:#7be07b;
     }
     *{box-sizing:border-box}
-    body{margin:0;padding:2rem;background:var(--bg);color:var(--fg);font-family:var(--font-main);line-height:1.5}
-    h1{color:var(--accent);margin-top:0;font-size:2rem;text-align:center}
-    details{border:1px solid var(--border);border-radius:6px;margin:1rem 0;background:var(--header-bg)}
-    summary{cursor:pointer;padding:.75rem 1rem;font-weight:600;color:var(--accent);user-select:none}
-    details[open] summary{border-bottom:1px solid var(--border)}
-    table{width:100%;border-collapse:collapse;font-size:.9rem}
-    th,td{padding:.4rem .6rem;border:1px solid var(--border)}
-    th{background:var(--table-bg);color:var(--accent);text-align:left}
-    tr:nth-child(even){background:var(--table-alt)}
-    .small{font-size:.8rem;opacity:.8}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#121420);color:var(--text);font:15px/1.5 system-ui,Segoe UI,Roboto,Inter,Arial}
+    a{color:var(--accent)}
+    header{position:sticky;top:0;z-index:10;background:rgba(12,14,19,.9);backdrop-filter:blur(6px);border-bottom:1px solid #1e2233}
+    header .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 16px}
+    .logo{font-weight:800;letter-spacing:.3px}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{width:36ch;max-width:70vw;background:#0f1320;border:1px solid #232b40;color:var(--text);padding:8px 10px;border-radius:8px}
+    .search button{background:var(--tile);border:1px solid #2c3550;color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+
+    main{display:grid;grid-template-columns: 2fr 1fr;gap:14px;padding:16px;min-height:calc(100% - 56px)}
+    .floor{
+      background:radial-gradient(1200px 600px at 50% 0%,#13172a,#0e1120 60%,#0b0d17);
+      padding:14px;border:1px solid #1c2033;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);
+      display:grid;grid-template-rows:auto 1fr;gap:10px;
+    }
+    h2{margin:8px 4px 6px;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+
+    .grid{
+      display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,120px);gap:10px;background:linear-gradient(0deg,transparent,transparent),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px),linear-gradient(0deg,var(--grid) 1px,transparent 1px);
+      background-size:100% 100%, calc((100% - 20px)/3) 100%, 100% calc((100% - 20px)/3);
+      background-position:0 0, 10px 0, 0 10px;
+    }
+    .tile{
+      background:linear-gradient(180deg,var(--tile),#151a29);border:1px solid #242a3f;border-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:.15s transform,.15s background;
+    }
+    .tile:hover{transform:translateY(-2px);background:var(--tile-hover)}
+    .tile .name{font-weight:700;text-align:center;padding:8px 10px}
+    .tile .sub{position:absolute;bottom:6px;left:10px;font-size:12px;color:var(--muted)}
+    .tile .spot{position:absolute;top:6px;right:10px;font-size:11px;color:#9db}
+
+    /* Drawer */
+    .drawer{position:fixed;inset:auto 0 0 0;max-height:64%;background:rgba(10,12,18,.98);border-top:1px solid #232840;backdrop-filter:blur(6px);transform:translateY(110%);transition:transform .18s ease-out;z-index:30}
+    .drawer.open{transform:translateY(0)}
+    .drawer .inner{display:grid;grid-template-columns: 1fr 1fr;gap:14px;padding:14px}
+    .drawer h3{margin:2px 0 6px}
+    .vendor-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .vendor-meta{font-size:13px;color:var(--muted)}
+    .close{background:var(--tile);border:1px solid #2d3450;color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    .items{border:1px solid #222a42;border-radius:12px;overflow:hidden}
+    .items header{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#121528;border-bottom:1px solid #20253a;padding:10px}
+    .items input{background:#0f1320;border:1px solid #232b40;color:var(--text);padding:6px 8px;border-radius:8px;width:260px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px 10px;border-bottom:1px solid #20253a;vertical-align:top}
+    th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px}
+    td .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+    .tag{background:var(--badge);border:1px solid #3a405d;border-radius:999px;padding:2px 8px;font-size:12px;color:#c9d1ff}
+    .curse{color:var(--warn);font-weight:700}
+    .btn{background:#20263d;border:1px solid #2c3550;color:var(--text);padding:6px 10px;border-radius:8px;cursor:pointer}
+
+    /* Cart */
+    .cart{background:var(--panel);border:1px solid #232a41;border-radius:14px;padding:12px;display:grid;grid-template-rows:auto 1fr auto;gap:10px}
+    .cart h3{margin:4px 2px}
+    .cart-list{overflow:auto;max-height:50vh;border-top:1px dashed #2a3048;border-bottom:1px dashed #2a3048}
+    .cart-line{display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:8px 0;border-bottom:1px solid #1b2034}
+    .cart-total{display:flex;justify-content:space-between;align-items:center}
+
+    footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;color:var(--muted)}
+    .lock{cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #2a3048;background:#13182a;color:var(--muted)}
+    .lock.on{color:#fbd}
+
+    /* Small screens */
+    @media (max-width: 1000px){
+      main{grid-template-columns: 1fr}
+      .drawer .inner{grid-template-columns:1fr}
+      .items input{width:100%}
+    }
   </style>
 </head>
 <body>
-<h1>The Crimson Horn — Redmarch Keep, Valerost</h1>
+  <header>
+    <div class="wrap">
+      <div class="logo">🏟️ The Crimson Horn — Grand Indoor Market</div>
+      <div class="search">
+        <input id="globalSearch" placeholder="Search stalls & items… (e.g., 'harvest', 'tools', '^')" />
+        <button id="clearSearch" title="Clear">Clear</button>
+      </div>
+    </div>
+  </header>
 
-<p class="small">“Where Oaths are Washed Down with Steel & Ale.”  Use this catalogue to browse and price goods before stepping into the Horn’s vaulted hall.  All prices are in gold pieces (gp).  Stock numbers reflect what’s on‑hand this tenday.</p>
+  <main>
+    <section class="floor">
+      <h2>Overhead Floor — tap a stall</h2>
+      <div class="grid" id="floorGrid"></div>
+    </section>
 
-<!-- Proprietor & Staff -->
-<details>
-  <summary>Proprietor &amp; Staff</summary>
-  <table>
-    <tr><th>Name</th><th>Race</th><th>Role</th><th>Quick Read</th></tr>
-    <tr><td>Rogan “Redhorn” Vesk</td><td>Orc</td><td>Owner / Pit‑Marshal</td><td>Retired duel champion; missing left tusk; keeps a ledger of all unpaid dueling debts.</td></tr>
-    <tr><td>Mira Stoneham</td><td>Human</td><td>Quartermaster</td><td>Former siege‑smith; sells spare gear &amp; patch‑plates.</td></tr>
-  </table>
-</details>
+    <aside class="cart" aria-label="Cart & Receipt">
+      <h3>🧾 Receipt</h3>
+      <div class="cart-list" id="cartList"></div>
+      <div class="cart-total">
+        <div id="cartTotal">0 gp</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" id="copyReceipt">Copy</button>
+          <button class="btn" id="printReceipt">Print</button>
+          <button class="btn" id="clearCart">Clear</button>
+        </div>
+      </div>
+      <footer>
+        <div>Prices in gp unless noted. <span id="dmBadge" style="display:none">DM Mode</span></div>
+        <button class="lock" id="dmToggle" title="Toggle DM Mode">🔒 DM</button>
+      </footer>
+    </aside>
+  </main>
 
-<!-- Black‑Rack Merchandise -->
-<details>
-  <summary>Black‑Rack Merchandise (behind the oak bar)</summary>
-  <table>
-    <tr><th>Item</th><th>Description</th><th>Price</th><th>Stock</th></tr>
-    <tr><td>Honor‑Brand Manacles</td><td>Iron cuffs that heat if the wearer breaks a spoken oath <em>(+1d4 fire dmg)</em>.</td><td>40</td><td>3</td></tr>
-    <tr><td>Blood‑Oath Vial</td><td>Single‑use crystal vial; mix two drops of blood — shatters &amp; screams if either party breaks contract.</td><td>35</td><td>5</td></tr>
-    <tr><td>Rust‑Bite Shiv</td><td>Dagger from corroded warforged plate; crits impose –1 AC (1 hr).</td><td>25</td><td>2</td></tr>
-    <tr><td>Duelist’s Shadow Cloak</td><td>Turns opaque crimson when wearer is flanked; cosmetic but intimidating.</td><td>18</td><td>4</td></tr>
-    <tr><td>Signal Ash</td><td>Palm sachet; toss in fire → column of crimson smoke visible 2 miles.</td><td>12</td><td>6</td></tr>
-    <tr><td>“Loaner” Duel Ledger</td><td>Hide‑bound book that self‑signs as witness, accepted as legal proof in Redmarch courts.</td><td>50</td><td>1</td></tr>
-  </table>
-</details>
+  <!-- Drawer for vendor inventory -->
+  <div id="drawer" class="drawer" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="inner">
+      <div>
+        <div class="vendor-head">
+          <div>
+            <h3 id="vendorName">Vendor</h3>
+            <div class="vendor-meta" id="vendorMeta"></div>
+          </div>
+          <button class="close" id="closeDrawer">Close</button>
+        </div>
 
-<!-- Constellation / Zodiac Items -->
-<details>
-  <summary>Valerost Constellation &amp; Zodiac Items</summary>
-  <table>
-    <tr><th>Item</th><th>Tied Sign(s)</th><th>Function / Lore</th><th>Price</th><th>Stock</th><th>Wt.</th></tr>
-    <tr><td>Valkeryn War‑Medal</td><td>Valkeryn (War)</td><td>Tap to ring like steel once/day (audible 100 ft); used to open formal duels.</td><td>30</td><td>3</td><td>0.2 lb</td></tr>
-    <tr><td>Crimson March Star‑Die</td><td>Festival token</td><td>Dodec die with 13 sigils; once per dawn may re‑roll one melee damage die, keeping the second result.</td><td>35</td><td>4</td><td>0.1 lb</td></tr>
-    <tr><td>Oathstar Lens</td><td>Any birth‑sign</td><td>Palm lens highlights a creature’s birth sigil if worn openly (RP clue).</td><td>25</td><td>2</td><td>Neg.</td></tr>
-    <tr><td>Blade‑Scale Charm</td><td>Warforged ↔ Dragon age</td><td>Two‑sided coin. Flip to gain advantage on next History check about the old war (<em>once/long rest</em>).</td><td>40</td><td>2</td><td>0.1 lb</td></tr>
-    <tr><td>Stormbound Mini‑Astrolabe</td><td>Dravath &amp; Valkeryn</td><td>Tracks pressure; 6‑hr warning of major surface storm within 30 mi.</td><td>55</td><td>1</td><td>1 lb</td></tr>
-  </table>
-</details>
+        <div class="items">
+          <header>
+            <div><strong>Items</strong></div>
+            <input id="itemFilter" placeholder="Filter this stall…" />
+          </header>
+          <div style="overflow:auto;max-height:45vh">
+            <table id="itemTable">
+              <thead>
+                <tr>
+                  <th style="width:35%">Item</th>
+                  <th style="width:10%">Price</th>
+                  <th style="width:10%">Weight</th>
+                  <th style="width:30%">Notes</th>
+                  <th style="width:15%">Add</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-<!-- Utility Magic & Wondrous Odds‑and‑Ends -->
-<details>
-  <summary>Utility Magic &amp; Wondrous Odds‑and‑Ends</summary>
-  <table>
-    <tr><th>Item</th><th>Attune?</th><th>Function</th><th>Price</th><th>Stock</th></tr>
-    <tr><td>Driftglobe</td><td>No</td><td>60‑ft light on voice command; floats &amp; follows.</td><td>90</td><td>2</td></tr>
-    <tr><td>Rope of Mending</td><td>No</td><td>50 ft hemp rope that self‑repairs in 1 min.</td><td>45</td><td>3</td></tr>
-    <tr><td>Lantern of Revealing</td><td>No</td><td>30‑ft bright cone reveals invisibility (1 hr oil).</td><td>120</td><td>1</td></tr>
-    <tr><td>Heward’s Handy Spice Pouch</td><td>No</td><td>Pinch produces any mundane spice.</td><td>55</td><td>2</td></tr>
-    <tr><td>Cloak of Billowing</td><td>No</td><td>Dramatic flutter on command — morale booster.</td><td>60</td><td>4</td></tr>
-    <tr><td>Sending Stones (pair)</td><td>No</td><td>25‑word, once‑per‑day two‑way message.</td><td>300</td><td>2&nbsp;pairs</td></tr>
-    <tr><td>Wand of Magic Detection</td><td>No</td><td>3/day <em>detect magic</em> without spell slot.</td><td>160</td><td>1</td></tr>
-    <tr><td>Decanter of Endless Water</td><td>No</td><td>“Stream,” “Fountain,” or “Geyser” on command.</td><td>300</td><td>1</td></tr>
-  </table>
-</details>
+      <div id="dmPane" style="display:none">
+        <h3>DM Notes for this Stall</h3>
+        <div id="dmNotes" style="border:1px solid #2a3048;border-radius:12px;padding:10px"></div>
+        <h3 style="margin-top:14px">Global Cursed / Unidentified Index</h3>
+        <div id="globalCurses" style="border:1px solid #2a3048;border-radius:12px;padding:10px;max-height:32vh;overflow:auto"></div>
+      </div>
+    </div>
+  </div>
 
-<!-- Always‑On Trinkets -->
-<details>
-  <summary>Minor Always‑On Trinkets</summary>
-  <table>
-    <tr><th>Item</th><th>Passive Effect</th><th>Price</th><th>Stock</th><th>Wt.</th></tr>
-    <tr><td>Heat‑Gauge Signet</td><td>Ring warms when food/drink exceeds safe temp.</td><td>18</td><td>4</td><td>0.1 lb</td></tr>
-    <tr><td>Stone‑Echo Token</td><td>Vibrates faintly when footfalls echo within 60 ft — tunnel early‑warning.</td><td>22</td><td>5</td><td>0.1 lb</td></tr>
-    <tr><td>Blood‑Oath Bead</td><td>Dulls grey the first time wearer breaks a promise each day.</td><td>20</td><td>6</td><td>Neg.</td></tr>
-    <tr><td>Duelist’s Balance Clip</td><td>Tugs wearer upright on uneven ground (adv. vs being shoved prone).</td><td>28</td><td>3</td><td>Neg.</td></tr>
-    <tr><td>Ember‑Ward Comb</td><td>Auto‑snuffs sparks if hair/fur ignites.</td><td>16</td><td>5</td><td>0.1 lb</td></tr>
-  </table>
-</details>
+<script>
+// ------------------ Data ------------------
+const DATA = {
+  stalls: [
+    {
+      id: 'rogan',
+      spot: 'NW Corner',
+      name: 'Rogan “Redhorn” Vesk',
+      race: 'Orc',
+      role: 'Owner / Pit‑Marshal',
+      quick: 'Retired duel champion; missing left tusk; keeps a ledger of unpaid dueling debts.',
+      items: [
+        { name: 'Duelist’s Chalk & Circle Stencil', price_gp: 8, weight: '2 lb', notes: 'Reusable stencil for regulation rings; powdered chalk.' },
+        { name: '^ Grudge‑Ledger Slate', price_gp: 35, weight: '1 lb', notes: 'Records the buyer’s “owed victories”. Hard to discard.', curseId: 'grudge-ledger' },
+        { name: 'Pit Token (set of 5)', price_gp: 5, weight: '—', notes: 'Grants entry to side‑ring practice bouts.' },
+        { name: 'Marshal’s Whistle', price_gp: 1, weight: '—', notes: 'Piercing tone; advantage to startle beasts (once per day).'},
+      ],
+      dm: [
+        { id: 'grudge-ledger', title: 'Grudge‑Ledger Slate', detect: 'DC 14 Arcana/Religion spots faint ink bleed at Torch‑set.', effect: 'Attunes on first signature. Until a duel is “won”, buyer rolls one attack per long rest with −1 (manifested doubt). Breaking the slate deals 2d6 psychic to holder.', remedy: 'Win a formal duel or wash the slate in moon‑salt while a rightful victor signs over the mark.' }
+      ]
+    },
+    {
+      id: 'mira',
+      spot: 'N Edge',
+      name: 'Mira Stoneham',
+      race: 'Human',
+      role: 'Quartermaster / Black‑Rack Merchandise',
+      quick: 'Former siege‑smith; sells spare gear & patch‑plates.',
+      items: [
+        // Tools (2014/conv prices as placeholders; adjust if using 2024 book)
+        { name: 'Artisan’s Tools — Smith’s', price_gp: 20, weight: '8 lb', notes: 'Tools & Games pricing may vary by 2024 rules.' },
+        { name: 'Artisan’s Tools — Leatherworker’s', price_gp: 5, weight: '5 lb', notes: '' },
+        { name: 'Artisan’s Tools — Carpenter’s', price_gp: 8, weight: '6 lb', notes: '' },
+        { name: 'Artisan’s Tools — Tinker’s', price_gp: 50, weight: '10 lb', notes: '' },
+        { name: 'Artisan’s Tools — Alchemist’s Supplies', price_gp: 50, weight: '8 lb', notes: '' },
+        { name: 'Artisan’s Tools — Brewer’s Supplies', price_gp: 20, weight: '6 lb', notes: '' },
+        { name: 'Gaming Set — Dice', price_gp: 1, weight: '—', notes: '' },
+        { name: 'Gaming Set — Cards', price_gp: 5, weight: '—', notes: '' },
+        { name: 'Gaming Set — Three‑Dragon Ante (deck)', price_gp: 10, weight: '—', notes: '' },
+        { name: 'Musical Instrument — Drum', price_gp: 6, weight: '3 lb', notes: '' },
+        { name: 'Patch‑Plate (armor repair)', price_gp: 7, weight: '2 lb', notes: 'Temporary +1 AC vs. one hit; 24h adhesive.' },
+        { name: '^ Violet Vault Patch', price_gp: 25, weight: '—', notes: 'Adheres to anything; sometimes to skin by “choice”.', curseId: 'violet-vault' },
+      ],
+      dm: [
+        { id: 'violet-vault', title: 'Violet Vault Patch', detect: 'DC 13 Arcana notices planar resin swirl.', effect: 'If applied to flesh, sticks until next new‑Torch; removing early deals 1d6 acid and leaves a sigil scar.', remedy: 'Dissolve with swamp‑mint oil and salt under mountain water.' }
+      ]
+    },
+    {
+      id: 'axellip',
+      spot: 'NE Corner',
+      name: 'Axellip Maze',
+      race: 'Halfling',
+      role: 'Valerost Constellation / Zodiac Items',
+      quick: 'Star‑cartomancer; sells moon‑timed charms; tracks who buys which sign.',
+      items: [
+        { name: 'Zodiac Charm — Wanderer’s Heart', price_gp: 18, weight: '—', notes: 'Once per night, +1 to a navigation check under clear moons.' },
+        { name: 'Chart, Valerost Nightroads', price_gp: 12, weight: '1 lb', notes: 'Advantage to avoid getting lost in Valerost after dusk.' },
+        { name: '^ Hollow Trace Sigil Pin', price_gp: 30, weight: '—', notes: 'Looks like protection; isn’t. Draws mild attention from the wrong eyes.', curseId: 'hollow-trace' },
+      ],
+      dm: [
+        { id: 'hollow-trace', title: 'Hollow Trace Sigil Pin', detect: 'DC 15 Religion identifies counterfeit blessing.', effect: 'While worn, first Stealth check each day made with disadvantage as something unseen “notices.”', remedy: 'Place in sunrise bowl with fresh ink; speak true name of buyer to sever notice.' }
+      ]
+    },
 
-<!-- Common Martial Traveller Gear -->
-<details>
-  <summary>Common Martial Traveller Gear</summary>
-  <table>
-    <tr><th>Item</th><th>Effect / Use</th><th>Price</th><th>Stock</th></tr>
-    <tr><td>Scar‑Salt Poultice Kit</td><td>Stops bleeding; advantage on first Medicine check.</td><td>15</td><td>3</td></tr>
-    <tr><td>Duellist’s Chalk (stick)</td><td>Marks 20‑ft circle that glows faintly at dusk — formal duels.</td><td>2</td><td>10</td></tr>
-    <tr><td>Crimson Hill Rope (50 ft)</td><td>Dyed deep red; disadvantage on cutting attempts (DC 15).</td><td>3</td><td>5</td></tr>
-    <tr><td>Travel Gauntlet (pair)</td><td>Half‑plate knuckles; counts as brass knuckles, +1 dmg vs constructs.</td><td>8</td><td>7</td></tr>
-  </table>
-</details>
+    {
+      id: 'pins',
+      spot: 'W Edge',
+      name: 'Nera “Pins” Volesh',
+      race: 'Gnome',
+      role: 'Always‑On Trinkets',
+      quick: 'Self‑powered charms; 3‑day swap policy.',
+      items: [
+        { name: 'Stitchlight Button', price_gp: 9, weight: '—', notes: 'Gives dim light when pricked; lasts 8 hours/day.' },
+        { name: 'Sentry Pepper', price_gp: 4, weight: '—', notes: 'Explodes into sneeze cloud on intrusion (DC 12 Con).'},
+        { name: '^ Tick‑Tock Locket', price_gp: 25, weight: '—', notes: 'Whispers timely advice… too timely.', curseId: 'tock-locket' },
+      ],
+      dm: [
+        { id: 'tock-locket', title: 'Tick‑Tock Locket', detect: 'DC 12 Arcana hears a second hand with no gears.', effect: 'Each dawn wearer must choose: +1 to Initiative OR −1 to first saving throw (fate tug).', remedy: 'Bury under a crossroads until both moons wane.'}
+      ]
+    },
 
-<!-- Craft Packs -->
-<details>
-  <summary>Craft &amp; Alchemy Packs</summary>
-  <table>
-    <tr><th>Pack Name</th><th>Primary Use</th><th>Contents (raw form)</th><th>Price</th><th>Wt.</th></tr>
-    <tr><td>Crimson Coagulant Kit</td><td>Basic healing potion (2d4+2)</td><td>Bloodleaf petals, powdered ironroot, duel‑sap vial</td><td>18</td><td>½ lb</td></tr>
-    <tr><td>Stonegrit Poultice Pack</td><td>Bruise‑mending salve (+1 AC vs bludgeon, 1 hr)</td><td>Granite spores, beeswax, troll‑moss shred</td><td>22</td><td>¾ lb</td></tr>
-    <tr><td>Frostbane Flask Set</td><td>Cold‑resistance draught (10 min)</td><td>Blue thistle ice, ember‑salt, fire‑resin cork</td><td>25</td><td>½ lb</td></tr>
-    <tr><td>Shadowlily Venom Satchel</td><td>Injury/contact poison (1d6/rd ×3; DC 12)</td><td>Shadowlily paste, bone‑ash, glass needle tube</td><td>30</td><td>¼ lb</td></tr>
-    <tr><td>Sunfire Draught Kit</td><td>Removes 1 lvl exhaustion*</td><td>Crystallised sun‑sap, spark‑powder, citrus rind</td><td>35</td><td>½ lb</td></tr>
-    <tr><td>Ironhide Resin Pouch</td><td>Harden‑skin salve (+1 Nat AC, 1 hr)</td><td>Ironbark pitch, chitin flecks, amber oil</td><td>28</td><td>¾ lb</td></tr>
-    <tr><td>Mireblossom Purge Pack</td><td>Antidote vs disease/poison</td><td>Mireblossom dew, stonemarrow root, mint</td><td>20</td><td>½ lb</td></tr>
-    <tr><td>Dreamseeker Sachet</td><td>Sleep potion or lucid‑dream ink</td><td>Crushed skullcap, veil‑moth dust, moon‑honey</td><td>15</td><td>¼ lb</td></tr>
-    <tr><td>Quickthorn Dust Vial</td><td>Paralytic dart poison (DC 13; 1 min)</td><td>Quickthorn pollen, alum agent</td><td>26</td><td>¼ lb</td></tr>
-    <tr><td>Emberbark Smoke Cones (3)</td><td>10‑ft smoke cloud, 2 rnds</td><td>Emberbark shaving cones &amp; soot‑gum</td><td>12</td><td>½ lb</td></tr>
-  </table>
-</details>
+    {
+      id: 'boran',
+      spot: 'Center',
+      name: 'Boran Pike',
+      race: 'Half‑Orc',
+      role: 'Common Stock — Martial Traveller Gear',
+      quick: 'Ex‑road scout; kit is clean, oiled, field‑tested.',
+      items: [
+        { name: 'Bedroll', price_gp: 1, weight: '7 lb', notes: '' },
+        { name: 'Climber’s Kit', price_gp: 25, weight: '12 lb', notes: '' },
+        { name: 'Healer’s Kit (10 uses)', price_gp: 5, weight: '3 lb', notes: '' },
+        // Monster‑harvesting kit (≈25 gp each)
+        { name: 'Bone Saw (folding)', price_gp: 25, weight: '2 lb', notes: 'For skeletal extractions; etched ruler.' },
+        { name: 'Gland Extractor & Ampoules', price_gp: 25, weight: '2 lb', notes: 'Pull volatile sacs intact; 6 vacuum vials.' },
+        { name: 'Preservative Jars (warded set)', price_gp: 25, weight: '6 lb', notes: 'Three‑seal jars; suspends decay for 7 days.' },
+        { name: 'Field Alchemy Roll', price_gp: 25, weight: '4 lb', notes: 'Mini mortar, filters, spirit lamp.' },
+        { name: 'Solvent Wash & Silvering Rinse', price_gp: 25, weight: '3 lb', notes: 'Neutralizes ichors; safe on gear.' },
+        { name: 'Rune Tags (engraving kit)', price_gp: 25, weight: '2 lb', notes: 'Mark parts with origin, moon, site; later fetch +10%.' },
+        { name: 'Cold‑Pack Satchel', price_gp: 25, weight: '5 lb', notes: 'Alchemical chill for 8 hours; refreeze nightly.' },
+        { name: 'Warded Specimen Case', price_gp: 35, weight: '10 lb', notes: 'Lockable chest; faint abjuration.' },
+      ],
+      dm: []
+    },
 
-<!-- Single‑Use Battle Curios -->
-<details>
-  <summary>Single‑Use Battle Curios</summary>
-  <table>
-    <tr><th>Item</th><th>Effect</th><th>Price</th><th>Stock</th></tr>
-    <tr><td>Oath‑Spark Capsule</td><td>BA: weapon gains +1 dmg &amp; crackling sparks (1 min).</td><td>20</td><td>4</td></tr>
-    <tr><td>Standfast Powder</td><td>Creates 10‑ft radius difficult terrain for non‑allies.</td><td>18</td><td>2</td></tr>
-    <tr><td>Echo of the Horn</td><td>Tiny clay whistle casts <em>Thaumaturgy</em> horn blast (300 ft) once/day.</td><td>5</td><td>8</td></tr>
-  </table>
-</details>
+    {
+      id: 'tassia',
+      spot: 'E Edge',
+      name: 'Tassia Wick',
+      race: 'Tiefling',
+      role: 'Single‑Use Battle Curios',
+      quick: 'One‑and‑done talismans—snap, throw, shatter; burn‑scarred, unfazed.',
+      items: [
+        { name: 'Shiver Bead', price_gp: 15, weight: '—', notes: 'Cold pop; 10‑ft cube difficult terrain for 1 round.' },
+        { name: 'Smokeglass Vial', price_gp: 12, weight: '—', notes: 'Light‑eating smoke; lightly obscured 20‑ft radius 1 min.' },
+        { name: 'Shock‑Fuse Clip', price_gp: 18, weight: '—', notes: 'Next weapon hit deals +1d4 lightning.' },
+        { name: '^ Hollow Fang Whistle', price_gp: 28, weight: '—', notes: 'Summons “helpful echoes”; sometimes something else.', curseId: 'hollow-fang' },
+      ],
+      dm: [
+        { id: 'hollow-fang', title: 'Hollow Fang Whistle', detect: 'DC 14 Arcana or Nature notices predatory harmonics.', effect: '1/day on use roll d6: on 1, a hostile lesser echo‑beast appears (MM wolf stats).', remedy: 'Soak in brine and hang where two roads cross for a night.' }
+      ]
+    },
 
-<!-- Useless Orcish Curios -->
-<details>
-  <summary>Useless (or Questionable) Orcish Curios</summary>
-  <table>
-    <tr><th>Item</th><th>Supposed Purpose</th><th>Reality Check</th><th>Price</th><th>Stock</th><th>Wt.</th></tr>
-    <tr><td>Squeak‑Tusk Fetish</td><td>“Roars when danger nears.”</td><td>Actually squeaks in humidity; annoys mounts.</td><td>6</td><td>5</td><td>0.1 lb</td></tr>
-    <tr><td>Cracked Warcharm Beads</td><td>“Records slain foes.”</td><td>Resets at dawn; counts bread crumbs as kills.</td><td>4</td><td>7</td><td>Neg.</td></tr>
-    <tr><td>Petrified Boar‑Snout Totem</td><td>Wards off cave spirits.</td><td>Smells of bacon; spirits unbothered — party noses are.</td><td>3</td><td>4</td><td>0.5 lb</td></tr>
-    <tr><td>Blood‑Oath Vial (Expired)</td><td>Seals a binding vow.</td><td>Ink dried; just stains fingers red for two days.</td><td>5</td><td>6</td><td>Neg.</td></tr>
-    <tr><td>Hollow Fang Whistle</td><td>Calls ancestral wolves.</td><td>Sub‑audible buzz only squirrels hate.</td><td>8</td><td>3</td><td>0.1 lb</td></tr>
-    <tr><td>Dueller’s Dent Helm</td><td>Shows the dent that saved a chief’s life.</td><td>One‑size‑fits‑none; heavy lump.</td><td>9</td><td>2</td><td>3 lb</td></tr>
-  </table>
-</details>
+    {
+      id: 'yarrow',
+      spot: 'SW Corner',
+      name: 'Old Yarrow Flint',
+      race: 'Dwarf',
+      role: 'Weapon Oddities',
+      quick: 'Collects misfit prototypes; insists on live demo behind the sand wall.',
+      items: [
+        { name: 'Counter‑curve Falx', price_gp: 32, weight: '3 lb', notes: 'On crit: choose to disarm instead of extra damage.' },
+        { name: '^ Backbiter Knife', price_gp: 12, weight: '1 lb', notes: 'Fine balance; occasionally cuts its owner when sheathed.', curseId: 'backbiter' },
+        { name: 'Spring‑bow Gauntlet', price_gp: 40, weight: '4 lb', notes: 'Hand crossbow analog; loads with wrist snap.' },
+      ],
+      dm: [
+        { id: 'backbiter', title: 'Backbiter Knife', detect: 'DC 12 Perception sees nicks on inner sheath.', effect: 'Whenever you sheathe after a miss, DC 10 Dex save or take 1 piercing.', remedy: 'Wrap in moss for a night; re‑oil with boar fat.' }
+      ]
+    },
 
-<!-- One‑Shot Trigger Items -->
-<details>
-  <summary>One‑Shot Trigger Items (only one of each in stock)</summary>
-  <table>
-    <tr><th>Item</th><th>Trigger</th><th>Effect</th><th>Price</th></tr>
-    <tr><td>Redmarch Flare‑Pike</td><td>Twist haft &amp; slam butt‑spike</td><td>30‑ft line, 2d6 fire (Dex 13 half).</td><td>120</td></tr>
-    <tr><td>Oath‑Breaker’s Buckle</td><td>Snap buckle in half</td><td>Casts <em>Catapult</em> on itself (10 lb object, 60 ft).</td><td>95</td></tr>
-    <tr><td>Stoneblood Shot‑Globe</td><td>Press thumb‑stud</td><td>10‑ft radius sticky stone sludge (Str 12 to exit).</td><td>80</td></tr>
-    <tr><td>Echo‑Horn Capsule</td><td>Bite &amp; spit</td><td>Deafens everyone in 20 ft for 1 rnd.</td><td>60</td></tr>
-    <tr><td>Gilded Duellist’s Tear</td><td>Crush gem on target</td><td><em>True Strike</em> on next attack.</td><td>70</td></tr>
-    <tr><td>Ironlark Feather Fuse</td><td>Snap feather quill</td><td>Shrill whistle audible 1 mile.</td><td>45</td></tr>
-    <tr><td>Violet Vault Patch</td><td>Slap on surface</td><td>Keyhole into solid rock (30 sec).</td><td>110</td></tr>
-    <tr><td>Breath‑Stealer Snuff</td><td>Blow powder cloud</td><td>Targets in 5 ft lose reaction 1 turn.</td><td>65</td></tr>
-  </table>
-</details>
+    {
+      id: 'kait',
+      spot: 'S Edge',
+      name: 'Kait “the Binder”',
+      race: 'Mapach (raccoon‑folk)',
+      role: 'Ready‑Made Packs',
+      quick: 'Pre‑bundled Scout/Healer/Delve kits; deposit refunded if returned intact.',
+      items: [
+        { name: 'Scout Pack (bundle)', price_gp: 18, weight: '—', notes: 'Bedroll, mess kit, 10 torches, 50 ft rope, tinderbox.' },
+        { name: 'Healer Pack (bundle)', price_gp: 25, weight: '—', notes: 'Healer’s kit (10), 2 bandage wraps, smelling salts.' },
+        { name: 'Delver Pack (bundle)', price_gp: 24, weight: '—', notes: 'Piton set, hammer, chalk, hooded lantern, oil x4.' },
+        { name: '^ Unmarked Locker Key', price_gp: 5, weight: '—', notes: 'Fits a locker “somewhere in town”.', curseId: 'locker-key' },
+      ],
+      dm: [
+        { id: 'locker-key', title: 'Unmarked Locker Key', detect: 'DC 13 Investigation reveals salty tarnish.', effect: 'Opens a locker with a minor haunt; first opener hears whispers—Disadvantage on first Wisdom check while inside docks.', remedy: 'Return key to any river‑shrine and leave a copper.' }
+      ]
+    },
 
-<!-- Field Scrolls & Pages -->
-<details>
-  <summary>Field Scroll Strips &amp; Pages</summary>
-  <table>
-    <tr><th>Scroll Name</th><th>Spell (lvl)</th><th>Practical Use</th><th>Price</th><th>Stock</th></tr>
-    <tr><td>Whisper‑Light Strip</td><td><em>Light</em> (C)</td><td>Hands‑free torch for 1 hr.</td><td>15</td><td>6</td></tr>
-    <tr><td>Seam‑Keeper Margin</td><td><em>Mending</em> (C)</td><td>Patch gear, tents, scabbards.</td><td>18</td><td>5</td></tr>
-    <tr><td>Sentry’s Margin</td><td><em>Alarm</em> (1)</td><td>8‑hr audible/mental tripwire.</td><td>25</td><td>4</td></tr>
-    <tr><td>Ink‑Reveal Slip</td><td><em>Detect Magic</em> (1)</td><td>10‑min ward &amp; glyph sweep.</td><td>30</td><td>4</td></tr>
-    <tr><td>Feather‑Drop Sheet</td><td><em>Feather Fall</em> (1)</td><td>Slow descent for 5 creatures.</td><td>35</td><td>3</td></tr>
-    <tr><td>Flicker‑Wall Strip</td><td><em>Shield</em> (1)</td><td>+5 AC vs one attack (1 rnd).</td><td>40</td><td>2</td></tr>
-    <tr><td>Familiar Charter</td><td><em>Find Familiar</em> (1)</td><td>Conjure scouting sprite/rat.</td><td>40</td><td>2</td></tr>
-    <tr><td>Clarion Glyph</td><td><em>Identify</em> (1)</td><td>Read item enchantment.</td><td>45</td><td>2</td></tr>
-    <tr><td>Purity Ribbon</td><td><em>Purify Food &amp; Drink</em> (1)</td><td>Detox rations, tunnel water.</td><td>25</td><td>3</td></tr>
-    <tr><td>Silent Handbill</td><td><em>Unseen Servant</em> (1)</td><td>1‑hr invisible helper.</td><td>35</td><td>2</td></tr>
-    <tr><td>Verdant Sigil</td><td><em>Detect Poison &amp; Disease</em> (1)</td><td>10‑min toxin scan.</td><td>30</td><td>3</td></tr>
-  </table>
-</details>
+    {
+      id: 'fenn',
+      spot: 'SE Corner',
+      name: 'Fenn “Two‑Coppers” Sal',
+      race: 'Human',
+      role: 'Tavern Rumours',
+      quick: 'Sells sealed rumor slips; discounts for proof; banned from dice tables.',
+      items: [
+        { name: 'Rumor Slip — Ledger Bleeds Ink', price_gp: 0.2, weight: '—', notes: 'Free whisper; pay 0.2 gp (2 sp) for details.' },
+        { name: 'Rumor Slip — Singing Lights on the River', price_gp: 0.5, weight: '—', notes: '5 sp for wreckers’ details.' },
+        { name: 'Rumor Slip — Door that Knows Markets', price_gp: 1, weight: '—', notes: '1 gp for phrase and sigil.' },
+        { name: 'Rumor Slip — Council False Face', price_gp: 2, weight: '—', notes: '2 gp names the Elder.' },
+        { name: 'Rumor Slip — Eye in the Dunes', price_gp: 1, weight: '—', notes: '1 gp buyer alias & route.' },
+        { name: 'Rumor Slip — Thirteenth Night Beacon', price_gp: 0.6, weight: '—', notes: '6 sp for rune/countermeasure.' },
+        { name: 'Rumor Slip — Lying Fish & Fear‑salve', price_gp: 0.4, weight: '—', notes: '4 sp tide & buyer tips.' },
+        { name: 'Rumor Slip — Wanderer’s Heart Will Crown', price_gp: 1, weight: '—', notes: '1 gp chart & sigil order.' },
+      ],
+      dm: []
+    }
+  ]
+};
 
-<!-- Scribe & Light Gear -->
-<details>
-  <summary>Scribe &amp; Light Utility Gear</summary>
-  <table>
-    <tr><th>Item</th><th>Function</th><th>Price</th><th>Stock</th></tr>
-    <tr><td>Inkwell of Endless Charcoal</td><td>Never runs dry of dark ink — oath‑scribe favourite.</td><td>40</td><td>3</td></tr>
-    <tr><td>Moon‑Tint Lens</td><td>In dim light, reads faint glyphs up to 30 ft.</td><td>35</td><td>2</td></tr>
-    <tr><td>Teal‑Flame Censer</td><td>Burns smokeless teal flame for 6 hrs on a pinch of salt.</td><td>25</td><td>4</td></tr>
-  </table>
-</details>
+// Build quick index of all curses for DM global list
+const CURSE_INDEX = (()=>{
+  const map = new Map();
+  for(const s of DATA.stalls){
+    for(const d of (s.dm||[])) map.set(d.id, {...d, stall:s.name});
+  }
+  return map;
+})();
 
-<!-- Weapon Oddities -->
-<details>
-  <summary>Weapon Oddities (legal…‑ish)</summary>
-  <table>
-    <tr><th>Item</th><th>Stat Block</th><th>Price</th><th>Notes</th></tr>
-    <tr><td>Ring‑Blade Buckler</td><td>Shield (+1 AC); thrown 20/60, 1d4 slashing, returns on miss.</td><td>25</td><td>&nbsp;</td></tr>
-    <tr><td>Bone‑Hook Kopis</td><td>As scimitar; crit ⇒ STR 13 save or trip.</td><td>15</td><td>&nbsp;</td></tr>
-    <tr><td>Guttersnipe Knucks</td><td>Brass knuckles; once/short rest reroll 1 dmg die.</td><td>5</td><td>&nbsp;</td></tr>
-  </table>
-</details>
+// -------------- Floor grid --------------
+const gridEl = document.getElementById('floorGrid');
+function renderFloor(filter=''){
+  gridEl.innerHTML = '';
+  const matches = (s)=> (s.name+" "+s.role+" "+s.quick).toLowerCase().includes(filter.toLowerCase());
+  const list = DATA.stalls.filter(matches);
+  const order = ['rogan','pins','yarrow','mira','boran','tassia','axellip','kait','fenn'];
+  const byId = new Map(list.map(x=>[x.id,x]));
+  // 3x3 template positions
+  const layout = [ 'rogan','mira','axellip', 'pins','boran','tassia', 'yarrow','kait','fenn' ];
+  for(const id of layout){
+    const s = byId.get(id);
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    if(s){
+      tile.innerHTML = `<div class="name">${s.name}</div><div class="sub">${s.role}</div><div class="spot">${s.spot||''}</div>`;
+      tile.addEventListener('click',()=>openStall(s.id));
+      tile.title = s.quick || '';
+    } else {
+      tile.style.opacity = .25; tile.style.pointerEvents='none';
+    }
+    gridEl.appendChild(tile);
+  }
+}
+renderFloor();
 
-<!-- Enchanted Weapons by Tier -->
-<details>
-  <summary>Weapons that Grow with the Wielder</summary>
-  <p class="small">Prices below are estimates for initial attunement (Lvl 0‑4).  Upgrades are generally quest or renown‑locked rather than sold outright.</p>
-  <table>
-    <tr><th>Weapon</th><th>Class Fit</th><th colspan="4">Scaling Features</th></tr>
-    <tr><td rowspan="4">Oath‑Edge Shortsword</td><td rowspan="4">Rogue / Bard</td><td><strong>Lvl 0‑4.</strong> Counts as magical; +1 dmg to surprised targets.</td></tr>
-    <tr><td><strong>Lvl 5‑10.</strong> Backslash — BA dash 15 ft after you crit.</td></tr>
-    <tr><td><strong>Lvl 11‑16.</strong> +1 weapon; Vanish — once/short rest turn invisible 1 rnd on kill.</td></tr>
-    <tr><td><strong>Lvl 17‑20.</strong> +2 weapon; crit grants <em>Greater Invisibility</em> 1 rnd &amp; half‑speed dash.</td></tr>
-    <tr><td rowspan="4">Storm‑Ward Greataxe</td><td rowspan="4">Fighter / Barbarian</td><td><strong>Lvl 0‑4.</strong> Magical; can’t be disarmed by non‑mag grip checks.</td></tr>
-    <tr><td><strong>Lvl 5‑10.</strong> Rumble — once/long rest add 1d6 thunder (cone 5 ft).</td></tr>
-    <tr><td><strong>Lvl 11‑16.</strong> +1 weapon; Breaker — ignore slashing resistance.</td></tr>
-    <tr><td><strong>Lvl 17‑20.</strong> +2 weapon; on crit cast <em>thunder step</em> (self).</td></tr>
-    <tr><td rowspan="4">Sunscript War‑Maul</td><td rowspan="4">Cleric / Paladin</td><td><strong>Lvl 0‑4.</strong> Counts as holy symbol; sheds dim light 10 ft.</td></tr>
-    <tr><td><strong>Lvl 5‑10.</strong> Radiant Smite — add 1d8 radiant once/day.</td></tr>
-    <tr><td><strong>Lvl 11‑16.</strong> +1 weapon; regain 1 expended slot (≤ lvl 2) at sunrise.</td></tr>
-    <tr><td><strong>Lvl 17‑20.</strong> +2 weapon; once/long rest emit 20 ft sunbeam (DC 15 Con).</td></tr>
-    <tr><td rowspan="4">Glyph‑wrought Quarterstaff</td><td rowspan="4">Wizard / Int‑caster</td><td><strong>Lvl 0‑4.</strong> Spellcasting focus; advantage on Arcana to scribe scrolls.</td></tr>
-    <tr><td><strong>Lvl 5‑10.</strong> +1 spell‑attack rolls.</td></tr>
-    <tr><td><strong>Lvl 11‑16.</strong> Store one lvl‑2 spell; release as BA (once/short rest).</td></tr>
-    <tr><td><strong>Lvl 17‑20.</strong> Store one lvl‑4 spell or two lvl‑2; recharge on long rest.</td></tr>
-  </table>
-</details>
+// Global search across stalls
+const globalSearch = document.getElementById('globalSearch');
+const clearSearch = document.getElementById('clearSearch');
+globalSearch.addEventListener('input', ()=> renderFloor(globalSearch.value));
+clearSearch.addEventListener('click', ()=>{globalSearch.value=''; renderFloor('');});
 
-<!-- Cave & Expedition Gear -->
-<details>
-  <summary>Cave &amp; Expedition Gear</summary>
-  <table>
-    <tr><th>Item</th><th>Problem Solved</th><th>Price</th><th>Notes</th><th>Stock</th></tr>
-    <tr><td>Folded Spire‑Kit</td><td>Cliffside bivy</td><td>60</td><td>Collapsible hammock ledge (400 lb)</td><td>2</td></tr>
-    <tr><td>Fogbreather Mask</td><td>Spores / dust</td><td>35</td><td>Replaceable veilmoss filter; lasts 1 wk</td><td>5</td></tr>
-    <tr><td>Mosswater Canteen</td><td>Purifies stagnant pools</td><td>25</td><td>1 hr to clear slime &amp; parasites</td><td>5</td></tr>
-    <tr><td>Stonebiter Stakes (6)</td><td>Instant rock anchor</td><td>5</td><td>Twist to self‑tap; DC 20 to pull free</td><td>4</td></tr>
-    <tr><td>Echo‑Mesh Tarp</td><td>Muffle camp sound / conceal loot</td><td>18</td><td>Blocks clangs, flicker‑light.</td><td>2</td></tr>
-    <tr><td>Tunnel Censer (2 hr)</td><td>Repels cave vermin</td><td>30</td><td>Also leaves scent trail for exit.</td><td>4</td></tr>
-  </table>
+// -------------- Drawer & Stall Render --------------
+const drawer = document.getElementById('drawer');
+const vendorName = document.getElementById('vendorName');
+const vendorMeta = document.getElementById('vendorMeta');
+const itemFilter = document.getElementById('itemFilter');
+const itemTableBody = document.querySelector('#itemTable tbody');
+const dmPane = document.getElementById('dmPane');
+const dmNotes = document.getElementById('dmNotes');
+const globalCurses = document.getElementById('globalCurses');
+const dmBadge = document.getElementById('dmBadge');
+let CURRENT_STALL = null;
+let DM_MODE = false;
 
-  <h4>Ready‑Made Packs</h4>
-  <ul>
-    <li><strong>Spelunker’s Core Kit — 30 gp.</strong> Hooded lantern, 3 oil flasks, 50 ft silk rope, 10 pitons, hammer, 4 chalk sticks, waterskin, tinderbox, crowbar.</li>
-    <li><strong>Deep Delver Upgrade — +55 gp.</strong> Fogbreather mask, Mosswater canteen, Echo‑mesh tarp, Stonebiter stakes (6).</li>
-    <li><strong>Arcane Add‑On — +150 gp.</strong> Driftglobe, Veilbreaker thread (feather fall ribbon), Whisper pin (20‑ft silent comms).</li>
-  </ul>
-</details>
+function openStall(id){
+  const s = DATA.stalls.find(x=>x.id===id);
+  if(!s) return;
+  CURRENT_STALL = s;
+  vendorName.textContent = s.name;
+  vendorMeta.textContent = `${s.race} — ${s.role}. ${s.quick||''}`;
+  itemFilter.value = '';
+  renderItems();
+  renderDMForStall();
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden','false');
+}
+function closeStall(){
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden','true');
+}
 
-<!-- Tavern Rumours -->
-<details>
-  <summary>Tavern Rumours (Overheard at the Horn)</summary>
-  <ul>
-    <li>White lilies have started blooming on Crimson Hill — they only grow near unquiet graves.</li>
-    <li>Humans whisper Valerius is courting Aelorthal scribes for “edits” to the chronicles.</li>
-    <li>Someone spotted Knight‑Captain Dragan’s banner heading <em>south</em>, not west. Decoy patrol?</li>
-  </ul>
-</details>
+document.getElementById('closeDrawer').addEventListener('click', closeStall);
 
-<p class="small">Compiled for adventuring reference in the world of <em>Nevos</em>.  Prices &amp; stock are subject to the whim of the proprietor and the shifting tides of Valerost’s honour‑duel economy.</p>
+function renderItems(){
+  const s = CURRENT_STALL; if(!s) return;
+  const q = itemFilter.value.trim().toLowerCase();
+  itemTableBody.innerHTML = '';
+  for(const it of s.items){
+    const hay = `${it.name} ${it.notes}`.toLowerCase();
+    if(q && !hay.includes(q)) continue;
+    const tr = document.createElement('tr');
+    const isCursed = !!it.curseId;
+    const name = isCursed ? `<span class="curse">^</span> ${it.name.replace(/^\^\s*/,'')}` : it.name;
+    const price = formatPrice(it.price_gp);
+    const tags = [];
+    if(isCursed) tags.push('cursed');
+    const notes = DM_MODE && isCursed ? (CURSE_INDEX.get(it.curseId)?.effect || it.notes) : it.notes;
+    tr.innerHTML = `
+      <td>${name}<div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></td>
+      <td>${price}</td>
+      <td>${it.weight||'—'}</td>
+      <td>${escapeHtml(notes||'')}</td>
+      <td><button class="btn">Add</button></td>`;
+    tr.querySelector('button').addEventListener('click', ()=> addToCart(s, it));
+    itemTableBody.appendChild(tr);
+  }
+}
+itemFilter.addEventListener('input', renderItems);
+
+function renderDMForStall(){
+  dmPane.style.display = DM_MODE ? 'block' : 'none';
+  dmBadge.style.display = DM_MODE ? 'inline' : 'none';
+  if(!DM_MODE || !CURRENT_STALL) return;
+  const list = CURRENT_STALL.dm || [];
+  dmNotes.innerHTML = list.length ? list.map(d=>
+    `<div style="margin:8px 0;padding:8px;border:1px dashed #3a4060;border-radius:8px">
+      <strong>${d.title}</strong><br/>
+      <em>Detect:</em> ${escapeHtml(d.detect)}<br/>
+      <em>Effect:</em> ${escapeHtml(d.effect)}<br/>
+      <em>Remedy:</em> ${escapeHtml(d.remedy)}
+    </div>`
+  ).join('') : '<em>No stall‑specific notes.</em>';
+
+  // Global index once
+  globalCurses.innerHTML = Array.from(CURSE_INDEX.values()).map(d=>
+    `<div style="margin:8px 0;padding:8px;border:1px dashed #3a4060;border-radius:8px">
+      <strong>${d.title}</strong> <span class="tag">${d.stall}</span><br/>
+      <em>Detect:</em> ${escapeHtml(d.detect)}<br/>
+      <em>Effect:</em> ${escapeHtml(d.effect)}<br/>
+      <em>Remedy:</em> ${escapeHtml(d.remedy)}
+    </div>`
+  ).join('');
+}
+
+// -------------- Cart --------------
+const cartList = document.getElementById('cartList');
+const cartTotal = document.getElementById('cartTotal');
+const copyReceipt = document.getElementById('copyReceipt');
+const printReceipt = document.getElementById('printReceipt');
+const clearCartBtn = document.getElementById('clearCart');
+let CART = [];
+
+function addToCart(stall, item){
+  CART.push({stall: stall.name, item: item.name.replace(/^\^\s*/,'').trim(), gp: item.price_gp||0});
+  renderCart();
+}
+function formatPrice(gp){
+  // Keep it simple: decimals allowed for sp (0.1 = 1 sp)
+  if(gp===undefined||gp===null) return '—';
+  if(Math.abs(gp - Math.round(gp)) < 1e-6) return `${gp} gp`;
+  // show sp if .1 steps
+  const sp = Math.round((gp%1)*10);
+  if(sp>0 && Math.abs(gp - Math.floor(gp) - sp/10) < 1e-6){
+    return `${Math.floor(gp)} gp ${sp} sp`;
+  }
+  return `${gp.toFixed(2)} gp`;
+}
+function renderCart(){
+  cartList.innerHTML = '';
+  let total = 0;
+  CART.forEach((c,idx)=>{
+    total += (c.gp||0);
+    const row = document.createElement('div');
+    row.className = 'cart-line';
+    row.innerHTML = `<div>${escapeHtml(c.item)} <span class="tag">${escapeHtml(c.stall)}</span></div>
+                     <div>${formatPrice(c.gp)}</div>
+                     <div><button class="btn" aria-label="Remove">✕</button></div>`;
+    row.querySelector('button').addEventListener('click',()=>{CART.splice(idx,1);renderCart();});
+    cartList.appendChild(row);
+  });
+  cartTotal.textContent = formatPrice(+total.toFixed(2));
+}
+copyReceipt.addEventListener('click', ()=>{
+  const lines = CART.map(c=>`- ${c.item} (${c.stall}) — ${formatPrice(c.gp)}`);
+  lines.push(`\nTotal: ${cartTotal.textContent}`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    copyReceipt.textContent='Copied'; setTimeout(()=>copyReceipt.textContent='Copy',1200);
+  });
+});
+printReceipt.addEventListener('click', ()=> window.print());
+clearCartBtn.addEventListener('click', ()=>{CART=[]; renderCart();});
+
+// -------------- DM Mode Toggle --------------
+const dmToggle = document.getElementById('dmToggle');
+function setDM(on){ DM_MODE = !!on; dmToggle.classList.toggle('on', DM_MODE); dmToggle.textContent = DM_MODE ? '🔓 DM' : '🔒 DM'; renderItems(); renderDMForStall(); }
+setDM(false);
+
+dmToggle.addEventListener('click', ()=> setDM(!DM_MODE));
+// Secret keyboard combo: D then M within 600ms
+(function(){
+  let lastD = 0; window.addEventListener('keydown', (e)=>{
+    if(e.key.toLowerCase()==='d'){ lastD = Date.now(); }
+    if(e.key.toLowerCase()==='m' && Date.now()-lastD < 600){ setDM(!DM_MODE); }
+  });
+})();
+
+// Helpers
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+</script>
 </body>
 </html>
