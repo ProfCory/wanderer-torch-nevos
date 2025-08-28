@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Emerald Come Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* Emerald Theme */
+      --bg:#1a202c; /* Dark slate */
+      --panel:#2d3748; /* Slightly lighter slate */
+      --muted:#a0aec0; /* Light gray */
+      --text:#e2e8f0; /* Off-white */
+      --accent:#48bb78; /* Emerald green */
+      --accent2:#63b3ed; /* Sky blue */
+      --warn:#ecc94b; /* Yellow for warnings */
+      --danger:#e53e3e; /* Red for danger */
+
+      --tile:#2c3440; /* Darker tile */
+      --tile-hover:#3b4554; /* Hover tile */
+      --grid:#141820; /* Grid lines */
+      --badge:#3f546d; /* Badge background */
+      --good:#68d391; /* Good (green) */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#141820);color:var(--text);font:15px/1.5 'Inter', system-ui,Segoe UI,Roboto,Arial}
+    a{color:var(--accent)}
+    header{position:sticky;top:0;z-index:10;background:rgba(26,32,44,.9);backdrop-filter:blur(6px);border-bottom:1px solid #2d3748}
+    header .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 16px}
+    .logo{font-weight:800;letter-spacing:.3px;color:var(--accent)}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{width:36ch;max-width:70vw;background:#171923;border:1px solid #4a5568;color:var(--text);padding:8px 10px;border-radius:8px}
+    .search button{background:var(--tile);border:1px solid #4a5568;color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+
+    main{display:grid;grid-template-columns: 2fr 1fr;gap:14px;padding:16px;min-height:calc(100% - 56px)}
+    .floor{
+      background:radial-gradient(1200px 600px at 50% 0%,#2d3748,#1a202c 60%,#141820);
+      padding:14px;border:1px solid #4a5568;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);
+      display:grid;grid-template-rows:auto 1fr;gap:10px;
+    }
+    h2{margin:8px 4px 6px;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+
+    .grid{
+      display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,120px);gap:10px;background:linear-gradient(0deg,transparent,transparent),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px),linear-gradient(0deg,var(--grid) 1px,transparent 1px);
+      background-size:100% 100%, calc((100% - 20px)/3) 100%, 100% calc((100% - 30px)/4);
+      background-position:0 0, 10px 0, 0 10px;
+    }
+    .tile{
+      background:linear-gradient(180deg,var(--tile),#232b38);border:1px solid #4a5568;border-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:.15s transform,.15s background;
+    }
+    .tile:hover{transform:translateY(-2px);background:var(--tile-hover)}
+    .tile .name{font-weight:700;text-align:center;padding:8px 10px}
+    .tile .sub{position:absolute;bottom:6px;left:10px;font-size:12px;color:var(--muted)}
+    .tile .spot{position:absolute;top:6px;right:10px;font-size:11px;color:var(--accent)} /* Changed color for better visibility */
+
+    /* Drawer */
+    .drawer{position:fixed;inset:auto 0 0 0;max-height:64%;background:rgba(26,32,44,.98);border-top:1px solid #4a5568;backdrop-filter:blur(6px);transform:translateY(110%);transition:transform .18s ease-out;z-index:30}
+    .drawer.open{transform:translateY(0)}
+    .drawer .inner{display:grid;grid-template-columns: 1fr 1fr;gap:14px;padding:14px}
+    .drawer h3{margin:2px 0 6px}
+    .vendor-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .vendor-meta{font-size:13px;color:var(--muted)}
+    .close{background:var(--tile);border:1px solid #4a5568;color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    .items{border:1px solid #4a5568;border-radius:12px;overflow:hidden}
+    .items header{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#1f2937;border-bottom:1px solid #4a5568;padding:10px}
+    .items input{background:#171923;border:1px solid #4a5568;color:var(--text);padding:6px 8px;border-radius:8px;width:260px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px 10px;border-bottom:1px solid #4a5568;vertical-align:top}
+    th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.2px}
+    td .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+    .tag{background:var(--badge);border:1px solid #4a5568;border-radius:999px;padding:2px 8px;font-size:12px;color:#c9d1ff}
+    .curse{color:var(--warn);font-weight:700}
+    .btn{background:#3a4a5f;border:1px solid #4a5568;color:var(--text);padding:6px 10px;border-radius:8px;cursor:pointer}
+    .btn:hover{background:#4a5a6f;}
+
+    /* Cart */
+    .cart{background:var(--panel);border:1px solid #4a5568;border-radius:14px;padding:12px;display:grid;grid-template-rows:auto 1fr auto;gap:10px}
+    .cart h3{margin:4px 2px}
+    .cart-list{overflow:auto;max-height:50vh;border-top:1px dashed #4a5568;border-bottom:1px dashed #4a5568}
+    .cart-line{display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:8px 0;border-bottom:1px solid #2f3e53}
+    .cart-total{display:flex;justify-content:space-between;align-items:center}
+
+    footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;color:var(--muted)}
+    .lock{cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #4a5568;background:#1f2937;color:var(--muted)}
+    .lock.on{color:var(--warn);background:#4a5568} /* DM mode on color */
+
+    /* Small screens */
+    @media (max-width: 1000px){
+      main{grid-template-columns: 1fr}
+      .drawer .inner{grid-template-columns:1fr}
+      .items input{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="logo">💎 The Emerald Come Marketplace</div>
+      <div class="search">
+        <input id="globalSearch" placeholder="Search stalls & items… (e.g., 'potion', 'sword', '^')" />
+        <button id="clearSearch" title="Clear">Clear</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="floor">
+      <h2>Market Stalls — Explore the Emerald Come</h2>
+      <div class="grid" id="floorGrid"></div>
+    </section>
+
+    <aside class="cart" aria-label="Cart & Receipt">
+      <h3>🧾 Current Receipt</h3>
+      <div class="cart-list" id="cartList"></div>
+      <div class="cart-total">
+        <div id="cartTotal" class="font-bold text-lg">0 gp</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" id="copyReceipt">Copy</button>
+          <button class="btn" id="printReceipt">Print</button>
+          <button class="btn" id="clearCart">Clear</button>
+        </div>
+      </div>
+      <footer>
+        <div>Prices in gp unless noted. <span id="dmBadge" style="display:none; color: var(--warn); font-weight: bold;">DM Mode Active</span></div>
+        <button class="lock" id="dmToggle" title="Toggle DM Mode">🔒 DM</button>
+      </footer>
+    </aside>
+  </main>
+
+  <!-- Drawer for vendor inventory -->
+  <div id="drawer" class="drawer" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="inner">
+      <div>
+        <div class="vendor-head">
+          <div>
+            <h3 id="vendorName">Vendor</h3>
+            <div class="vendor-meta" id="vendorMeta"></div>
+          </div>
+          <button class="close" id="closeDrawer">Close</button>
+        </div>
+
+        <div class="items">
+          <header>
+            <div><strong>Stall Inventory</strong></div>
+            <input id="itemFilter" placeholder="Filter this stall…" />
+          </header>
+          <div style="overflow:auto;max-height:45vh">
+            <table id="itemTable">
+              <thead>
+                <tr>
+                  <th style="width:35%">Item</th>
+                  <th style="width:10%">Price</th>
+                  <th style="10%">Weight</th>
+                  <th style="30%">Notes</th>
+                  <th style="15%">Add</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="dmPane" style="display:none">
+        <h3>DM Notes for this Stall</h3>
+        <div id="dmNotes" style="border:1px solid #4a5568;border-radius:12px;padding:10px;background:#1f2937"></div>
+        <h3 style="margin-top:14px">Global Cursed / Unidentified Index</h3>
+        <div id="globalCurses" style="border:1px solid #4a5568;border-radius:12px;padding:10px;max-height:32vh;overflow:auto;background:#1f2937"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ------------------ Data ------------------
+const DATA = {
+  stalls: [
+    {
+      id: 'emerald_armory',
+      spot: 'NW Arc',
+      name: 'The Emerald Armory',
+      race: 'Dwarven',
+      role: 'Master Armorsmith & Weaponsmith',
+      quick: 'Finest masterwork weapons and legendary armor for the discerning adventurer.',
+      items: [
+        { name: 'Plate Armor (Masterwork)', price_gp: 2500, weight: '65 lb', notes: 'Superior craftsmanship, +1 AC vs. non-magical bludgeoning. (Rare)' },
+        { name: 'Half Plate Armor (Enchanted)', price_gp: 1200, weight: '40 lb', notes: 'Lightweight and flexible, grants advantage on Dexterity (Stealth) checks. (Uncommon)' },
+        { name: 'Shield of Deflection', price_gp: 800, weight: '6 lb', notes: '+2 to AC; can use a reaction to deflect a projectile, reducing damage by 1d6+proficiency. (Rare)' },
+        { name: 'Greatsword of Cleaving', price_gp: 750, weight: '7 lb', notes: '+1 to attack and damage rolls. On a critical hit, the next attack on a different target has advantage. (Rare)' },
+        { name: 'Longsword of Slicing Winds', price_gp: 600, weight: '3 lb', notes: 'Deals an additional 1d4 slashing damage; can create a gust of wind (DC 13 Str save). (Uncommon)' },
+        { name: 'Rapier of Swift Strikes', price_gp: 500, weight: '2 lb', notes: '+1 to attack rolls, grants advantage on Initiative checks. (Uncommon)' },
+        { name: 'Light Crossbow (Repeating)', price_gp: 400, weight: '5 lb', notes: 'Holds 5 bolts, automatically reloads. (Rare)' },
+        { name: 'Heavy Crossbow (Siege-breaker)', price_gp: 700, weight: '18 lb', notes: 'Deals an additional 1d6 piercing damage to structures and objects. (Rare)' },
+        { name: 'Warhammer of Shockwaves', price_gp: 650, weight: '2 lb', notes: 'On hit, target must succeed on DC 14 Constitution saving throw or be pushed 5 feet. (Rare)' },
+        { name: 'Pike of Impaling', price_gp: 300, weight: '18 lb', notes: 'Reach 10 ft. +1 to damage rolls. (Uncommon)' },
+        { name: '^ Gauntlets of the Stone Fist', price_gp: 1500, weight: '4 lb', notes: 'Grants +1 to unarmed strike attack and damage rolls; once per long rest, can deal an extra 2d6 bludgeoning damage. (Rare)', curseId: 'stone-fist-gauntlets' },
+      ],
+      dm: [
+        { id: 'stone-fist-gauntlets', title: 'Gauntlets of the Stone Fist', detect: 'DC 14 Arcana detects faint tremors even when still.', effect: 'When attuned, the wearer occasionally clenches their fist involuntarily. If they roll a natural 1 on an attack roll with any weapon, they take 1d4 bludgeoning damage as the gauntlets briefly turn against them.', remedy: 'Bathe the gauntlets in the blood of an earth elemental under a new moon.' }
+      ]
+    },
+    {
+      id: 'arcane_resonances',
+      spot: 'N Sky',
+      name: 'Arcane Resonances',
+      race: 'Elven',
+      role: 'Master Enchanter & Scroll Scribe',
+      quick: 'Rare spell scrolls, powerful foci, and esoteric components from distant planes.',
+      items: [
+        { name: 'Spell Scroll (Level 4)', price_gp: 2000, weight: '—', notes: 'Common level 4 spell. (Very Rare)' },
+        { name: 'Spell Scroll (Level 5)', price_gp: 3000, weight: '—', notes: 'Common level 5 spell. (Very Rare)' },
+        { name: 'Spell Scroll (Level 6)', price_gp: 20000, weight: '—', notes: 'Common level 6 spell. (Legendary)' },
+        { name: 'Spell Scroll (Level 7)', price_gp: 25000, weight: '—', notes: 'Common level 7 spell. (Legendary)' },
+        { name: 'Spell Scroll (Level 8)', price_gp: 30000, weight: '—', notes: 'Common level 8 spell. (Legendary)' },
+        { name: 'Spell Scroll (Level 9)', price_gp: 100000, weight: '—', notes: 'Common level 9 spell. (Legendary)' },
+        { name: 'Orb of the Whispering Depths', price_gp: 15000, weight: '3 lb', notes: 'Focus, grants advantage on Arcana checks related to abyssal magic. (Very Rare)' },
+        { name: 'Crystal of Planar Echoes', price_gp: 12000, weight: '1 lb', notes: 'Focus, allows user to cast *Plane Shift* once per week (DC 17 spell save). (Very Rare)' },
+        { name: 'Wand of Lightning Bolts', price_gp: 5000, weight: '1 lb', notes: '3 charges, casts *Lightning Bolt* (DC 15 spell save). Regains 1d3 charges daily. (Rare)' },
+        { name: 'Component Pouch (Endless)', price_gp: 1000, weight: '2 lb', notes: 'Contains any non-consumable, non-costly spell components. (Uncommon)' },
+        { name: '^ Tome of Forgotten Tongues', price_gp: 8000, weight: '5 lb', notes: 'Contains obscure languages, but sometimes demands sacrifice. (Very Rare)', curseId: 'forgotten-tongues' },
+      ],
+      dm: [
+        { id: 'forgotten-tongues', title: 'Tome of Forgotten Tongues', detect: 'DC 16 History/Arcana notices unsettling script that moves slightly.', effect: 'Reading the tome grants knowledge of one obscure language for 24 hours. However, each reading requires a DC 13 Wisdom saving throw; on a fail, the reader forgets one language they already know for 1d4 hours.', remedy: 'The tome must be cleansed in the tears of a beholder and then sealed with a True Name.' }
+      ]
+    },
+    {
+      id: 'shady_exchange',
+      spot: 'NE Slums',
+      name: 'The Shady Exchange',
+      race: 'Tiefling',
+      role: 'Black Market Broker',
+      quick: 'Poisons, illicit goods, information, and a discrete buying service for "found" treasures.',
+      items: [
+        { name: 'Assassin\'s Blood (vial)', price_gp: 150, weight: '—', notes: 'Poison. DC 10 Con save or 1d12 poison damage, poisoned for 24h. (DMG)' },
+        { name: 'Carrion Crawler Mucus (vial)', price_gp: 200, weight: '—', notes: 'Poison. DC 13 Con save or paralyzed for 1 min. (DMG)' },
+        { name: 'Midnight Tears (vial)', price_gp: 1500, weight: '—', notes: 'Poison. DC 17 Con save or 9d6 poison damage. (DMG)' },
+        { name: 'Purple Worm Poison (vial)', price_gp: 2000, weight: '—', notes: 'Poison. DC 19 Con save or 12d6 poison damage. (DMG)' },
+        { name: 'Wyvern Poison (vial)', price_gp: 1200, weight: '—', notes: 'Poison. DC 15 Con save or 7d6 poison damage. (DMG)' },
+        { name: 'Thieves\' Tools (Masterwork)', price_gp: 75, weight: '1 lb', notes: 'Advantage on checks to pick locks or disarm traps. (Rare)' },
+        { name: 'Disguise Kit (Perfected)', price_gp: 50, weight: '3 lb', notes: 'Advantage on checks to create disguises. (Uncommon)' },
+        { name: 'Forgery Kit (Artisan-grade)', price_gp: 30, weight: '5 lb', notes: 'Advantage on checks to create forgeries. (Uncommon)' },
+        { name: 'Bag of Holding', price_gp: 500, weight: '15 lb', notes: 'Holds 500 lbs, 64 cubic feet. (Uncommon)' },
+        { name: 'Cloak of Elvenkind', price_gp: 600, weight: '1 lb', notes: 'Advantage on Dexterity (Stealth) checks made to hide. (Uncommon)' },
+        { name: '^ Whispering Dagger', price_gp: 300, weight: '1 lb', notes: 'A seemingly ordinary dagger that sometimes offers sinister advice. (Uncommon)', curseId: 'whispering-dagger' },
+      ],
+      dm: [
+        { id: 'whispering-dagger', title: 'Whispering Dagger', detect: 'DC 14 Investigation finds small, almost invisible runes on the blade; DC 12 Arcana detects a faint, discordant hum.', effect: 'When attuned, the dagger whispers suggestions to the wielder (Insight DC 13 to discern true intent). If the wielder acts on a malevolent suggestion, they gain 1 temporary hit point, but have disadvantage on Charisma (Persuasion) checks for 1 hour.', remedy: 'The dagger must be used to protect an innocent life, then buried in holy ground for 7 days.' }
+      ]
+    },
+    {
+      id: 'gems_glamours',
+      spot: 'W Gardens',
+      name: 'Gems & Glamours',
+      race: 'Gnomish',
+      role: 'Jeweler & Gemcutter',
+      quick: 'Exquisite jewels, rare spell components, and enchanted trinkets from subterranean mines.',
+      items: [
+        { name: 'Diamond (500 gp)', price_gp: 500, weight: '—', notes: 'Spell component for *Revivify*.' },
+        { name: 'Diamond (1000 gp)', price_gp: 1000, weight: '—', notes: 'Spell component for *Greater Restoration*.' },
+        { name: 'Ruby (1500 gp)', price_gp: 1500, weight: '—', notes: 'Spell component for various enchantments.' },
+        { name: 'Sapphire (2000 gp)', price_gp: 2000, weight: '—', notes: 'Spell component for various enchantments.' },
+        { name: 'Emerald (5000 gp)', price_gp: 5000, weight: '—', notes: 'Spell component for high-level spells like *Scrying*.' },
+        { name: 'Amulet of Proof Against Detection and Location', price_gp: 2500, weight: '1 lb', notes: 'Wearer cannot be targeted by divination magic. (Rare)' },
+        { name: 'Ring of Spell Storing', price_gp: 5000, weight: '—', notes: 'Can store up to 5 levels of spells. (Rare)' },
+        { name: 'Ioun Stone (Protection)', price_gp: 4000, weight: '—', notes: '+1 AC. (Rare)' },
+        { name: 'Ioun Stone (Sustenance)', price_gp: 3000, weight: '—', notes: 'Requires no food or water. (Rare)' },
+        { name: 'Jeweler\'s Tools (Masterwork)', price_gp: 75, weight: '2 lb', notes: 'Advantage on checks to appraise or cut gems. (Uncommon)' },
+        { name: '^ Glimmering Geode', price_gp: 1000, weight: '2 lb', notes: 'Sparkles beautifully; sometimes echoes nearby thoughts. (Uncommon)', curseId: 'glimmering-geode' },
+      ],
+      dm: [
+        { id: 'glimmering-geode', title: 'Glimmering Geode', detect: 'DC 13 Investigation notices a faint, almost imperceptible tremor from within the stone.', effect: 'When held, the geode passively projects surface thoughts (Int DC 12 to filter) of nearby creatures (10 ft radius) to the holder. However, once per day, it randomly broadcasts one of the holder\'s own embarrassing or private thoughts to all within the radius (Cha DC 14 to cover up).', remedy: 'Submerge in pure spring water for 3 days and nights, then present it as an offering to a creature of pure elemental earth.' }
+      ]
+    },
+    {
+      id: 'alchemists_haven',
+      spot: 'Central Oasis',
+      name: 'Alchemist\'s Haven',
+      race: 'Human',
+      role: 'Potions & Concoctions Specialist',
+      quick: 'Potions of every hue and purpose, from common remedies to rare elixirs.',
+      items: [
+        { name: 'Potion of Healing (Superior)', price_gp: 1000, weight: '0.5 lb', notes: 'Restores 4d4 + 4 hit points. (Rare)' },
+        { name: 'Potion of Healing (Supreme)', price_gp: 5000, weight: '0.5 lb', notes: 'Restores 10d4 + 20 hit points. (Very Rare)' },
+        { name: 'Potion of Greater Healing', price_gp: 200, weight: '0.5 lb', notes: 'Restores 4d4 + 4 hit points. (Uncommon)' },
+        { name: 'Potion of Speed', price_gp: 800, weight: '0.5 lb', notes: 'Gain an additional action, +2 AC, advantage on Dex saves for 1 min. (Very Rare)' },
+        { name: 'Potion of Gaseous Form', price_gp: 500, weight: '0.5 lb', notes: 'Become gaseous for 1 hour. (Rare)' },
+        { name: 'Potion of Invulnerability', price_gp: 20000, weight: '0.5 lb', notes: 'Resistance to all damage for 1 minute. (Legendary, consumable)' },
+        { name: 'Elixir of Health', price_gp: 1000, weight: '0.5 lb', notes: 'Cures all diseases and neutralizes all poisons. (Rare)' },
+        { name: 'Oil of Etherealness', price_gp: 2000, weight: '0.5 lb', notes: 'Become ethereal for 1 hour. (Rare)' },
+        { name: 'Alchemist\'s Fire (Greater)', price_gp: 150, weight: '1 lb', notes: 'Deals 2d6 fire damage on hit, 1d6 ongoing. (Uncommon)' },
+        { name: 'Antitoxin (Greater Vial)', price_gp: 100, weight: '—', notes: 'Advantage on saving throws against poison for 1 hour. (Uncommon)' },
+        { name: 'Alchemist\'s Supplies (Portable Lab)', price_gp: 150, weight: '10 lb', notes: 'Contains advanced tools for complex concoctions. (Uncommon)' },
+        { name: '^ Vial of Liquid Luck', price_gp: 600, weight: '—', notes: 'Grants advantage on one roll, but fate balances the scales. (Rare)', curseId: 'liquid-luck' },
+      ],
+      dm: [
+        { id: 'liquid-luck', title: 'Vial of Liquid Luck', detect: 'DC 13 Arcana notices the liquid shimmers oddly against light sources, sometimes forming vague symbols.', effect: 'When consumed, grants advantage on one attack roll, saving throw, or ability check within the next hour. However, the next time the consumer would gain advantage from any source within 24 hours, they instead roll with disadvantage.', remedy: 'The vial must be refilled with a potion of healing and then poured into a natural spring at dawn.' }
+      ]
+    },
+    {
+      id: 'grand_emporium',
+      spot: 'E Market',
+      name: 'The Grand Emporium',
+      race: 'Half-Orc',
+      role: 'General Goods Trader',
+      quick: 'Everything from common provisions to specialized adventuring tools and rare crafting components.',
+      items: [
+        { name: 'Rope, Silk (100 ft.)', price_gp: 20, weight: '10 lb', notes: 'Superior strength and flexibility.' },
+        { name: 'Climber\'s Kit (Reinforced)', price_gp: 40, weight: '12 lb', notes: 'Includes reinforced pitons and a self-braking belay device.' },
+        { name: 'Explorer\'s Pack (Expedition)', price_gp: 25, weight: '—', notes: 'Includes specialized maps, a portable water purifier, and freeze-dried rations.' },
+        { name: 'Map, Regional (Detailed)', price_gp: 50, weight: '1 lb', notes: 'Shows terrain, major settlements, and known danger zones.' },
+        { name: 'Spyglass (Magnified)', price_gp: 2500, weight: '1 lb', notes: 'Doubles normal spyglass range. (Uncommon)' },
+        { name: 'Tent (Mage-proof, 4-person)', price_gp: 100, weight: '30 lb', notes: 'Provides basic protection against divination magic. (Uncommon)' },
+        { name: 'Tinker\'s Tools (Precision Set)', price_gp: 100, weight: '10 lb', notes: 'Advantage on checks to repair complex clockwork or construct small devices. (Uncommon)' },
+        { name: 'Carpenter\'s Tools (Portable Workshop)', price_gp: 50, weight: '15 lb', notes: 'Includes miniature saw, planer, and various chisels. (Uncommon)' },
+        { name: 'Cook\'s Utensils (Gourmet Set)', price_gp: 10, weight: '10 lb', notes: 'Adds +1 to Constitution saves against food poisoning for dishes prepared with these. (Common)' },
+        { name: 'Waterskin (Self-filling)', price_gp: 50, weight: '1 lb', notes: 'Fills with fresh water over 1 hour when empty. (Uncommon)' },
+        { name: '^ Compass of Wayward Journeys', price_gp: 75, weight: '1 lb', notes: 'Always points north, but sometimes to a "spiritual north". (Uncommon)', curseId: 'wayward-compass' },
+      ],
+      dm: [
+        { id: 'wayward-compass', title: 'Compass of Wayward Journeys', detect: 'DC 11 Arcana notes faint displacement aura around needle.', effect: 'While holding the compass, any attempt to magically teleport or find a true bearing (e.g., by *Pass Without Trace* or *Guidance*) has a 10% chance of misdirection (DM\'s choice). It always points north, but sometimes it\'s the North of a different plane.', remedy: 'Bury the compass at a true cardinal point for a full moon cycle.' }
+      ]
+    },
+    {
+      id: 'sky_sails_dock',
+      spot: 'SW Docks',
+      name: 'The Sky-Sails Dock',
+      race: 'Goliath',
+      role: 'Airship & Maritime Broker',
+      quick: 'Exclusive airships, sturdy galleys, and components for aerial or naval travel.',
+      items: [
+        { name: 'Airship (Light Patrol)', price_gp: 40000, weight: '—', notes: 'Seats 6, top speed 80 mph. Requires skilled pilot. (DMG)' },
+        { name: 'Galley (War-rigged)', price_gp: 30000, weight: '—', notes: 'Equipped with ballistae and reinforced hull. (DMG)' },
+        { name: 'Warship (Dwarven Ironclad)', price_gp: 25000, weight: '—', notes: 'Heavily armored, slow but formidable. (DMG)' },
+        { name: 'Sailing Ship (Merchant Prince)', price_gp: 10000, weight: '—', notes: 'Luxurious quarters, larger cargo capacity. (DMG)' },
+        { name: 'Telescope (Ship-mounted)', price_gp: 1000, weight: '50 lb', notes: 'Enhances range for perception checks at sea. (Uncommon)' },
+        { name: 'Ship\'s Bell (Alarm)', price_gp: 50, weight: '20 lb', notes: 'Rings loudly, can alert crew up to 1 mile. (Common)' },
+        { name: 'Life Raft (Emergency)', price_gp: 100, weight: '50 lb', notes: 'Inflatable, holds 6 people. (Common)' },
+        { name: 'Weather-Predicting Orb', price_gp: 750, weight: '5 lb', notes: 'Predicts weather patterns for 24 hours (DC 13 Wisdom check for accuracy). (Rare)' },
+        { name: '^ Compass of Lost Shores', price_gp: 200, weight: '1 lb', notes: 'Always points to the nearest uncharted island or hidden cove. (Rare)', curseId: 'lost-shores-compass' },
+      ],
+      dm: [
+        { id: 'lost-shores-compass', title: 'Compass of Lost Shores', detect: 'DC 14 Survival notices the needle vibrates subtly, even in still air.', effect: 'The compass always points to the nearest uncharted location within 100 miles. However, once per week, it mysteriously adds a day to any sea voyage as the ship is drawn slightly off course towards a newly revealed (and often dangerous) location.', remedy: 'The compass must be buried on a shoreline touched by both fresh river water and saltwater at the same tide.' }
+      ]
+    },
+    {
+      id: 'tinkers_wonders',
+      spot: 'S Clocktower',
+      name: 'Tinker\'s Wonders',
+      race: 'Gnomish/Goblin',
+      role: 'Inventors & Gunsmiths',
+      quick: 'Explosive devices, intricate clockwork contraptions, and finely crafted firearms.',
+      items: [
+        { name: 'Musket (Repeating)', price_gp: 750, weight: '10 lb', notes: 'Holds 3 bullets, can fire multiple times per round. (DMG, Rare)' },
+        { name: 'Pistol (Dragonfire)', price_gp: 500, weight: '3 lb', notes: 'Deals 1d6 piercing + 1d4 fire damage. (DMG, Rare)' },
+        { name: 'Gunpowder (Keg)', price_gp: 250, weight: '20 lb', notes: 'Explosive. (DMG)' },
+        { name: 'Gunpowder (Powder Horn)', price_gp: 35, weight: '2 lb', notes: 'Small container of gunpowder. (DMG)' },
+        { name: 'Bullets, Firearm (20)', price_gp: 6, weight: '1 lb', notes: 'Ammunition for firearms. (DMG)' },
+        { name: 'Clockwork Homunculus', price_gp: 2000, weight: '10 lb', notes: 'A small, programmable construct assistant. (Very Rare)' },
+        { name: 'Goggles of Night', price_gp: 400, weight: '0.5 lb', notes: 'Grants darkvision out to 60 feet. (Uncommon)' },
+        { name: 'Bag of Tricks (Gray)', price_gp: 700, weight: '0.5 lb', notes: 'Pull out random animals. (Uncommon)' },
+        { name: 'Sentry Golem (Tiny)', price_gp: 5000, weight: '50 lb', notes: 'A small, immobile guardian golem that alerts to intrusions. (Rare)' },
+        { name: 'Tinker\'s Tools (Artificer\'s Set)', price_gp: 150, weight: '12 lb', notes: 'Grants proficiency in Tinker\'s Tools, or expertise if already proficient. (Rare)' },
+        { name: '^ Ever-Ticking Watch', price_gp: 200, weight: '—', notes: 'Keeps perfect time, but sometimes skips ahead. (Uncommon)', curseId: 'ever-ticking-watch' },
+      ],
+      dm: [
+        { id: 'ever-ticking-watch', title: 'Ever-Ticking Watch', detect: 'DC 12 Investigation notices the hands sometimes move with an unnaturally fast blur, then snap back.', effect: 'The watch always shows the correct time. However, once per day, at a moment of the DM\'s choosing, the wearer loses concentration on a spell or takes disadvantage on an ability check due to a sudden, inexplicable feeling of temporal displacement. The watch briefly jumps forward or backward a few seconds, then corrects itself.', remedy: 'The watch must be immersed in a pool of molten lead during a lunar eclipse.' }
+      ]
+    },
+    {
+      id: 'verdant_grove',
+      spot: 'SE Outskirts',
+      name: 'The Verdant Grove',
+      race: 'Half-Elf',
+      role: 'Druidic Artisan & Herbalist',
+      quick: 'Natural remedies, potent poisons, and rare components harvested from ancient forests.',
+      items: [
+        { name: 'Herbalism Kit (Masterwork)', price_gp: 25, weight: '3 lb', notes: 'Advantage on checks to identify herbs or prepare poultices. (Uncommon)' },
+        { name: 'Poisons, Basic (Botanical)', price_gp: 100, weight: '—', notes: 'Non-magical poison sourced from rare plants. (PHB)' },
+        { name: 'Sprig of Mistletoe (Ancient)', price_gp: 10, weight: '—', notes: 'A particularly potent druidic focus.' },
+        { name: 'Wooden Staff (Living Branch)', price_gp: 50, weight: '4 lb', notes: 'Acts as a Quarterstaff, sheds dim light in a 5 ft radius. (Uncommon)' },
+        { name: 'Bagpipes (Enchanted)', price_gp: 80, weight: '6 lb', notes: 'Inspires allies (once per long rest, allies gain +1d4 to one attack roll). (Uncommon)' },
+        { name: 'Ring of Animal Influence', price_gp: 1500, weight: '—', notes: '3 charges, casts *Animal Friendship*, *Fear* (animals only), or *Speak with Animals*. (Rare)' },
+        { name: 'Staff of the Woodlands', price_gp: 7500, weight: '4 lb', notes: 'Can cast *Pass without Trace*, *Barkskin*, *Locate Animals or Plants*, etc. (Rare)' },
+        { name: 'Boots of the Winterlands', price_gp: 500, weight: '1 lb', notes: 'Resistance to cold damage; move across ice/snow without difficult terrain. (Uncommon)' },
+        { name: '^ Bloom of False Spring', price_gp: 75, weight: '—', notes: 'A beautiful flower that seems to glow; wilts at inconvenient times. (Common)', curseId: 'false-spring-bloom' },
+      ],
+      dm: [
+        { id: 'false-spring-bloom', title: 'Bloom of False Spring', detect: 'DC 10 Nature or Arcana notices the flower sheds no pollen and its glow is unnaturally cold.', effect: 'While carried, the bloom glows softly, acting as a torch. However, at the DM\'s discretion (e.g., during a tense social encounter or when trying to sneak), the flower will suddenly and dramatically wilt, dropping all its petals and extinguishing its light, drawing unwanted attention (Stealth checks at disadvantage for 1 round).', remedy: 'Plant the bloom in barren soil and water it with your own tears for a week, then successfully grow another plant from the same soil.' }
+      ]
+    },
+    {
+      id: 'sacred_hearth',
+      spot: 'E Cathedral',
+      name: 'The Sacred Hearth',
+      race: 'Aasimar',
+      role: 'High Priestess & Reliquary Keeper',
+      quick: 'Holy artifacts, divine services, and potent blessings for the faithful.',
+      items: [
+        { name: 'Holy Water (Blessed Vial)', price_gp: 50, weight: '1 lb', notes: 'Deals 2d6 radiant damage to fiends/undead. (PHB)' },
+        { name: 'Amulet of the Devout', price_gp: 1000, weight: '0.5 lb', notes: '+1 to spell attack rolls and saving throw DCs for cleric/paladin spells. (Uncommon)' },
+        { name: 'Reliquary (Warded)', price_gp: 100, weight: '2 lb', notes: 'Protects contents from scrying for 24 hours. (Uncommon)' },
+        { name: 'Emblem (Divine Radiance)', price_gp: 75, weight: '—', notes: 'Casts *Light* at will, counts as a holy symbol. (Common)' },
+        { name: 'Priest\'s Pack (Exorcist\'s)', price_gp: 50, weight: '—', notes: 'Contains holy water, incense, a crucifix, and a small prayer book. (Uncommon)' },
+        { name: 'Scroll of Protection (Fiends)', price_gp: 200, weight: '—', notes: 'Creates a barrier against fiends for 5 minutes. (Uncommon)' },
+        { name: 'Pendant of the Sacred Oath', price_gp: 1500, weight: '0.5 lb', notes: 'Once per long rest, gain advantage on a saving throw against an enchantment spell. (Rare)' },
+        { name: 'Mace of Disruption', price_gp: 4000, weight: '4 lb', notes: '+1 to attack and damage rolls; deals extra 2d6 radiant to undead. (Rare)' },
+        { name: '^ Circlet of Penance', price_gp: 800, weight: '0.5 lb', notes: 'Promotes piety, but at a cost. (Rare)', curseId: 'circlet-penance' },
+      ],
+      dm: [
+        { id: 'circlet-penance', title: 'Circlet of Penance', detect: 'DC 13 Religion notices a faint, almost imperceptible inscription of a forgotten vow within the silver.', effect: 'While worn, the wearer gains advantage on Wisdom (Religion) checks. However, they are compelled to confess their minor sins aloud at least once per day, and take 1d4 psychic damage if they fail to do so before a long rest.', remedy: 'The circlet must be worn for 7 consecutive days in a temple dedicated to a deity of justice, and the wearer must atone for a significant past wrongdoing.' }
+      ]
+    },
+    {
+      id: 'magic_item_auction',
+      spot: 'High Spire',
+      name: 'Emerald Spire Auction House',
+      race: 'Various',
+      role: 'Auctioneer',
+      quick: 'Rare and powerful magic items go up for bid. Inventory changes weekly!',
+      items: [
+        { name: 'Ring of Protection', price_gp: 2500, weight: '—', notes: '+1 AC and +1 to all saving throws. (Rare)' },
+        { name: 'Manual of Golems (Clay)', price_gp: 10000, weight: '5 lb', notes: 'Contains the instructions to create a clay golem. (Very Rare)' },
+        { name: 'Belt of Giant Strength (Hill)', price_gp: 4000, weight: '1 lb', notes: 'Sets Strength to 21. (Rare)' },
+        { name: 'Staff of Power', price_gp: 35000, weight: '4 lb', notes: 'Powerful arcane focus, can cast multiple high-level spells. (Very Rare)' },
+        { name: 'Plate Armor of Etherealness', price_gp: 45000, weight: '65 lb', notes: 'Can become ethereal once per day for 10 minutes. (Very Rare)' },
+        { name: 'Sword of Sharpness (Greatsword)', price_gp: 20000, weight: '6 lb', notes: 'Score a critical hit on a 19 or 20. (Very Rare)' },
+        { name: 'Tome of Clear Thought', price_gp: 15000, weight: '5 lb', notes: 'Increases Intelligence score by 2, up to 20. (Very Rare, consumable)' },
+        { name: 'Wand of Polymorph', price_gp: 7000, weight: '1 lb', notes: '7 charges, casts *Polymorph*. (Rare)' },
+        { name: 'Orb of Dragonkind (Green)', price_gp: 50000, weight: '10 lb', notes: 'Grants control over green dragons, can cast associated spells. (Legendary)' },
+        { name: 'Vorpal Sword', price_gp: 100000, weight: '7 lb', notes: '+3 to attack and damage rolls, decapitates on natural 20. (Legendary)' },
+        { name: '^ Amulet of Health (Flickering)', price_gp: 1500, weight: '0.5 lb', notes: 'Sets Constitution to 19, but sometimes causes coughing fits. (Rare)', curseId: 'flickering-health' },
+      ],
+      dm: [
+        { id: 'flickering-health', title: 'Amulet of Health (Flickering)', detect: 'DC 15 Medicine or Arcana detects slight, irregular pulsations in the wearer\'s heart rate.', effect: 'While worn, the wearer\'s Constitution score is 19. However, at random times (DM discretion, e.g., during a crucial spell concentration or social interaction), the wearer is overcome by a sudden, intense coughing fit, causing disadvantage on their next saving throw or ability check.', remedy: 'The amulet must be boiled in a potion of greater healing and then worn by a sickly, non-magical beast until it recovers its health naturally.' }
+      ]
+    },
+     {
+      id: 'general_goods_guild',
+      spot: 'Market Square',
+      name: 'General Goods Guild Counter',
+      race: 'Various',
+      role: 'Common Provisions & Equipment',
+      quick: 'All the mundane necessities for any adventurer. Bulk import available in DM mode.',
+      items: [
+        { name: 'Abacus', price_gp: 2, weight: '2 lb', notes: 'Counting frame.' },
+        { name: 'Backpack', price_gp: 2, weight: '5 lb', notes: 'Standard adventuring gear.' },
+        { name: 'Bedroll', price_gp: 1, weight: '7 lb', notes: 'For a comfortable rest.' },
+        { name: 'Rope, hempen (50 ft.)', price_gp: 1, weight: '10 lb', notes: 'Essential for climbing or tying things.' },
+        { name: 'Torch', price_gp: 0.01, weight: '1 lb', notes: 'Provides light for 1 hour.' },
+        { name: 'Tinderbox', price_gp: 0.5, weight: '1 lb', notes: 'For starting fires quickly.' },
+        { name: 'Rations (1 day)', price_gp: 0.5, weight: '2 lb', notes: 'Non-perishable food.' },
+        { name: 'Waterskin', price_gp: 0.2, weight: '5 lb (full)', notes: 'Holds 4 pints of water.' },
+        { name: 'Crowbar', price_gp: 2, weight: '5 lb', notes: 'Provides advantage on Strength checks to break objects.' },
+        { name: 'Healer’s Kit (10 uses)', price_gp: 5, weight: '3 lb', notes: 'Restores 1 hp or stabilizes a dying creature. (10 uses)' },
+        { name: 'Clothes, traveler’s', price_gp: 2, weight: '4 lb', notes: 'Durable and practical attire.' },
+        { name: 'Lock', price_gp: 10, weight: '1 lb', notes: 'Standard lock, DC 15 to pick.' },
+        { name: 'Lantern, hooded', price_gp: 5, weight: '2 lb', notes: 'Illuminates a 30-foot radius, dim light for another 30 feet.' },
+        { name: 'Oil (flask)', price_gp: 0.1, weight: '1 lb', notes: 'Fuels a lantern for 6 hours; flammable.' },
+        { name: 'Spyglass', price_gp: 1000, weight: '1 lb', notes: 'Magnifies distant objects 8 times.' },
+        { name: 'Ink (1 oz bottle)', price_gp: 10, weight: '—', notes: 'For writing and scribing.' },
+        { name: 'Paper (1 sheet)', price_gp: 0.2, weight: '—', notes: 'For notes and documents.' },
+        { name: 'Vial (glass)', price_gp: 1, weight: '—', notes: 'Small container for liquids.' },
+        { name: 'Tent (2-person)', price_gp: 2, weight: '20 lb', notes: 'Provides shelter for two.' },
+        { name: 'Shovel', price_gp: 2, weight: '5 lb', notes: 'For digging and excavation.' },
+        { name: 'Cook’s Utensils', price_gp: 1, weight: '8 lb', notes: 'Basic set of cooking tools.' },
+        { name: 'Smith’s Tools', price_gp: 20, weight: '8 lb', notes: 'For metalworking and repairs.' },
+        { name: 'Tinker’s Tools', price_gp: 50, weight: '10 lb', notes: 'For repairing mechanisms and crafting small devices.' },
+        { name: 'Gaming Set — Dice', price_gp: 0.1, weight: '—', notes: 'A set of standard dice.' },
+        { name: 'Mount — Warhorse', price_gp: 400, weight: '—', notes: 'Strong and trained for combat.' },
+        { name: 'Saddle, military', price_gp: 20, weight: '30 lb', notes: 'Provides advantage on saves to remain mounted.' },
+        { name: 'Potion of Healing (Basic)', price_gp: 50, weight: '0.5 lb', notes: 'Restores 2d4 + 2 hit points. (Common)' },
+      ],
+      dm: [] // No specific DM notes for generic items, the bulk import feature is explained in the quick note.
+    },
+    {
+      id: 'consignment_counter',
+      spot: 'S Exchange',
+      name: 'Consignment Counter (Upload)',
+      race: 'Various',
+      role: 'Bring-Your-Own Inventory',
+      quick: 'Upload a JSON file to add items to this stall (no DM mode needed).',
+      items: [
+        { name: '— (empty) —', price_gp: 0, weight: '—', notes: 'Use the Upload panel in DM mode to import custom JSON items into this stall.' }
+      ],
+      dm: []
+    }
+  ]
+};
+
+// Build quick index of all curses for DM global list
+const CURSE_INDEX = (()=>{
+  const map = new Map();
+  for(const s of DATA.stalls){
+    for(const d of (s.dm||[])) map.set(d.id, {...d, stall:s.name});
+  }
+  return map;
+})();
+
+// -------------- Floor grid --------------
+const gridEl = document.getElementById('floorGrid');
+function renderFloor(filter=''){
+  gridEl.innerHTML = '';
+  const matches = (s)=> (s.name+" "+s.role+" "+s.quick).toLowerCase().includes(filter.toLowerCase());
+  const list = DATA.stalls.filter(matches);
+  
+  // Custom layout for Emerald Come, including the new stalls
+  const layout = [
+    'emerald_armory', 'arcane_resonances', 'shady_exchange',
+    'gems_glamours', 'alchemists_haven', 'grand_emporium',
+    'sky_sails_dock', 'tinkers_wonders', 'verdant_grove',
+    'sacred_hearth', 'magic_item_auction', 'general_goods_guild',
+    'consignment_counter', 'spare1', 'spare2' // Added placeholders for potential future stalls
+  ];
+  
+  const byId = new Map(list.map(x=>[x.id,x]));
+  for(const id of layout){
+    const s = byId.get(id);
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    if(s){
+      tile.innerHTML = `<div class="name">${s.name}</div><div class="sub">${s.role}</div><div class="spot">${s.spot||''}</div>`;
+      tile.addEventListener('click',()=>openStall(s.id));
+      tile.title = s.quick || '';
+    } else {
+      tile.style.opacity = .25; tile.style.pointerEvents='none'; // Visual for empty slots
+      tile.innerHTML = `<div class="name" style="color:var(--muted)">Empty Stall</div>`;
+    }
+    gridEl.appendChild(tile);
+  }
+}
+renderFloor();
+
+// Global search across stalls
+const globalSearch = document.getElementById('globalSearch');
+const clearSearch = document.getElementById('clearSearch');
+globalSearch.addEventListener('input', ()=> renderFloor(globalSearch.value));
+clearSearch.addEventListener('click', ()=>{globalSearch.value=''; renderFloor('');});
+
+// -------------- Drawer & Stall Render --------------
+const drawer = document.getElementById('drawer');
+const vendorName = document.getElementById('vendorName');
+const vendorMeta = document.getElementById('vendorMeta');
+const itemFilter = document.getElementById('itemFilter');
+const itemTableBody = document.querySelector('#itemTable tbody');
+const dmPane = document.getElementById('dmPane');
+const dmNotes = document.getElementById('dmNotes');
+const globalCurses = document.getElementById('globalCurses');
+const dmBadge = document.getElementById('dmBadge');
+let CURRENT_STALL = null;
+let DM_MODE = false;
+
+function openStall(id){
+  const s = DATA.stalls.find(x=>x.id===id);
+  if(!s) return;
+  CURRENT_STALL = s;
+  vendorName.textContent = s.name;
+  vendorMeta.textContent = `${s.race} — ${s.role}. ${s.quick||''}`;
+  itemFilter.value = '';
+  renderItems();
+  renderDMForStall();
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden','false');
+}
+function closeStall(){
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden','true');
+}
+
+document.getElementById('closeDrawer').addEventListener('click', closeStall);
+
+function renderItems(){
+  const s = CURRENT_STALL; if(!s) return;
+  const q = itemFilter.value.trim().toLowerCase();
+  itemTableBody.innerHTML = '';
+  
+  const itemsContainer = document.querySelector('.items');
+  let uploadBox = document.getElementById('uploadBox');
+
+  // Handle upload box for Consignment Counter
+  if (s.id === 'consignment_counter') {
+    if (!uploadBox) {
+      const hdr = itemsContainer.querySelector('header');
+      hdr.insertAdjacentHTML('afterend', `
+        <div id="uploadBox" style="padding:10px;border-bottom:1px solid var(--panel);background:var(--tile);">
+          <strong>Upload JSON Inventory</strong>
+          <input type="file" id="uploadFile" accept="application/json" class="ml-4" />
+          <button class="btn ml-2" id="uploadLoad">Load</button>
+          <span id="uploadStatus" class="ml-2 text-sm text-yellow-300"></span>
+          <p class="text-xs text-gray-400 mt-2">Upload a JSON array of objects with 'name', 'price_gp', 'weight', 'notes', and optional 'curseId'.</p>
+        </div>`);
+      uploadBox = document.getElementById('uploadBox'); // Get the newly created element
+      const fileEl = document.getElementById('uploadFile');
+      document.getElementById('uploadLoad').onclick = async ()=>{
+        const f = fileEl.files && fileEl.files[0];
+        if(!f){ document.getElementById('uploadStatus').textContent = 'Choose a file.'; return; }
+        document.getElementById('uploadStatus').textContent = 'Loading...';
+        try{
+          const txt = await f.text();
+          const arr = JSON.parse(txt);
+          if(!Array.isArray(arr)) throw new Error('Top-level JSON must be an array of items.');
+          let added = 0; const names = new Set(s.items.map(x=>x.name));
+          for(const it of arr){
+            if(!it || !it.name) continue;
+            // Ensure proper conversion and default values
+            const price_gp = parseFloat(it.price_gp) || 0;
+            const weight = it.weight || '—';
+            const notes = it.notes || '';
+            const curseId = it.curseId || undefined;
+
+            if(!names.has(it.name)){
+              s.items.push({ name: it.name, price_gp, weight, notes, curseId });
+              names.add(it.name); added++;
+            }
+          }
+          document.getElementById('uploadStatus').textContent = `Added ${added} items.`;
+          renderItems(); // Re-render to show new items
+        }catch(err){ document.getElementById('uploadStatus').textContent = `Error: ${err.message}`; }
+      };
+    }
+  } else {
+    if (uploadBox) {
+      uploadBox.remove();
+    }
+  }
+
+  // Render items for the stall (excluding the placeholder for consignment if it has other items)
+  for(const it of s.items){
+    if (s.id === 'consignment_counter' && it.name === '— (empty) —' && s.items.length > 1) {
+        continue; // Skip the empty placeholder if real items have been added
+    }
+
+    const hay = `${it.name} ${it.notes}`.toLowerCase();
+    if(q && !hay.includes(q)) continue;
+    const tr = document.createElement('tr');
+    const isCursed = !!it.curseId;
+    const name = isCursed ? `<span class="curse">^</span> ${it.name.replace(/^\^\s*/,'')}` : it.name;
+    const price = formatPrice(it.price_gp);
+    const tags = [];
+    if(isCursed) tags.push('cursed');
+    const notes = DM_MODE && isCursed ? (CURSE_INDEX.get(it.curseId)?.effect || it.notes) : it.notes; // Show effect in DM mode
+    tr.innerHTML = `
+      <td>${name}<div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></td>
+      <td>${price}</td>
+      <td>${it.weight||'—'}</td>
+      <td>${escapeHtml(notes||'')}</td>
+      <td><button class="btn">Add</button></td>`;
+    tr.querySelector('button').addEventListener('click', ()=> addToCart(s, it));
+    itemTableBody.appendChild(tr);
+  }
+}
+itemFilter.addEventListener('input', renderItems);
+
+function renderDMForStall(){
+  dmPane.style.display = DM_MODE ? 'block' : 'none';
+  dmBadge.style.display = DM_MODE ? 'inline' : 'none';
+  if(!DM_MODE || !CURRENT_STALL) return;
+  const list = CURRENT_STALL.dm || [];
+  dmNotes.innerHTML = list.length ? list.map(d=>
+    `<div style="margin:8px 0;padding:8px;border:1px dashed var(--muted);border-radius:8px;background:#2d3748">
+      <strong>${d.title}</strong><br/>
+      <em>Detect:</em> ${escapeHtml(d.detect)}<br/>
+      <em>Effect:</em> ${escapeHtml(d.effect)}<br/>
+      <em>Remedy:</em> ${escapeHtml(d.remedy)}
+    </div>`
+  ).join('') : '<em>No stall‑specific DM notes.</em>';
+
+  // Global index once
+  globalCurses.innerHTML = Array.from(CURSE_INDEX.values()).map(d=>
+    `<div style="margin:8px 0;padding:8px;border:1px dashed var(--muted);border-radius:8px;background:#2d3748">
+      <strong>${d.title}</strong> <span class="tag">${d.stall}</span><br/>
+      <em>Detect:</em> ${escapeHtml(d.detect)}<br/>
+      <em>Effect:</em> ${escapeHtml(d.effect)}<br/>
+      <em>Remedy:</em> ${escapeHtml(d.remedy)}
+    </div>`
+  ).join('');
+}
+
+// -------------- Cart --------------
+const cartList = document.getElementById('cartList');
+const cartTotal = document.getElementById('cartTotal');
+const copyReceipt = document.getElementById('copyReceipt');
+const printReceipt = document.getElementById('printReceipt');
+const clearCartBtn = document.getElementById('clearCart');
+let CART = [];
+
+function addToCart(stall, item){
+  CART.push({stall: stall.name, item: item.name.replace(/^\^\s*/,'').trim(), gp: item.price_gp||0});
+  renderCart();
+}
+function formatPrice(gp){
+  // Convert GP to GP, SP, CP for display. 1 GP = 10 SP = 100 CP
+  if(gp===undefined||gp===null) return '—';
+  let totalCP = Math.round(gp * 100); // Convert GP to CP for consistent calculation
+  
+  const gold = Math.floor(totalCP / 100);
+  totalCP %= 100;
+  const silver = Math.floor(totalCP / 10);
+  const copper = totalCP % 10;
+
+  let priceParts = [];
+  if (gold > 0) priceParts.push(`${gold} GP`);
+  if (silver > 0) priceParts.push(`${silver} SP`);
+  if (copper > 0) priceParts.push(`${copper} CP`);
+  
+  if (priceParts.length === 0) return '0 GP'; // Handle 0 cost
+  return priceParts.join(', ');
+}
+
+function renderCart(){
+  cartList.innerHTML = '';
+  let total = 0;
+  CART.forEach((c,idx)=>{
+    total += (c.gp||0);
+    const row = document.createElement('div');
+    row.className = 'cart-line';
+    row.innerHTML = `<div>${escapeHtml(c.item)} <span class="tag">${escapeHtml(c.stall)}</span></div>
+                     <div>${formatPrice(c.gp)}</div>
+                     <div><button class="btn text-sm p-1 px-2">✕</button></div>`;
+    row.querySelector('button').addEventListener('click',()=>{CART.splice(idx,1);renderCart();});
+    cartList.appendChild(row);
+  });
+  cartTotal.textContent = formatPrice(+total.toFixed(2));
+}
+copyReceipt.addEventListener('click', ()=>{
+  const lines = CART.map(c=>`- ${c.item} (${c.stall}) — ${formatPrice(c.gp)}`);
+  lines.push(`\nTotal: ${cartTotal.textContent}`);
+  // Use document.execCommand('copy') for better iframe compatibility
+  const textarea = document.createElement('textarea');
+  textarea.value = lines.join('\n');
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+      document.execCommand('copy');
+      copyReceipt.textContent='Copied!';
+  } catch (err) {
+      alert('Failed to copy. Please select and copy manually.');
+  }
+  document.body.removeChild(textarea);
+  setTimeout(()=>copyReceipt.textContent='Copy',1200);
+});
+printReceipt.addEventListener('click', ()=> window.print());
+clearCartBtn.addEventListener('click', ()=>{CART=[]; renderCart();});
+
+// -------------- DM Mode Toggle --------------
+const dmToggle = document.getElementById('dmToggle');
+function setDM(on){ DM_MODE = !!on; dmToggle.classList.toggle('on', DM_MODE); dmToggle.textContent = DM_MODE ? '🔓 DM' : '🔒 DM'; renderItems(); renderDMForStall(); }
+setDM(false);
+
+dmToggle.addEventListener('click', ()=> setDM(!DM_MODE));
+// Secret keyboard combo: D then M within 600ms
+(function(){
+  let lastD = 0; window.addEventListener('keydown', (e)=>{
+    if(e.key.toLowerCase()==='d'){ lastD = Date.now(); }
+    if(e.key.toLowerCase()==='m' && Date.now()-lastD < 600){ setDM(!DM_MODE); }
+  });
+})();
+
+// Helpers
+function escapeHtml(s){
+  return (s || '').replace(/[&<>"']/g, function(m){
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
+}
+</script>
+</body>
+</html>
