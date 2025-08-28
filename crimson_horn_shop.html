@@ -628,9 +628,7 @@ dmToggle.addEventListener('click', ()=> setDM(!DM_MODE));
 
 function importThievesGuild(raw){
   if(!CURRENT_STALL) return 0;
-  const lines = (raw||'').replace(/
-/g,'').split(/
-+/);
+  const lines = (raw||'').replace(/\r/g,'').split(/\n+/);
   const items = [];
   for(let i=0;i<lines.length;i++){
     const name = lines[i].trim();
@@ -640,7 +638,7 @@ function importThievesGuild(raw){
       const L = lines[j].trim();
       const m = L.match(/^Cost:\s*([0-9,]+)\s*(gp|sp|cp)/i) || L.match(/^([0-9,]+)\s*(gp|sp|cp)$/i);
       if(m){ cost = parseFloat(m[1].replace(/,/g,'')); unit = m[2].toLowerCase(); }
-      const w = L.match(/^Weight:\s*([^]+?)(?:\.|$)/i) || L.match(/^([0-9.]+\s*lb\.?.*)/i);
+      const w = L.match(/^Weight:\s*([^]+?)(?:\.|$)/i) || L.match(/^([0-9.]+\s*lb\.?)/i);
       if(w) weight = w[1].replace(/Wt|Weight:/i,'').trim();
     }
     if(cost!==null){
@@ -655,7 +653,7 @@ function importThievesGuild(raw){
 }
 
 // Helpers
-function escapeHtml(s){ return (s||'').replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[m])); }
+function escapeHtml(s){ return (s||'').replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[m])); }[m])); }
 </script>
 </body>
 </html>
