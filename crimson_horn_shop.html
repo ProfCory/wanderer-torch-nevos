@@ -29,9 +29,9 @@
     h2{margin:8px 4px 6px;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
 
     .grid{
-      display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,120px);gap:10px;background:linear-gradient(0deg,transparent,transparent),
+      display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,120px);gap:10px;background:linear-gradient(0deg,transparent,transparent),
       linear-gradient(90deg,var(--grid) 1px,transparent 1px),linear-gradient(0deg,var(--grid) 1px,transparent 1px);
-      background-size:100% 100%, calc((100% - 20px)/3) 100%, 100% calc((100% - 20px)/3);
+      background-size:100% 100%, calc((100% - 20px)/3) 100%, 100% calc((100% - 30px)/4);
       background-position:0 0, 10px 0, 0 10px;
     }
     .tile{
@@ -336,6 +336,65 @@ const DATA = {
         { name: 'Rumor Slip — Wanderer’s Heart Will Crown', price_gp: 1, weight: '—', notes: '1 gp chart & sigil order.' },
       ],
       dm: []
+    },
+    {
+      id: 'general',
+      spot: 'S Alley',
+      name: 'General Goods (Guild Counter)',
+      race: 'Various',
+      role: 'All Equipment — General Goods',
+      quick: 'Catch-all counter for common goods. In DM mode, paste the ThievesGuild "All Equipment" table to bulk-load everything.',
+      items: [
+        { name: 'Abacus', price_gp: 2, weight: '2 lb', notes: 'Counting frame. (PHB baseline)' },
+        { name: 'Backpack', price_gp: 2, weight: '5 lb', notes: 'Adventuring gear' },
+        { name: 'Bedroll', price_gp: 1, weight: '7 lb', notes: '' },
+        { name: 'Ball Bearings (1,000)', price_gp: 1, weight: '2 lb', notes: '' },
+        { name: 'Rope, hempen (50 ft.)', price_gp: 1, weight: '10 lb', notes: '' },
+        { name: 'Rope, silk (50 ft.)', price_gp: 10, weight: '5 lb', notes: '' },
+        { name: 'Torch', price_gp: 0.01, weight: '1 lb', notes: '' },
+        { name: 'Tinderbox', price_gp: 0.5, weight: '1 lb', notes: '' },
+        { name: 'Rations (1 day)', price_gp: 0.5, weight: '2 lb', notes: '' },
+        { name: 'Waterskin', price_gp: 0.2, weight: '5 lb (full)', notes: '' },
+        { name: 'Crowbar', price_gp: 2, weight: '5 lb', notes: '' },
+        { name: 'Hammer', price_gp: 1, weight: '3 lb', notes: '' },
+        { name: 'Piton (10)', price_gp: 1, weight: '5 lb', notes: '' },
+        { name: 'Healer’s Kit (10 uses)', price_gp: 5, weight: '3 lb', notes: '' },
+        { name: 'Clothes, traveler’s', price_gp: 2, weight: '4 lb', notes: '' },
+        { name: 'Lock', price_gp: 10, weight: '1 lb', notes: '' },
+        { name: 'Lantern, hooded', price_gp: 5, weight: '2 lb', notes: '' },
+        { name: 'Lantern, bullseye', price_gp: 10, weight: '2 lb', notes: '' },
+        { name: 'Oil (flask)', price_gp: 0.1, weight: '1 lb', notes: '' },
+        { name: 'Grappling Hook', price_gp: 2, weight: '4 lb', notes: '' },
+        { name: 'Spyglass', price_gp: 1000, weight: '1 lb', notes: '' },
+        { name: 'Merchant’s Scale', price_gp: 5, weight: '3 lb', notes: '' },
+        { name: 'Ink (1 oz bottle)', price_gp: 10, weight: '—', notes: '' },
+        { name: 'Paper (1 sheet)', price_gp: 0.2, weight: '—', notes: '' },
+        { name: 'Parchment (1 sheet)', price_gp: 0.1, weight: '—', notes: '' },
+        { name: 'Soap', price_gp: 0.02, weight: '—', notes: '' },
+        { name: 'Vial (glass)', price_gp: 1, weight: '—', notes: '' },
+        { name: 'Bottle, glass', price_gp: 2, weight: '2 lb', notes: '' },
+        { name: 'Bucket', price_gp: 0.05, weight: '2 lb', notes: '' },
+        { name: 'Barrel', price_gp: 2, weight: '70 lb', notes: '' },
+        { name: 'Tent (2-person)', price_gp: 2, weight: '20 lb', notes: '' },
+        { name: 'Shovel', price_gp: 2, weight: '5 lb', notes: '' },
+        { name: 'Whetstone', price_gp: 0.01, weight: '1 lb', notes: '' },
+        { name: 'Cook’s Utensils', price_gp: 1, weight: '8 lb', notes: 'Tool' },
+        { name: 'Smith’s Tools', price_gp: 20, weight: '8 lb', notes: 'Tool' },
+        { name: 'Tinker’s Tools', price_gp: 50, weight: '10 lb', notes: 'Tool' },
+        { name: 'Cartographer’s Tools', price_gp: 15, weight: '6 lb', notes: 'Tool' },
+        { name: 'Disguise Kit', price_gp: 25, weight: '3 lb', notes: 'Kit' },
+        { name: 'Forgery Kit', price_gp: 15, weight: '5 lb', notes: 'Kit' },
+        { name: 'Gaming Set — Dice', price_gp: 0.1, weight: '—', notes: '' },
+        { name: 'Gaming Set — Cards', price_gp: 0.5, weight: '—', notes: '' },
+        { name: 'Instrument — Flute', price_gp: 2, weight: '1 lb', notes: '' },
+        { name: 'Instrument — Lute', price_gp: 35, weight: '2 lb', notes: '' },
+        { name: 'Mount — Mule', price_gp: 8, weight: '—', notes: '' },
+        { name: 'Saddle, pack', price_gp: 5, weight: '15 lb', notes: '' },
+        { name: 'Rations (1 week)', price_gp: 3.5, weight: '14 lb', notes: 'Convenience bundle' }
+      ],
+      dm: [
+        { id: 'gg-import', title: 'ThievesGuild Equipment Importer', detect: 'DM utility', effect: 'In DM mode, paste the “All Equipment” page content from thievesguild.cc and click Import. The parser will attempt to extract Item, Cost (Norm) and Weight; currency sp/cp are converted to gp.', remedy: 'If a row fails to parse, reformat as: name | cost unit | weight (e.g., "Abacus | 2 gp | 2 lb").' }
+      ]
     }
   ]
 };
@@ -358,7 +417,7 @@ function renderFloor(filter=''){
   const order = ['rogan','pins','yarrow','mira','boran','tassia','axellip','kait','fenn'];
   const byId = new Map(list.map(x=>[x.id,x]));
   // 3x3 template positions
-  const layout = [ 'rogan','mira','axellip', 'pins','boran','tassia', 'yarrow','kait','fenn' ];
+  const layout = [ 'rogan','mira','axellip', 'pins','boran','tassia', 'yarrow','kait','fenn', 'general','spare1','spare2' ];
   for(const id of layout){
     const s = byId.get(id);
     const tile = document.createElement('div');
@@ -527,7 +586,76 @@ dmToggle.addEventListener('click', ()=> setDM(!DM_MODE));
 })();
 
 // Helpers
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+// General Goods importer augment (DM‑only)
+(function(){
+  const target = document.getElementById('dmPane');
+  if(!target) return;
+  const ensureUI = ()=>{
+    if(!DM_MODE || !CURRENT_STALL || CURRENT_STALL.id!=='general') return;
+    if(document.getElementById('ggImport')) return;
+    const dmNotes = document.getElementById('dmNotes');
+    if(!dmNotes) return;
+    const html = `
+      <div style=\"margin-top:12px;padding:10px;border:1px solid #394060;border-radius:10px;background:#101426\">
+        <div style=\"display:flex;justify-content:space-between;align-items:center;gap:8px\">
+          <strong>Bulk Import from ThievesGuild “All Equipment”</strong>
+          <button class=\"btn\" id=\"ggClear\">Clear Items</button>
+        </div>
+        <p style=\"color:#9aa3bd;margin:6px 0 8px\">Paste table content from <em>thievesguild.cc/equipment</em>. Parser extracts <em>Item</em>, <em>Cost (Norm)</em>, and <em>Weight</em>. Currency (sp/cp) is converted to gp.</p>
+        <textarea id=\"ggPaste\" rows=\"8\" style=\"width:100%;background:#0f1320;color:#e7eaf1;border:1px solid #2b3350;border-radius:8px;padding:8px\" placeholder=\"Paste here…\"></textarea>
+        <div style=\"display:flex;gap:8px;margin-top:8px\">
+          <button class=\"btn\" id=\"ggImport\">Import</button>
+          <button class=\"btn\" id=\"ggSample\">Load Sample</button>
+          <div id=\"ggStatus\" style=\"color:#9bd\"></div>
+        </div>
+      </div>`;
+    dmNotes.insertAdjacentHTML('beforeend', html);
+    const paste = document.getElementById('ggPaste');
+    document.getElementById('ggImport').onclick = ()=>{
+      const txt = paste.value||''; const added = importThievesGuild(txt);
+      document.getElementById('ggStatus').textContent = `Added ${added} items.`;
+      renderItems();
+    };
+    document.getElementById('ggSample').onclick = ()=>{
+      const sample = `Abacus\nCost: 2 gp\nWeight: 2 lb.\nBackpack\nCost: 2 gp\nWeight: 5 lb.`;
+      paste.value = sample;
+    };
+    document.getElementById('ggClear').onclick = ()=>{ CURRENT_STALL.items = []; renderItems(); };
+  };
+  const obs = new MutationObserver(()=> ensureUI());
+  obs.observe(target, { attributes:true, childList:true, subtree:true });
+})();
+
+function importThievesGuild(raw){
+  if(!CURRENT_STALL) return 0;
+  const lines = (raw||'').replace(/
+/g,'').split(/
++/);
+  const items = [];
+  for(let i=0;i<lines.length;i++){
+    const name = lines[i].trim();
+    if(!name || /^(cost:|cheap:|expensive:|weight:|optional metal types|item|cost|weight)/i.test(name)) continue;
+    let j=i+1, cost=null, unit='gp', weight='—';
+    for(; j<Math.min(i+7, lines.length); j++){
+      const L = lines[j].trim();
+      const m = L.match(/^Cost:\s*([0-9,]+)\s*(gp|sp|cp)/i) || L.match(/^([0-9,]+)\s*(gp|sp|cp)$/i);
+      if(m){ cost = parseFloat(m[1].replace(/,/g,'')); unit = m[2].toLowerCase(); }
+      const w = L.match(/^Weight:\s*([^]+?)(?:\.|$)/i) || L.match(/^([0-9.]+\s*lb\.?.*)/i);
+      if(w) weight = w[1].replace(/Wt|Weight:/i,'').trim();
+    }
+    if(cost!==null){
+      const gp = unit==='gp'? cost : unit==='sp'? +(cost/10).toFixed(2) : +(cost/100).toFixed(2);
+      items.push({ name, price_gp: gp, weight, notes: '' });
+    }
+  }
+  const nameSet = new Set(CURRENT_STALL.items.map(x=>x.name));
+  let added=0;
+  for(const it of items){ if(!nameSet.has(it.name)){ CURRENT_STALL.items.push(it); nameSet.add(it.name); added++; } }
+  return added;
+}
+
+// Helpers
+function escapeHtml(s){ return (s||'').replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[m])); }
 </script>
 </body>
 </html>
