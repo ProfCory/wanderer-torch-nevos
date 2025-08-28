@@ -395,6 +395,18 @@ const DATA = {
       dm: [
         { id: 'gg-import', title: 'ThievesGuild Equipment Importer', detect: 'DM utility', effect: 'In DM mode, paste the “All Equipment” page content from thievesguild.cc and click Import. The parser will attempt to extract Item, Cost (Norm) and Weight; currency sp/cp are converted to gp.', remedy: 'If a row fails to parse, reformat as: name | cost unit | weight (e.g., "Abacus | 2 gp | 2 lb").' }
       ]
+    },
+    {
+      id: 'upload',
+      spot: 'S Annex',
+      name: 'Consignment Counter (Upload)',
+      race: 'Various',
+      role: 'Bring‑Your‑Own Inventory',
+      quick: 'Upload a JSON file to add items to this stall (no DM mode needed).',
+      items: [
+        { name: '— (empty) —', price_gp: 0, weight: '—', notes: 'Use the Upload panel above to import items into this stall.' }
+      ],
+      dm: []
     }
   ]
 };
@@ -417,7 +429,7 @@ function renderFloor(filter=''){
   const order = ['rogan','pins','yarrow','mira','boran','tassia','axellip','kait','fenn'];
   const byId = new Map(list.map(x=>[x.id,x]));
   // 3x3 template positions
-  const layout = [ 'rogan','mira','axellip', 'pins','boran','tassia', 'yarrow','kait','fenn', 'general','spare1','spare2' ];
+  const layout = [ 'rogan','mira','axellip', 'pins','boran','tassia', 'yarrow','kait','fenn', 'general','upload','spare2' ];
   for(const id of layout){
     const s = byId.get(id);
     const tile = document.createElement('div');
@@ -476,6 +488,40 @@ function renderItems(){
   const s = CURRENT_STALL; if(!s) return;
   const q = itemFilter.value.trim().toLowerCase();
   itemTableBody.innerHTML = '';
+  // Upload stall: show a file input panel (JSON array of items)
+  const itemsContainer = document.querySelector('.items');
+  const existingUpload = document.getElementById('uploadBox');
+  if (s.id === 'upload' && !existingUpload) {
+    const hdr = itemsContainer.querySelector('header');
+    hdr.insertAdjacentHTML('afterend', `
+      <div id="uploadBox" style="padding:10px;border-bottom:1px solid #20253a;background:#0f1320">
+        <strong>Upload JSON</strong>
+        <input type="file" id="uploadFile" accept="application/json" style="margin-left:10px" />
+        <button class="btn" id="uploadLoad">Load</button>
+        <span id="uploadStatus" style="margin-left:8px;color:#9bd"></span>
+      </div>`);
+    const fileEl = document.getElementById('uploadFile');
+    document.getElementById('uploadLoad').onclick = async ()=>{
+      const f = fileEl.files && fileEl.files[0];
+      if(!f){ document.getElementById('uploadStatus').textContent = 'Choose a file.'; return; }
+      try{
+        const txt = await f.text();
+        const arr = JSON.parse(txt);
+        if(!Array.isArray(arr)) throw new Error('Top-level JSON must be an array');
+        let added = 0; const names = new Set(s.items.map(x=>x.name));
+        for(const it of arr){
+          if(!it || !it.name) continue;
+          if(names.has(it.name)) continue;
+          s.items.push({ name: it.name, price_gp: it.price_gp||0, weight: it.weight||'—', notes: it.notes||'', curseId: it.curseId });
+          names.add(it.name); added++;
+        }
+        document.getElementById('uploadStatus').textContent = `Added ${added} items.`;
+        renderItems();
+      }catch(err){ document.getElementById('uploadStatus').textContent = 'Error: '+err.message; }
+    };
+  } else if (s.id !== 'upload' && existingUpload) {
+    existingUpload.remove();
+  }
   for(const it of s.items){
     const hay = `${it.name} ${it.notes}`.toLowerCase();
     if(q && !hay.includes(q)) continue;
@@ -653,7 +699,17 @@ function importThievesGuild(raw){
 }
 
 // Helpers
-function escapeHtml(s){ return (s||'').replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[m])); }[m])); }
+function escapeHtml(s){
+  return (s || '').replace(/[&<>\"']/g, function(m){
+    return ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    })[m];
+  });
+}[m])); }[m])); }
 </script>
 </body>
 </html>
