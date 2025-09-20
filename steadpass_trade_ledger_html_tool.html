@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Steadpass Trade Ledger</title>
+  <style>
+    :root { --bg:#0f1115; --card:#171923; --muted:#aab2c0; --text:#e7ecf5; --accent:#8bd3ff; --accent2:#9cffb5; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0f1115,#10131a 40%,#0d0f15);color:var(--text)}
+    header{padding:20px 24px;border-bottom:1px solid #232635;background:#0f121a;position:sticky;top:0;z-index:20}
+    h1{margin:0;font-size:20px;letter-spacing:.3px}
+    main{max-width:1200px;margin:20px auto;padding:0 16px 40px}
+    .grid{display:grid;gap:12px}
+    .row{display:grid;grid-template-columns:140px 1.4fr .6fr .6fr 2fr 120px;gap:8px;align-items:center}
+    .row.head{font-size:12px;color:var(--muted);opacity:.9}
+    .card{background:var(--card);border:1px solid #23273a;border-radius:14px;padding:14px}
+    input,select,button,textarea{background:#0e1119;border:1px solid #2b3045;border-radius:10px;color:var(--text);padding:10px;font-size:14px}
+    input[type="number"]{appearance:textfield}
+    button{cursor:pointer;transition:transform .04s ease,background .3s ease}
+    button:hover{transform:translateY(-1px)}
+    .btn{background:#182033}
+    .btn.primary{background:linear-gradient(90deg,#2a3350,#1c2a42);border-color:#314067}
+    .btn.green{background:linear-gradient(90deg,#17402a,#143723);border-color:#1d5c3c}
+    .btn.red{background:linear-gradient(90deg,#3a1b1b,#2a1313);border-color:#5a2626}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #24283a;padding:10px 8px;text-align:left}
+    tr:hover td{background:#121726}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#0e1625;border:1px solid #27314d;font-size:12px;color:var(--accent)}
+    .footer-note{color:var(--muted);font-size:12px;margin-top:6px}
+    #exportBox{width:100%;min-height:160px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Steadpass Trade Ledger <span class="pill">Common & Uncommon</span></h1>
+    <div class="footer-note">Add rows, edit inline, then capture/export as plain text or JSON. Everything autosaves to your browser.</div>
+  </header>
+  <main class="grid">
+    <section class="card">
+      <div class="row head">
+        <div>Location</div>
+        <div>Item</div>
+        <div>Qty</div>
+        <div>Price</div>
+        <div>Notes</div>
+        <div>Actions</div>
+      </div>
+      <div class="row" id="newRow">
+        <select id="loc">
+          <option value="Farmhouse (A)">Farmhouse (A)</option>
+          <option value="Inn (B)">Inn (B)</option>
+          <option value="General Shop (C)">General Shop (C)</option>
+          <option value="Food Market – Co‑op (F)">Food Market – Co‑op (F)</option>
+          <option value="Town House (H)">Town House (H)</option>
+          <option value="Stable (I)">Stable (I)</option>
+        </select>
+        <input id="item" placeholder="Item name" />
+        <input id="qty" type="number" min="0" step="1" placeholder="0" />
+        <input id="price" placeholder="e.g., 1 gp / 5 sp" />
+        <input id="notes" placeholder="Short note or ingredient use" />
+        <button class="btn primary" id="addBtn">+ Add</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <button class="btn" id="importSample">Import Steadpass Sample</button>
+        <button class="btn" id="clearAll">Clear All</button>
+        <button class="btn green" id="exportText">Capture & Export (Text)</button>
+        <button class="btn" id="exportJSON">Export JSON</button>
+        <button class="btn" id="copyText">Copy Text</button>
+        <button class="btn" id="downloadText">Download .txt</button>
+      </div>
+      <div style="overflow:auto;margin-top:12px">
+        <table id="ledger">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Notes</th>
+              <th style="width:90px">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px">
+        <label class="footer-note">Captured text output</label>
+        <textarea id="exportBox" placeholder="Click Capture & Export (Text) to generate..." spellcheck="false"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Storage helpers
+    const KEY = 'steadpass-ledger-v1';
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function load(){
+      try{ return JSON.parse(localStorage.getItem(KEY)) || [] }catch{ return [] }
+    }
+    function save(rows){ localStorage.setItem(KEY, JSON.stringify(rows)); }
+
+    // Render
+    function render(){
+      const tbody = $('#ledger tbody');
+      tbody.innerHTML = '';
+      const rows = load();
+      rows.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td contenteditable data-col="location">${escapeHTML(r.location)}</td>
+          <td contenteditable data-col="item">${escapeHTML(r.item)}</td>
+          <td contenteditable data-col="qty">${escapeHTML(r.qty)}</td>
+          <td contenteditable data-col="price">${escapeHTML(r.price)}</td>
+          <td contenteditable data-col="notes">${escapeHTML(r.notes)}</td>
+          <td>
+            <button class="btn" data-act="up" title="Move up">▲</button>
+            <button class="btn" data-act="down" title="Move down">▼</button>
+            <button class="btn red" data-act="delete" title="Delete">✕</button>
+          </td>`;
+        tr.dataset.index = i;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHTML(s){ return String(s ?? '').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) }
+
+    // Add row
+    $('#addBtn').addEventListener('click', ()=>{
+      const row = {
+        location: $('#loc').value.trim(),
+        item: $('#item').value.trim(),
+        qty: $('#qty').value.trim(),
+        price: $('#price').value.trim(),
+        notes: $('#notes').value.trim(),
+      };
+      if(!row.item){ alert('Item name is required.'); return }
+      const rows = load(); rows.push(row); save(rows); render();
+      // clear inputs
+      ['item','qty','price','notes'].forEach(id=>$('#'+id).value='');
+    });
+
+    // Edit inline
+    $('#ledger').addEventListener('input', (e)=>{
+      const td = e.target.closest('[contenteditable]');
+      if(!td) return;
+      const idx = Number(td.parentElement.dataset.index);
+      const col = td.dataset.col;
+      const rows = load();
+      rows[idx][col] = td.textContent.trim();
+      save(rows);
+    });
+
+    // Row actions
+    $('#ledger').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-act]');
+      if(!btn) return;
+      const tr = btn.closest('tr');
+      const idx = Number(tr.dataset.index);
+      const rows = load();
+      const act = btn.dataset.act;
+      if(act==='delete'){ rows.splice(idx,1); }
+      if(act==='up' && idx>0){ const [r]=rows.splice(idx,1); rows.splice(idx-1,0,r); }
+      if(act==='down' && idx<rows.length-1){ const [r]=rows.splice(idx,1); rows.splice(idx+1,0,r); }
+      save(rows); render();
+    });
+
+    // Export text
+    $('#exportText').addEventListener('click', ()=>{
+      const rows = load();
+      const lines = [];
+      lines.push('Steadpass Trade Ledger (Common & Uncommon)');
+      lines.push('Location\tItem\tQty\tPrice\tNotes');
+      for(const r of rows){
+        lines.push([r.location,r.item,r.qty,r.price,r.notes].map(x=>String(x??'').replace(/\t/g,' ')).join('\t'));
+      }
+      const out = lines.join('\n');
+      $('#exportBox').value = out;
+    });
+
+    // Export JSON
+    $('#exportJSON').addEventListener('click', ()=>{
+      $('#exportBox').value = JSON.stringify(load(), null, 2);
+    });
+
+    // Copy
+    $('#copyText').addEventListener('click', async ()=>{
+      const val = $('#exportBox').value;
+      if(!val){ alert('Nothing to copy. Click Capture & Export first.'); return }
+      try{ await navigator.clipboard.writeText(val); alert('Copied to clipboard.'); }catch{ alert('Copy failed. Select and copy manually.'); }
+    });
+
+    // Download
+    $('#downloadText').addEventListener('click', ()=>{
+      const val = $('#exportBox').value || '';
+      const blob = new Blob([val], {type:'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'steadpass_ledger.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Clear
+    $('#clearAll').addEventListener('click', ()=>{
+      if(confirm('Clear all rows?')){ save([]); render(); $('#exportBox').value=''; }
+    });
+
+    // Sample import (from our earlier list)
+    $('#importSample').addEventListener('click', ()=>{
+      if(!confirm('Import sample Steadpass inventory and replace current rows?')) return;
+      const sample = [
+        {location:'Farmhouse (A)',item:'Chicken (per bird)',qty:'12',price:'2 sp',notes:'Egg-layers'},
+        {location:'Farmhouse (A)',item:'Goat (per head)',qty:'6',price:'2 gp',notes:'Milk & meat'},
+        {location:'Farmhouse (A)',item:'Pig (per head)',qty:'4',price:'3 gp',notes:'Slaughter stock'},
+        {location:'Farmhouse (A)',item:'Mule',qty:'2',price:'8 gp',notes:'Pack animal'},
+        {location:'Farmhouse (A)',item:'Oxen (pair)',qty:'1',price:'20 gp',notes:'Heavy plowing'},
+        {location:'Farmhouse (A)',item:'Grain sack (50 lb)',qty:'10',price:'5 sp',notes:'Feed & flour'},
+        {location:'Farmhouse (A)',item:'Salt lick',qty:'6',price:'1 sp',notes:'Livestock care'},
+        {location:'Farmhouse (A)',item:'Beekeeping kit',qty:'1',price:'5 gp',notes:'Honey & wax source'},
+        {location:'Farmhouse (A)',item:'Comfrey root (herbal)',qty:'8 bundles',price:'3 sp',notes:'Ingredient: healing poultice base'},
+        {location:'Farmhouse (A)',item:'Herb bundles (sage/thyme/rosemary)',qty:'10',price:'1 sp',notes:'Cooking & minor alchemy'},
+        {location:'Inn (B)',item:'Smoking leaf (pouch)',qty:'6',price:'5 sp',notes:'Local blend'},
+        {location:'Inn (B)',item:'Clay pipe',qty:'4',price:'2 sp',notes:'Plain'},
+        {location:'Inn (B)',item:'Trinkets (dice/charms)',qty:'10',price:'1–5 sp',notes:'Curios'},
+        {location:'Inn (B)',item:'Soap cake',qty:'12',price:'1 sp',notes:'Lard & ash'},
+        {location:'Inn (B)',item:'Brush/comb',qty:'6',price:'2 sp',notes:'Wooden'},
+        {location:'Inn (B)',item:'Blanket, wool',qty:'5',price:'5 sp',notes:'Heavy weave'},
+        {location:'Inn (B)',item:'Feather pillow',qty:'4',price:'8 sp',notes:'Comfortable'},
+        {location:'Inn (B)',item:'Beeswax candle (pair)',qty:'8',price:'1 sp',notes:'Burns long'},
+        {location:'Inn (B)',item:'Lavender oil (herbal)',qty:'4 vials',price:'5 sp',notes:'Ingredient: rest/sleep brews'},
+        {location:'General Shop (C)',item:'Hemp rope (50 ft)',qty:'6',price:'1 gp',notes:'Adventurer staple'},
+        {location:'General Shop (C)',item:'Silk rope (50 ft)',qty:'2',price:'10 gp',notes:'Uncommon luxury'},
+        {location:'General Shop (C)',item:'Oil flask',qty:'12',price:'1 sp',notes:'Lamp fuel'},
+        {location:'General Shop (C)',item:'Iron pot',qty:'3',price:'2 gp',notes:'Cooking'},
+        {location:'General Shop (C)',item:'Wooden utensils set',qty:'5',price:'2 sp',notes:'Bowl/spoon'},
+        {location:'General Shop (C)',item:'Clay mug',qty:'12',price:'1 sp',notes:'Durable'},
+        {location:'General Shop (C)',item:'Wax seals (stick)',qty:'4',price:'5 sp',notes:'Letters/contracts'},
+        {location:'General Shop (C)',item:'Ink (bottle)',qty:'2',price:'8 sp',notes:'Quills included'},
+        {location:'General Shop (C)',item:'Paper sheets (10)',qty:'5 bundles',price:'1 gp',notes:'Writing stock'},
+        {location:'General Shop (C)',item:'Saltpetre + charcoal (herbal)',qty:'6 packets',price:'1 gp',notes:'Ingredient: smoke powders/alchemist\'s fire'},
+        {location:'Food Market – Co‑op (F)',item:'Apples (bushel)',qty:'5',price:'5 sp',notes:'Fresh'},
+        {location:'Food Market – Co‑op (F)',item:'Root crops (sack)',qty:'8',price:'4 sp',notes:'Keeps well'},
+        {location:'Food Market – Co‑op (F)',item:'Dried beans (sack)',qty:'5',price:'3 sp',notes:'Staple'},
+        {location:'Food Market – Co‑op (F)',item:'Cheese wheel (small)',qty:'6',price:'1 gp',notes:'Goat\'s milk'},
+        {location:'Food Market – Co‑op (F)',item:'Butter (1 lb)',qty:'4',price:'3 sp',notes:'Fresh churned'},
+        {location:'Food Market – Co‑op (F)',item:'Jerky (1 lb)',qty:'8',price:'5 sp',notes:'Salted'},
+        {location:'Food Market – Co‑op (F)',item:'Salted fish (bundle of 5)',qty:'6',price:'7 sp',notes:'Common'},
+        {location:'Food Market – Co‑op (F)',item:'Mandrake sprigs (herbal)',qty:'2 roots',price:'5 gp',notes:'Rare: vigour/restoration base'},
+        {location:'Town House (H)',item:'Chair, simple',qty:'6',price:'3 sp',notes:'Wooden'},
+        {location:'Town House (H)',item:'Table, small',qty:'3',price:'8 sp',notes:'Carpenter-made'},
+        {location:'Town House (H)',item:'Straw mattress',qty:'5',price:'5 sp',notes:'Cheap bedding'},
+        {location:'Town House (H)',item:'Cabin kit (wood/nails/canvas)',qty:'2',price:'25 gp',notes:'DIY cabin'},
+        {location:'Town House (H)',item:'Hireling (per day)',qty:'3',price:'1 gp',notes:'Carpenter/weaver/laborer'},
+        {location:'Town House (H)',item:'Oak gall (herbal)',qty:'4 lumps',price:'4 sp',notes:'Ink or ward base'},
+        {location:'Stable (I)',item:'Riding horse',qty:'3',price:'75 gp',notes:'Saddle not included'},
+        {location:'Stable (I)',item:'Draft horse',qty:'2',price:'50 gp',notes:'For carts'},
+        {location:'Stable (I)',item:'Pony',qty:'2',price:'30 gp',notes:'Small riders'},
+        {location:'Stable (I)',item:'Mule',qty:'3',price:'8 gp',notes:'Pack beast'},
+        {location:'Stable (I)',item:'Goat',qty:'4',price:'2 gp',notes:'Hardy stock'},
+        {location:'Stable (I)',item:'Saddle, riding',qty:'4',price:'10 gp',notes:'Standard'},
+        {location:'Stable (I)',item:'Pack saddle',qty:'3',price:'5 gp',notes:'Mule/pony'},
+        {location:'Stable (I)',item:'Bridle & reins',qty:'6',price:'2 gp',notes:'Horse gear'},
+        {location:'Stable (I)',item:'Horseshoe set + fitting',qty:'6',price:'1 gp',notes:'Shoeing included'},
+        {location:'Stable (I)',item:'Brush & care kit',qty:'4',price:'5 sp',notes:'Grooming'},
+        {location:'Stable (I)',item:'Valerian root (herbal)',qty:'6 bundles',price:'2 sp',notes:'Calming draught base'}
+      ];
+      save(sample); render();
+    });
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
