@@ -3,24 +3,25 @@
   "points": [
     {
       "id": "id_xxx",
-      "level": "world",                // or { "row": 0, "col": 0 } for subgrid
-      "type": "city",                  // city | capital | port | region | landmark
+      "level": "world",
+      "type": "city",
       "name": "Redmarch",
       "notes": "capital of Valerost",
-      "rating": 4,                     // 0..5
+      "rating": 4,
       "fav": true,
-      "lat": 512, "lng": 768,          // image coords (Leaflet CRS.Simple)
+      "lat": 512,
+      "lng": 768,
       "worldCell": "C-4"
     }
   ],
   "roads": [
     {
       "id": "id_road",
-      "level": "world",                // or cell level
+      "level": "world",
       "type": "road",
       "name": "King's Way",
       "notes": "caravan route",
-      "coords": [[y1,x1],[y2,x2],[...]]
+      "coords": [[100,100],[200,200]]
     }
   ]
 }
