@@ -1,0 +1,26 @@
+{
+  "meta": { "image": "Nevos_main.png", "w": 1024, "h": 1024 },
+  "points": [
+    {
+      "id": "id_xxx",
+      "level": "world",                // or { "row": 0, "col": 0 } for subgrid
+      "type": "city",                  // city | capital | port | region | landmark
+      "name": "Redmarch",
+      "notes": "capital of Valerost",
+      "rating": 4,                     // 0..5
+      "fav": true,
+      "lat": 512, "lng": 768,          // image coords (Leaflet CRS.Simple)
+      "worldCell": "C-4"
+    }
+  ],
+  "roads": [
+    {
+      "id": "id_road",
+      "level": "world",                // or cell level
+      "type": "road",
+      "name": "King's Way",
+      "notes": "caravan route",
+      "coords": [[y1,x1],[y2,x2],[...]]
+    }
+  ]
+}
