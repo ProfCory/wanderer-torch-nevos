@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nevos Custom Grid Map — v3 (with Import/Export, Categories, Roads)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; }
+    #app { display: grid; grid-template-columns: 360px 1fr; height: 100%; }
+    aside { border-right: 1px solid #ddd; padding: 12px; overflow: auto; }
+    aside h1 { font-size: 16px; margin: 0 0 8px; }
+    aside .controls { display: grid; gap: 8px; margin-bottom: 12px; }
+    aside input[type="text"], aside select, aside textarea, aside input[type="number"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    aside button, .btn { padding: 8px 10px; border: 1px solid #bbb; background: #f6f6f6; border-radius: 6px; cursor: pointer; }
+    aside .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .small { font-size: 12px; color: #555; }
+    #map { width: 100%; height: 100%; }
+
+    .grid-col-label, .grid-row-label { background: rgba(255,255,255,0.85); padding: 2px 4px; border-radius: 4px; font-size: 12px; color: #333; }
+    .leaflet-tooltip.grid-tip { background: rgba(255,255,255,0.95); border: 1px solid #ccc; color:#222; }
+
+    .list { display:grid; gap:8px; }
+    .card { border:1px solid #e6e6e6; border-radius:8px; padding:8px; background:#fff; }
+    .card h3 { margin:0 0 4px; font-size:14px; }
+    .meta { font-size:12px; color:#666; display:flex; gap:8px; flex-wrap:wrap; }
+    .stars { font-size:14px; }
+    .fav { color:#cc8a00; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <aside>
+      <h1>Nevos Grid Map — v3</h1>
+      <div class="controls">
+        <div class="row">
+          <label><input type="checkbox" id="toggleGrid" checked> Show world grid</label>
+          <label><input type="checkbox" id="zoomCellMode"> Click-to-zoom into cell</label>
+        </div>
+        <div class="row">
+          <label>World rows <input type="number" id="rowsInput" min="2" max="52" value="10"></label>
+          <label>World cols <input type="number" id="colsInput" min="2" max="52" value="10"></label>
+        </div>
+        <div class="row">
+          <label>Subgrid rows <input type="number" id="subRowsInput" min="2" max="52" value="10"></label>
+          <label>Subgrid cols <input type="number" id="subColsInput" min="2" max="52" value="10"></label>
+        </div>
+        <div class="row">
+          <button id="resetView">Back to world</button>
+          <button id="redrawBtn">Redraw grid</button>
+        </div>
+        <hr/>
+        <div class="row">
+          <button id="exportBtn">Export JSON</button>
+          <label class="btn" for="importFile">Import JSON</label>
+          <input id="importFile" type="file" accept="application/json" style="display:none" />
+          <button id="clearBtn">Clear all</button>
+        </div>
+        <div class="small">Default load path: <code>map/data/points.json</code> (if present). Export downloads a file you can commit to that path in the repo.</div>
+        <hr/>
+        <div class="row"><strong>Add marker</strong></div>
+        <div class="row">
+          <select id="typeSelect">
+            <option value="city">City</option>
+            <option value="capital">Capital</option>
+            <option value="port">Port</option>
+            <option value="region">Region</option>
+            <option value="landmark">Landmark</option>
+          </select>
+          <button id="drawRoadBtn">Road mode</button>
+        </div>
+        <input id="nameInput" type="text" placeholder="Name" />
+        <textarea id="notesInput" rows="3" placeholder="Notes / tags"></textarea>
+        <div class="row">
+          <label>Rating (0–5) <input id="ratingInput" type="number" min="0" max="5" step="1" value="0"></label>
+          <label><input id="favInput" type="checkbox"> Favorite</label>
+        </div>
+        <div class="small">Tip: with Road mode ON, click multiple points to trace a road, then press Enter or click Road mode again to finish.</div>
+        <hr/>
+        <div class="list" id="list"></div>
+        <div class="small">Image must be next to this HTML: <code>Nevos_main.png</code> (1024×1024).</div>
+      </div>
+    </aside>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // --- CONFIG ---
+    const IMAGE_URL = 'Nevos_main.png';
+    const IMAGE_W = 1024; // px
+    const IMAGE_H = 1024; // px
+    const DEFAULT_DATA_URL = 'data/points.json'; // relative to this HTML when hosted (GitHub Pages or raw repo)
+
+    // --- STATE ---
+    const state = { points: [], roads: [] }; // world + subgrid items live together, filtered by level
+
+    function uid(){ return 'id-'+Math.random().toString(36).slice(2,9); }
+    function stars(n){ n = Math.max(0, Math.min(5, n|0)); return '★★★★★☆☆☆☆☆'.slice(5-n, 10-n); }
+
+    // DOM
+    const $ = (id)=>document.getElementById(id);
+    const rowsInput = ()=> parseInt($('rowsInput').value,10);
+    const colsInput = ()=> parseInt($('colsInput').value,10);
+    const subRowsInput = ()=> parseInt($('subRowsInput').value,10);
+    const subColsInput = ()=> parseInt($('subColsInput').value,10);
+
+    // --- MAP INIT ---
+    const bounds = [[0,0],[IMAGE_H,IMAGE_W]];
+    const map = L.map('map',{ crs:L.CRS.Simple, minZoom:-2, maxZoom:4, preferCanvas:true });
+    L.imageOverlay(IMAGE_URL,bounds).addTo(map);
+    map.fitBounds(bounds);
+
+    // layers
+    const worldGridLayer = L.layerGroup().addTo(map);
+    const worldLabelLayer = L.layerGroup().addTo(map);
+    let subgridLayer = null, subgridLabelLayer = null;
+    const markerLayer = L.layerGroup().addTo(map);
+    const roadLayer = L.layerGroup().addTo(map);
+
+    // draw world grid
+    function drawWorldGrid(R, C){
+      worldGridLayer.clearLayers(); worldLabelLayer.clearLayers();
+      const cellW = IMAGE_W / C, cellH = IMAGE_H / R;
+      for(let c=0;c<=C;c++) L.polyline([[0,c*cellW],[IMAGE_H,c*cellW]],{color:'#000',weight:1,opacity:0.25}).addTo(worldGridLayer);
+      for(let r=0;r<=R;r++) L.polyline([[r*cellH,0],[r*cellH,IMAGE_W]],{color:'#000',weight:1,opacity:0.25}).addTo(worldGridLayer);
+      for(let c=0;c<C;c++) L.marker([6,(c+0.5)*cellW],{interactive:false,icon:L.divIcon({className:'grid-col-label', html:String(c+1)})}).addTo(worldLabelLayer);
+      for(let r=0;r<R;r++) L.marker([(r+0.5)*cellH,6],{interactive:false,icon:L.divIcon({className:'grid-row-label', html:String.fromCharCode(65+r)})}).addTo(worldLabelLayer);
+    }
+    drawWorldGrid(rowsInput(), colsInput());
+
+    // helpers
+    function gridRefFromLatLng(latlng,R,C){
+      const cellW=IMAGE_W/C, cellH=IMAGE_H/R;
+      const col=Math.min(C-1,Math.max(0,Math.floor(latlng.lng/cellW)));
+      const row=Math.min(R-1,Math.max(0,Math.floor(latlng.lat/cellH)));
+      const cellBounds=[[row*cellH, col*cellW],[(row+1)*cellH,(col+1)*cellW]];
+      return {row,col,label:`${String.fromCharCode(65+row)}-${col+1}`,cellBounds};
+    }
+
+    // toggles
+    $('toggleGrid').addEventListener('change', (e)=>{
+      if(e.target.checked){ map.addLayer(worldGridLayer); map.addLayer(worldLabelLayer);} else { map.removeLayer(worldGridLayer); map.removeLayer(worldLabelLayer);} });
+    $('redrawBtn').addEventListener('click', ()=> drawWorldGrid(rowsInput(), colsInput()));
+    $('resetView').addEventListener('click', ()=>{ map.fitBounds(bounds); destroySubgrid(); });
+
+    // subgrid
+    let zoomCellMode=false; $('zoomCellMode').addEventListener('change',e=> zoomCellMode=e.target.checked);
+    function destroySubgrid(){ if(subgridLayer){map.removeLayer(subgridLayer);subgridLayer=null;} if(subgridLabelLayer){map.removeLayer(subgridLabelLayer);subgridLabelLayer=null;} }
+    function enterSubgrid(cell){ destroySubgrid(); const R=subRowsInput(), C=subColsInput(); const [[y0,x0],[y1,x1]]=cell.cellBounds; map.fitBounds(cell.cellBounds);
+      subgridLayer=L.layerGroup().addTo(map); subgridLabelLayer=L.layerGroup().addTo(map);
+      const width=x1-x0, height=y1-y0, cellW=width/C, cellH=height/R;
+      for(let c=0;c<=C;c++) L.polyline([[y0,x0+c*cellW],[y1,x0+c*cellW]],{color:'#06c',weight:1,opacity:0.35}).addTo(subgridLayer);
+      for(let r=0;r<=R;r++) L.polyline([[y0+r*cellH,x0],[y0+r*cellH,x1]],{color:'#06c',weight:1,opacity:0.35}).addTo(subgridLayer);
+      for(let c=0;c<C;c++) L.marker([y0+6, x0+(c+0.5)*cellW],{interactive:false,icon:L.divIcon({className:'grid-col-label', html:String(c+1)})}).addTo(subgridLabelLayer);
+      for(let r=0;r<R;r++) L.marker([y0+(r+0.5)*cellH, x0+6],{interactive:false,icon:L.divIcon({className:'grid-row-label', html:String.fromCharCode(65+r)})}).addTo(subgridLabelLayer);
+      currentLevel = {row: cell.row, col: cell.col};
+      renderListsAndLayers();
+    }
+
+    // current level: 'world' or {row,col}
+    let currentLevel = 'world';
+
+    // add marker or road
+    let roadMode=false; let roadTemp=[]; let roadTempPolyline=null;
+    $('drawRoadBtn').addEventListener('click', ()=>{
+      roadMode = !roadMode; roadTemp=[]; if(roadTempPolyline){ roadLayer.removeLayer(roadTempPolyline); roadTempPolyline=null; }
+      $('drawRoadBtn').textContent = roadMode ? 'Finish road' : 'Road mode';
+    });
+
+    map.on('click',(e)=>{
+      const world = gridRefFromLatLng(e.latlng, rowsInput(), colsInput());
+      if(zoomCellMode){ enterSubgrid(world); return; }
+
+      if(roadMode){
+        roadTemp.push([e.latlng.lat, e.latlng.lng]);
+        if(roadTempPolyline){ roadLayer.removeLayer(roadTempPolyline); }
+        roadTempPolyline = L.polyline(roadTemp,{color:'#8b4513',weight:2}).addTo(roadLayer);
+        return;
+      }
+
+      // add a point marker using sidebar fields
+      const point = {
+        id: uid(),
+        level: currentLevel, // 'world' or {row,col}
+        type: $('typeSelect').value, // city/capital/port/region/landmark
+        name: $('nameInput').value || 'Unnamed',
+        notes: $('notesInput').value || '',
+        rating: parseInt($('ratingInput').value||'0',10),
+        fav: $('favInput').checked || false,
+        lat: e.latlng.lat, lng: e.latlng.lng,
+        worldCell: world.label
+      };
+      state.points.push(point);
+      renderListsAndLayers();
+    });
+
+    // finish road with Enter or toggling button
+    window.addEventListener('keydown', (ev)=>{ if(roadMode && ev.key==='Enter'){ finalizeRoad(); }});
+    function finalizeRoad(){
+      if(roadTemp.length>=2){
+        const name = $('nameInput').value || 'Road';
+        const notes = $('notesInput').value || '';
+        const road = { id:uid(), level: currentLevel, type:'road', name, notes, coords: roadTemp.slice() };
+        state.roads.push(road);
+      }
+      roadMode=false; $('drawRoadBtn').textContent='Road mode'; roadTemp=[]; if(roadTempPolyline){ roadLayer.removeLayer(roadTempPolyline); roadTempPolyline=null; }
+      renderListsAndLayers();
+    }
+
+    // render markers/roads + list
+    function inCurrentLevel(item){
+      if(currentLevel==='world') return item.level==='world';
+      const lv = item.level;
+      return typeof lv==='object' && lv.row===currentLevel.row && lv.col===currentLevel.col;
+    }
+
+    function renderListsAndLayers(){
+      markerLayer.clearLayers(); roadLayer.clearLayers();
+
+      // markers
+      state.points.filter(inCurrentLevel).forEach(p=>{
+        const iconHtml = p.fav ? '★' : '●';
+        const icon = L.divIcon({className:'', html:`<div class="${p.fav?'fav':''}" title="${p.type}">${iconHtml}</div>`});
+        const m = L.marker([p.lat,p.lng],{icon}).addTo(markerLayer);
+        m.bindTooltip(`<strong>${p.name}</strong><br>${p.type}${p.type==='capital'?' (capital)':''}<br>Rating: ${p.rating}/5<br>${p.worldCell}`);
+      });
+
+      // roads
+      state.roads.filter(inCurrentLevel).forEach(r=>{
+        const pl = L.polyline(r.coords,{color:'#8b4513',weight:2}).addTo(roadLayer);
+        pl.bindTooltip(`<strong>${r.name}</strong><br>${r.notes}`);
+      });
+
+      // list
+      const list = $('list'); list.innerHTML='';
+      const makeCard = (html)=>{ const div=document.createElement('div'); div.className='card'; div.innerHTML=html; list.appendChild(div); };
+      const levelText = currentLevel==='world' ? 'World' : `Cell ${String.fromCharCode(65+currentLevel.row)}-${currentLevel.col+1}`;
+      makeCard(`<h3>${levelText}</h3><div class='meta'>${state.points.filter(inCurrentLevel).length} places • ${state.roads.filter(inCurrentLevel).length} roads</div>`);
+      state.points.filter(inCurrentLevel).forEach(p=>{
+        makeCard(`<h3>${p.name} ${p.fav?'<span class="fav">★</span>':''}</h3><div class='meta'>${p.type} • ${p.worldCell} • <span class='stars'>${'★'.repeat(p.rating)}${'☆'.repeat(5-p.rating)}</span></div><div class='meta'>${p.notes||''}</div>`);
+      });
+    }
+
+    // EXPORT/IMPORT and GitHub-friendly load
+    $('exportBtn').addEventListener('click', ()=>{
+      const payload = { meta:{ image: IMAGE_URL, w: IMAGE_W, h: IMAGE_H }, points: state.points, roads: state.roads };
+      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'points.json'; a.click(); URL.revokeObjectURL(a.href);
+    });
+
+    $('importFile').addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader(); reader.onload = () => {
+        try { const json = JSON.parse(reader.result); state.points = json.points||[]; state.roads = json.roads||[]; renderListsAndLayers(); }
+        catch(err){ alert('Invalid JSON.'); }
+      }; reader.readAsText(file);
+    });
+
+    $('clearBtn').addEventListener('click', ()=>{ if(confirm('Delete all points & roads (current level + others)?')){ state.points=[]; state.roads=[]; renderListsAndLayers(); }});
+
+    async function tryLoadDefault(){
+      try{
+        const resp = await fetch(DEFAULT_DATA_URL, {cache:'no-store'});
+        if(resp.ok){ const json = await resp.json(); state.points=json.points||[]; state.roads=json.roads||[]; renderListsAndLayers(); }
+      }catch(_){}
+    }
+    tryLoadDefault();
+
+    // when entering subgrid, move markers/roads to that level if added there
+    function setLevelWorld(){ currentLevel='world'; renderListsAndLayers(); }
+    function setLevelCell(row,col){ currentLevel={row,col}; renderListsAndLayers(); }
+
+    // ensure currentLevel switches appropriately
+    function enterSubgridAndSet(cell){ enterSubgrid(cell); setLevelCell(cell.row, cell.col); }
+    // override earlier enterSubgrid call to also set level
+    const oldEnter = enterSubgrid; enterSubgrid = (cell)=> enterSubgridAndSet(cell);
+  </script>
+</body>
+</html>
