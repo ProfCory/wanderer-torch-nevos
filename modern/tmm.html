@@ -5,18 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Modern Manual: Interactive Guide</title>
     <!-- Chosen Palette: Warm Neutral (Amber and Stone) -->
-    <!-- Application Structure Plan: A single-page application with a persistent sidebar navigation (top bar on mobile). This non-linear, task-oriented structure replaces the linear book format. Users can instantly jump to 'Character Options', 'Equipment', 'Vehicles', or 'Hacking'. This is superior for a TTRPG reference, where users need to look up specific rules, items, or class features quickly, rather than read front-to-back. Key interactions include:
-    1. 'Character Options': A nested accordion system to browse classes and their modern subclasses without clutter.
-    2. 'Equipment': A filterable card grid for weapons, paired with summary charts (Chart.js) for at-a-glance comparison. Also includes an interactive 'Credit Score Calculator'.
-    3. 'Vehicles': A filterable card grid for vehicles.
-    4. 'Hacking': A static HTML/CSS flowchart to visually simplify the complex hacking process.
-    This structure is designed for findability and rapid reference during gameplay or character creation. -->
+    <!-- Application Structure Plan: A single-page application with a persistent sidebar navigation (top bar on mobile). This non-linear, task-oriented structure replaces the linear book format. Users can instantly jump to 'Character Options', 'Equipment', 'Vehicles', 'Hacking', or 'Magic'. This is superior for a TTRPG reference, where users need to look up specific rules, items, or class features quickly, rather than read front-to-back. Key interactions include:
+    1. 'Character Options': Tabs that mirror the book's chapters (Class Mods, Subclasses, Backgrounds, Feats) with an accordion for subclass details.
+    2. 'Equipment': Now includes a 'Tools & Gear' tab and a new 'Armory (App. A)' tab for the detailed guns.
+    3. 'Vehicles': A filterable card grid for vehicles, using data from Appendix B.
+    4. 'Hacking': A text-based guide to the *actual* hacking rules from Chapter 7. (User requested no changes).
+    5. 'Magic': A new top-level page with an accordion for all spells from Chapter 9.
+    This structure is designed for findability and rapid reference, now accurately reflecting the source document's content. -->
     <!-- Visualization & Content Choices:
-    - Report Info: Weapon Tables (Name, Cost, Damage, Properties). Goal: Compare & find weapons. Viz/Method: Interactive card grid + Bar Charts (Chart.js). Interaction: Text search & category filters update the card grid. Charts show avg. damage/cost by category. Justification: Cards are more responsive and readable than tables. Charts give a quick summary. Library: Vanilla JS (filtering), Chart.js (charts).
-    - Report Info: Subclass Features (Lists of features by level). Goal: Easy browsing of character progression. Viz/Method: HTML/JS Accordion. Interaction: Click class name to expand/collapse its subclass details. Justification: Hides irrelevant information, reducing clutter. Library: Vanilla JS.
-    - Report Info: Credit Score Table. Goal: Quickly find a purchase DC. Viz/Method: HTML Table (reference) + JS "Calculator". Interaction: Select lifestyle from dropdown, JS displays the corresponding DC. Justification: Interactive tool is faster and more engaging than manual table lookup. Library: Vanilla JS.
-    - Report Info: Hacking Rules (Multi-step process). Goal: Simplify the rule's flow. Viz/Method: Flowchart built with HTML divs and Tailwind flexbox. Interaction: None (static visual aid). Justification: Visual flow is easier to grasp than dense text. Adheres to NO SVG/Mermaid.
-    - Report Info: Vehicle Stats. Goal: Browse & compare vehicles. Viz/Method: Filterable card grid. Interaction: Category filters (Land, Air). Justification: Consistent, responsive browsing experience (like weapons). Library: Vanilla JS. -->
+    - Report Info: Subclass Features (Ch 2). Goal: Easy browsing. Viz/Method: HTML/JS Accordion. Interaction: Click class name to expand/collapse. Justification: Hides irrelevant information. Library: Vanilla JS.
+    - Report Info: Weapon Tables (Ch 6 & App. A). Goal: Compare & find weapons. Viz/Method: Two separate interactive card grids (one for simple, one for advanced). Interaction: Text search & category filters update the card grid. Justification: Separating the simple (Ch 6) from the advanced (App. A) list prevents clutter and serves both new players and advanced users. Library: Vanilla JS (filtering), Chart.js (charts).
+    - Report Info: Wealth System (Ch 5, p. 34-36). Goal: Explain the core economy. Viz/Method: HTML text and tables. Interaction: None. Justification: Rules as written.
+    - Report Info: Spells (Ch 9, p. 60-64). Goal: Browse all new spells. Viz/Method: A new top-level page ('Magic') with an accordion, grouped by spell level. Interaction: Click spell level to expand/collapse. Justification: Classic, easy-to-use spellbook format. Library: Vanilla JS.
+    - Report Info: Tools & Gear (Ch 6, p. 37-39). Goal: List all modern gear. Viz/Method: A dedicated tab under 'Equipment' with structured HTML lists. Interaction: None. Justification: Consolidates all non-weapon/armor items in one place.
+    - Report Info: Hacking Rules (Ch 7, p. 50-51). Goal: Simplify the rule's flow. Viz/Method: Structured HTML lists. Interaction: None. Justification: Per user request, this tab is unchanged. Adheres to NO SVG/Mermaid. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -43,13 +45,13 @@
             color: #1c1917; 
             font-weight: 600;
         }
-        .subclass-content {
+        .content-accordion-content {
             transition: max-height 0.3s ease-out;
             overflow: hidden;
             max-height: 0;
         }
-        .subclass-content.open {
-            max-height: 2000px; 
+        .content-accordion-content.open {
+            max-height: 4000px; 
         }
         .page-content {
             animation: fadeIn 0.5s ease-in-out;
@@ -87,6 +89,7 @@
                 <li><a href="#equipment" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">🎒 Equipment</a></li>
                 <li><a href="#vehicles" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">🚗 Vehicles</a></li>
                 <li><a href="#hacking" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">💻 Hacking</a></li>
+                <li><a href="#magic" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">✨ Magic</a></li>
             </ul>
         </nav>
 
@@ -98,15 +101,14 @@
                 <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">Welcome to the Modern Manual</h2>
                 <div class="bg-white p-6 rounded-lg shadow-md space-y-4 text-lg">
                     <p>This interactive guide provides a complete reference for running and playing in a modern-day Dungeons & Dragons 5th Edition campaign, based on "The Modern Manual." The original document is a fantastic resource, and this app's goal is to make that information even more accessible and easier to reference during your game.</p>
-                    <p>Many a question has been raised regarding different mechanics to "modernize" Dungeons and Dragons. Forum post after forum post features inquiries, suggestions, rebuttals, and arguments over how (and why) to integrate things like firearms and computers into the D&D setting. The name of the game is, after all, Dungeons and Dragons, not Dodge Chargers and Derringers.</p>
-                    <p>This supplement (and this app) is designed to integrate modern technology into the fantastic world of D&D. Use the navigation on the left to explore new character subclasses, filterable lists of modern weapons and vehicles, and simplified rules for hacking and credit scores. Time marches on. A good adventurer should always be prepared to adapt.</p>
+                    <p>This supplement (and this app) is designed to integrate modern technology into the fantastic world of D&D. Its "pulp-first" design ensures that an "angry dwarf with a club [is] just as viable as a Green Beret with an M16."</p>
+                    <p>Use the navigation on the left to explore new character options, filterable lists of modern weapons and vehicles, and simplified rules for hacking and the Wealth system. Time marches on. A good adventurer should always be prepared to adapt.</p>
                 </div>
                 <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-900 p-4 rounded-lg shadow">
                     <h3 class="font-bold text-xl mb-2">How to Use This Guide</h3>
-                    <p>Click the links in the navigation bar to jump to any section. Many sections, like 'Equipment', have sub-navigation tabs and interactive filters to help you find exactly what you're looking for. 'Character Options' features a collapsible accordion to let you browse new subclasses without getting overwhelmed. Explore and enjoy!</p>
+                    <p>Click the links in the navigation bar to jump to any section. The content in this app is pulled directly from the source document to ensure accuracy. Use the interactive filters and accordions to find what you need quickly.</p>
                 </div>
 
-                <!-- New Resources Section -->
                 <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
                     <h3 class="font-bold text-xl mb-2 text-stone-800">Campaign Resources</h3>
                     <p class="text-lg">Access the original files and audio overview for your campaign.</p>
@@ -123,7 +125,7 @@
                         </li>
                         <li>
                             <p class="font-medium text-stone-700">Audio Overview: The "Pulp Fantasy" Philosophy</p>
-                            <audio controls class="w-full mt-2" src="modern-manual-audio-overview.mp3">
+                            <audio controls class="w-full mt-2" src="Pulp Fantasy Combat Reloads and Wealth.mp3">
                                 Your browser does not support the audio element.
                             </audio>
                         </li>
@@ -134,50 +136,65 @@
             <!-- Character Options Page -->
             <div id="characterOptions" class="page-content hidden space-y-6">
                 <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">👤 Character Options</h2>
-                <p class="text-lg bg-white p-6 rounded-lg shadow-md">The modern world offers new paths and skills. This section contains new skills, backgrounds, feats, and a complete set of new subclasses for every core class, designed to fit a modern setting. Use the tabs below to explore these new options.</p>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">This section covers all new player options from Part 1 of the manual, broken down by chapter. You can find new starting equipment, subclasses, backgrounds, and feats to build your modern hero.</p>
                 
                 <div class="bg-white rounded-lg shadow-md">
-                    <div id="char-opt-tabs" class="flex border-b border-stone-300">
-                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-skills">New Skills</button>
-                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-backgrounds">Backgrounds</button>
-                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-feats">Feats</button>
-                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-subclasses">Subclasses</button>
+                    <div id="char-opt-tabs" class="flex flex-wrap border-b border-stone-300">
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-subclasses">Subclasses (Ch 2)</button>
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-backgrounds">Backgrounds (Ch 3)</button>
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-feats">Feats (Ch 4)</button>
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-class-mods">Class Mods (Ch 1)</button>
                     </div>
 
-                    <div id="char-opt-skills" class="char-opt-tab-content p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">New Skills</h3>
-                        <p>The following skills can be added to the standard 5th Edition skill list. Your GM will decide if they are available in your campaign.</p>
-                        <ul class="list-disc list-inside space-y-2">
-                            <li><strong>Computers (Intelligence):</strong> Your Intelligence (Computers) check measures your ability to access, control, and manipulate computer systems, software, and networks.</li>
-                            <li><strong>Demolitions (Intelligence):</strong> Your Intelligence (Demolitions) check measures your ability to properly identify, set, and disarm explosives, as well as identify their properties.</li>
-                        </ul>
-                    </div>
-                    <div id="char-opt-backgrounds" class="char-opt-tab-content hidden p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">New Backgrounds</h3>
-                        <p>These backgrounds are appropriate for characters in a modern setting.</p>
-                        <ul class="list-disc list-inside space-y-2">
-                            <li><strong>Hacker:</strong> You are a self-taught (or formally-taught) computer expert, capable of breaking into systems with ease.</li>
-                            <li><strong>Mechanic:</strong> You've always had a way with machines, and can fix just about anything with an engine.</li>
-                            <li><strong>Officer:</strong> You were a member of a police force, dedicated to upholding the law and protecting the innocent.</li>
-                            <li><strong>Radical:</strong> You fought for a cause, perhaps one outside the law, using unconventional methods.</li>
-                            <li><strong>Soldier:</strong> You were a professional soldier, trained in modern combat and tactics.</li>
-                        </ul>
-                    </div>
-                    <div id="char-opt-feats" class="char-opt-tab-content hidden p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">New Feats</h3>
-                        <p>These feats offer new capabilities related to modern combat and technology.</p>
-                        <ul class="list-disc list-inside space-y-2">
-                            <li><strong>Close Quarters Combatant:</strong> You are adept at fighting in close range, even with ranged weapons.</li>
-                            <li><strong>Computer Whiz:</strong> You have an innate talent for technology, granting you advantage on certain Computers checks.</li>
-                            <li><strong>Modern Heavy Armor Master:</strong> You can use your armor to deflect bullets, reducing incoming ballistic damage.</li>
-                            <li><strong>Pistol Expert:</strong> You have mastered the art of fighting with pistols, gaining bonuses to attack and damage.</li>
-                            <li><strong>Rifle Expert:</strong> You are a master of the rifle, able to make difficult shots and reroll damage.</li>
-                        </ul>
-                    </div>
-                    <div id="char-opt-subclasses" class="char-opt-tab-content hidden p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">New Subclasses</h3>
-                        <p>Click on any class below to see its new modern-themed subclass and features.</p>
+                    <div id="char-opt-subclasses" class="char-opt-tab-content p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Subclasses (Chapter 2, p. 9)</h3>
+                        <p>Click on any class below to see its new modern-themed subclass and features, as written in the manual.</p>
                         <div id="subclass-accordion" class="space-y-2"></div>
+                    </div>
+                    
+                    <div id="char-opt-backgrounds" class="char-opt-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Backgrounds (Chapter 3, p. 27)</h3>
+                        <p>These backgrounds are appropriate for characters in a modern setting and include a **Wealth Bonus** for the new economy system.</p>
+                        <ul class="list-disc list-inside space-y-2 font-medium">
+                            <li>Academic (Wealth +3)</li>
+                            <li>Athlete (Wealth +1)</li>
+                            <li>Blue Collar (Wealth +2)</li>
+                            <li>Dilettante (Wealth +6)</li>
+                            <li>Emergency Services (Wealth +2)</li>
+                            <li>Law Enforcement (Wealth +1)</li>
+                            <li>Thrill Seeker (Wealth +1)</li>
+                            <li>White Collar (Wealth +3)</li>
+                        </ul>
+                        <p class="mt-4 text-sm text-stone-600">See p. 27-30 of the manual for full details on proficiencies and features.</p>
+                    </div>
+                    
+                    <div id="char-opt-feats" class="char-opt-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Feats (Chapter 4, p. 31)</h3>
+                        <p>These feats offer powerful new capabilities related to modern combat and technology.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Gunslinger:</strong> Use two-weapon fighting with non-light firearms, Dash and shoot, reload without a free hand.</li>
+                            <li><strong>Grenadier:</strong> Draw, arm, and throw grenades as a **Bonus Action**. Increased throw range.</li>
+                            <li><strong>Hacker:</strong> +1 Int, gain proficiency with hacking tools. Get an **additional hacking action for free** when using your action to hack.</li>
+                            <li><strong>Mechanic:</strong> Proficiency with mechanic's tools. Repair extra HP to vehicles.</li>
+                            <li><strong>Paramedic:</strong> +1 Con/Int/Wis, proficiency (or expertise) in Medicine. Can attempt to revive a creature that died within the last 10 minutes (DC 20 Medicine).</li>
+                            <li><strong>Sapper:</strong> +1 Dex. Add half proficiency bonus to your explosive's save DC. Checks to disarm *your* explosives have disadvantage.</li>
+                            <li><strong>Sniper:</strong> While prone, no disadvantage at long range with two-handed weapons. If you don't move, get +2 to hit on your *next* turn.</li>
+                            <li><strong>Speed Reload:</strong> Massively improves reload times (Box: Free Action, Internal: Bonus Action, Belt: Action).</li>
+                            <li><strong>Wheelman:</strong> Proficiency with all vehicles. Add your proficiency to the vehicle's checks/saves. Use Reaction to add proficiency to vehicle's AC. Vehicle gains **Evasion**.</li>
+                        </ul>
+                    </div>
+
+                    <div id="char-opt-class-mods" class="char-opt-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Base Class Modifications (Chapter 1, p. 7)</h3>
+                        <p>The manual provides new starting equipment and proficiency options for all 12 core classes. Below are some highlights:</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Cleric:</strong> Gains proficiency with Submachine Guns.</li>
+                            <li><strong>Fighter:</strong> Can start with a plate carrier and an automatic rifle.</li>
+                            <li><strong>Ranger:</strong> Can start with a sniper rifle.</li>
+                            <li><strong>Rogue:</strong> Gains proficiency with pocket pistols, pistols, submachine guns, and katanas.</li>
+                            <li><strong>Sorcerer & Wizard:</strong> Gain proficiency with various light firearms like pocket pistols.</li>
+                        </ul>
+                        <p class="mt-4 text-sm text-stone-600">See p. 7-8 of the manual for the full list of equipment and proficiency options for each class.</p>
                     </div>
                 </div>
             </div>
@@ -185,78 +202,75 @@
             <!-- Equipment Page -->
             <div id="equipment" class="page-content hidden space-y-6">
                 <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">🎒 Equipment</h2>
-                <p class="text-lg bg-white p-6 rounded-lg shadow-md">This section details new equipment for the modern age, from armor and weapons to computers and explosives. It also introduces the Credit Score system as an alternative to tracking exact currency for large purchases. Use the tabs to navigate.</p>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">This section details the new economy and equipment from Part 2 of the manual. All data is pulled directly from the source text.</p>
                 
                 <div class="bg-white rounded-lg shadow-md">
-                    <div id="equip-tabs" class="flex border-b border-stone-300">
-                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-credit">Credit Score</button>
-                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-armor">Armor</button>
-                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-weapons">Weapons</button>
-                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-gear">Adventuring Gear</button>
+                    <div id="equip-tabs" class="flex flex-wrap border-b border-stone-300">
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-wealth">Wealth System (Ch 5)</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-weapons">Weapons (Ch 6)</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-armory">Armory (App. A)</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-armor">Armor (Ch 6)</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-gear">Tools & Gear (Ch 6)</button>
                     </div>
 
-                    <div id="equip-credit" class="equip-tab-content p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">Credit Score</h3>
-                        <p>In a modern setting, tracking every dollar can be tedious. The Credit Score system abstracts your purchasing power. When you attempt to buy something significant, you make a Charisma (Persuasion) or Intelligence (Investigation) check against a DC determined by your lifestyle. On a success, you acquire the item.</p>
-                        <div class="flex flex-col md:flex-row gap-6">
+                    <div id="equip-wealth" class="equip-tab-content p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">The Wealth System (Chapter 5, p. 34)</h3>
+                        <p>The manual uses an abstract **Wealth score** instead of tracking cash. Your starting Wealth is **2d4 + your Background bonus**.</p>
+                        
+                        <h4 class="text-xl font-semibold mt-4">How to Make a Purchase (p. 34)</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Compare the item's **Value** to your character's **Wealth** score.</li>
+                            <li><strong>If Value ≤ Wealth AND Value is ≤ 14:</strong> You buy it. Your Wealth score does *not* decrease.</li>
+                            <li><strong>If Value is ≥ 15 (a "luxury" item):</strong> You buy it. Your Wealth score **decreases by 1**.</li>
+                            <li><strong>If Value > Wealth (an "expensive" item):</strong> You buy it. Your Wealth score **decreases by 1** (for 1-10 points over), **1d6** (for 11-15 over), or **2d6** (for 16-20 over). The "luxury" tax (Rule 3) *still applies* on top of this.</li>
+                            <li>You cannot buy an item with a Value more than 20 points higher than your Wealth.</li>
+                        </ol>
+
+                        <div class="flex flex-col md:flex-row gap-6 mt-6">
                             <div class="flex-1">
-                                <h4 class="text-xl font-semibold mb-2">Credit Score DC by Lifestyle</h4>
+                                <h4 class="text-xl font-semibold mb-2">Financial Well-Being (p. 34)</h4>
                                 <table class="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr class="bg-stone-100">
-                                            <th class="p-2 border border-stone-300">Lifestyle</th>
-                                            <th class="p-2 border border-stone-300">Check DC</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr class="bg-stone-100"><th class="p-2 border border-stone-300">Wealth</th><th class="p-2 border border-stone-300">Financial State</th></tr></thead>
                                     <tbody>
-                                        <tr><td class="p-2 border border-stone-300">Wretched</td><td class="p-2 border border-stone-300">10</td></tr>
-                                        <tr><td class="p-2 border border-stone-300">Squalid</td><td class="p-2 border border-stone-300">12</td></tr>
-                                        <tr><td class="p-2 border border-stone-300">Poor</td><td class="p-2 border border-stone-300">14</td></tr>
-                                        <tr><td class="p-2 border border-stone-300">Modest</td><td class="p-2 border border-stone-300">16</td></tr>
-                                        <tr><td class="p-2 border border-stone-300">Comfortable</td><td class="p-2 border border-stone-300">18</td></tr>
-                                        <tr><td class="p-2 border border-stone-300">Wealthy</td><td class="p-2 border border-stone-300">20</td></tr>
-                                        <tr><td class="p-2 border border-stone-300">Aristocratic</td><td class="p-2 border border-stone-300">22</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">0</td><td class="p-2 border border-stone-300">Impoverished/Indebted</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">1-4</td><td class="p-2 border border-stone-300">Struggling</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">5-10</td><td class="p-2 border border-stone-300">Middle Class</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">11-15</td><td class="p-2 border border-stone-300">Affluent</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">16-20</td><td class="p-2 border border-stone-300">Wealthy</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">21-30</td><td class="p-2 border border-stone-300">Rich</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">31+</td><td class="p-2 border border-stone-300">Filthy Rich</td></tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="flex-1 bg-amber-50 p-4 rounded-lg shadow-inner">
-                                <h4 class="text-xl font-semibold mb-2">Credit Check Calculator</h4>
-                                <label for="lifestyle-select" class="block mb-2 font-medium">Select your Lifestyle:</label>
-                                <select id="lifestyle-select" class="w-full p-2 border border-stone-300 rounded-lg">
-                                    <option value="10">Wretched</option>
-                                    <option value="12">Squalid</option>
-                                    <option value="14">Poor</option>
-                                    <option value="16" selected>Modest</option>
-                                    <option value="18">Comfortable</option>
-                                    <option value="20">Wealthy</option>
-                                    <option value="22">Aristocratic</option>
-                                </select>
-                                <p class="mt-4 text-lg">Your Credit Check DC is: <span id="credit-dc-output" class="font-bold text-2xl text-amber-600">16</span></p>
+                            <div class="flex-1">
+                                <h4 class="text-xl font-semibold mb-2">Currency Exchange (p. 36)</h4>
+                                <p class="mb-2">For spell components, use this conversion, then find the item's **Value** from the `Determining Value` table (p. 36).</p>
+                                <table class="w-full text-left border-collapse">
+                                    <thead><tr class="bg-stone-100"><th class="p-2 border border-stone-300">Coin</th><th class="p-2 border border-stone-300">Dollar Amount</th></tr></thead>
+                                    <tbody>
+                                        <tr><td class="p-2 border border-stone-300">1 Platinum</td><td class="p-2 border border-stone-300">$100</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">1 Gold</td><td class="p-2 border border-stone-300">$10</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">1 Electrum</td><td class="p-2 border border-stone-300">$5</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">1 Silver</td><td class="p-2 border border-stone-300">$1</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">1 Copper</td><td class="p-2 border border-stone-300">$0.10</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    <div id="equip-armor" class="equip-tab-content hidden p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">Modern Armor</h3>
-                        <p>Modern materials offer protection comparable to medieval armor, with different properties. "Ballistic" armor is designed to stop bullets, while "Impact" armor protects against melee trauma.</p>
-                        <ul class="list-disc list-inside space-y-2">
-                            <li><strong>Light Armor:</strong> Padded Vest, Kevlar Vest (Ballistic)</li>
-                            <li><strong>Medium Armor:</strong> Riot Gear (Impact), Dragon Skin Vest (Ballistic)</li>
-                            <li><strong>Heavy Armor:</strong> Bomb Suit (Impact), Plate Carrier (Ballistic)</li>
-                            <li><strong>Shield:</strong> Ballistic Shield</li>
-                        </ul>
-                    </div>
-                    <div id="equip-weapons" class="equip-tab-content p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">Modern Weapons</h3>
-                        <p>Firearms are prevalent in the modern age. Use the filters below to browse the weapon database. New properties like 'Automatic' and 'Burst Fire' add new tactical options.</p>
+                    
+                    <div id="equip-weapons" class="equip-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Modern Weapons (Chapter 6, p. 43)</h3>
+                        <p>Firearms and modern melee weapons. Use the filters below to browse the database, built from the table on p. 43.</p>
                         
                         <div class="flex flex-wrap gap-4 mb-6">
                             <input type="text" id="weapon-search" placeholder="Search weapons..." class="flex-grow p-2 border border-stone-300 rounded-lg">
                             <div class="flex gap-2 flex-wrap">
                                 <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="all">All</button>
-                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Pistol">Pistols</button>
-                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Rifle">Rifles</button>
-                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Shotgun">Shotguns</button>
-                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="SMG">SMGs</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Simple Melee">Simple Melee</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Simple Ranged">Simple Ranged</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Martial Melee">Martial Melee</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Martial Ranged">Martial Ranged</button>
                             </div>
                         </div>
 
@@ -268,7 +282,7 @@
                                 </div>
                             </div>
                             <div class="bg-stone-50 p-4 rounded-lg shadow-inner">
-                                <h4 class="text-xl font-semibold mb-2 text-center">Avg. Cost by Category</h4>
+                                <h4 class="text-xl font-semibold mb-2 text-center">Avg. Value (Cost) by Category</h4>
                                 <div class="chart-container">
                                     <canvas id="weapon-cost-chart"></canvas>
                                 </div>
@@ -278,17 +292,53 @@
                         <div id="weapon-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         </div>
                     </div>
+
+                    <div id="equip-armory" class="equip-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Armory (Appendix A, p. 65)</h3>
+                        <p>A detailed list of specific firearm models from Appendix A, for greater granularity in your campaign. Note that damage dice may differ from the simple "Weapons" tab, as these stats are more specific.</p>
+                        
+                        <div class="flex flex-wrap gap-4 mb-6">
+                            <input type="text" id="armory-search" placeholder="Search armory..." class="flex-grow p-2 border border-stone-300 rounded-lg">
+                            <div class="flex gap-2 flex-wrap">
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="all">All</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Pistol">Pistols</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Rifle">Rifles</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Sniper Rifle">Sniper Rifles</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Antimateriel">Antimateriel</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Submachine Gun">SMGs</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Machine Gun">LMG/HMG</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Shotgun">Shotguns</button>
+                                <button class="armory-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Launcher">Launchers</button>
+                            </div>
+                        </div>
+                        
+                        <div id="armory-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        </div>
+                    </div>
+                    
+                    <div id="equip-armor" class="equip-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Modern Armor (Chapter 6, p. 41)</h3>
+                        <p>Modern armor is divided into Light, Medium, and Heavy categories. All data is from the table on p. 41.</p>
+                        <div id="armor-grid" class="space-y-4"></div>
+                    </div>
+
                     <div id="equip-gear" class="equip-tab-content hidden p-6 space-y-4">
-                        <h3 class="text-2xl font-semibold">Adventuring Gear</h3>
-                        <p>Modern adventurers carry different tools.</p>
-                        <ul class="list-disc list-inside space-y-2">
-                            <li><strong>Smartphone:</strong> A handheld device for communication, simple computing, and accessing the internet.</li>
-                            <li><strong>Laptop:</strong> A portable computer required for most advanced Computers checks and hacking attempts.</li>
-                            <li><strong>First Aid Kit:</strong> Can be used to stabilize a dying creature without a Medicine check.</li>
-                            <li><strong>Duct Tape:</strong> Can be used for temporary repairs or as makeshift bindings.</li>
-                            <li><strong>Zip Ties:</strong> A modern replacement for manacles.</li>
-                            <li><strong>Explosives:</strong> C4, Dynamite, Flashbang, Smoke Grenade. Require Demolitions (Int) checks to use effectively.</li>
-                        </ul>
+                        <h3 class="text-2xl font-semibold">Tools & Gear (Chapter 6, p. 37-39)</h3>
+                        
+                        <h4 class="text-xl font-semibold mt-4">Tools (p. 37)</h4>
+                        <table class="w-full text-left border-collapse">
+                            <thead><tr class="bg-stone-100"><th class="p-2 border border-stone-300">Item</th><th class="p-2 border border-stone-300">Value</th><th class="p-2 border border-stone-300">Weight</th><th class="p-2 border border-stone-300">Description</th></tr></thead>
+                            <tbody>
+                                <tr><td class="p-2 border border-stone-300">Engineering Kit</td><td class="p-2 border border-stone-300">12</td><td class="p-2 border border-stone-300">8 lb.</td><td class="p-2 border border-stone-300">Repair electrical devices, disarm explosives.</td></tr>
+                                <tr><td class="p-2 border border-stone-300">Forensics Kit</td><td class="p-2 border border-stone-300">12</td><td class="p-2 border border-stone-300">8 lb.</td><td class="p-2 border border-stone-300">Investigate crime scenes without contamination.</td></tr>
+                                <tr><td class="p-2 border border-stone-300">Hacking Tools</td><td class="p-2 border border-stone-300">14</td><td class="p-2 border border-stone-300">6 lb.</td><td class="p-2 border border-stone-300">Hardware/software for hacking checks.</td></tr>
+                                <tr><td class="p-2 border border-stone-300">Mechanic Tools</td><td class="p-2 border border-stone-300">12</td><td class="p-2 border border-stone-300">8 lb.</td><td class="p-2 border border-stone-300">Repair cars and motorcycles.</td></tr>
+                                <tr><td class="p-2 border border-stone-300">Spy Kit</td><td class="p-2 border border-stone-300">16</td><td class="p-2 border border-stone-300">12 lb.</td><td class="p-2 border border-stone-300">Camera detectors, sound amplifiers, etc.</td></tr>
+                            </tbody>
+                        </table>
+                        
+                        <h4 class="text-xl font-semibold mt-6">Adventuring Gear (p. 39)</h4>
+                        <div id="adventuring-gear-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                     </div>
                 </div>
             </div>
@@ -296,13 +346,13 @@
             <!-- Vehicles Page -->
             <div id="vehicles" class="page-content hidden space-y-6">
                 <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">🚗 Vehicles</h2>
-                <p class="text-lg bg-white p-6 rounded-lg shadow-md">Vehicles are a key part of modern life. This section provides stats and rules for a variety of land, air, and water vehicles. Use the filters to find a specific type of vehicle. Each vehicle has its own stat block, similar to a creature, including Armor Class, Hit Points, and Speed.</p>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">This section provides stat blocks for a variety of land, air, and water vehicles from Appendix B (p. 84-96). Use the filters to find a specific type of vehicle. Note that "Value" is not listed, as it is not part of the stat blocks.</p>
                 
                 <div class="flex flex-wrap gap-4 mb-6">
                     <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="all">All</V>
                     <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Land">Land</button>
-                    <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Air">Air</button>
                     <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Water">Water</button>
+                    <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Air">Air</button>
                 </div>
 
                 <div id="vehicle-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -312,41 +362,61 @@
             <!-- Hacking Page -->
             <div id="hacking" class="page-content hidden space-y-6">
                 <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">💻 Hacking</h2>
-                <p class="text-lg bg-white p-6 rounded-lg shadow-md">Hacking allows characters proficient with the Computers skill to break into digital systems. This is often a multi-step process involving gaining access, running programs, and executing exploits. The flowchart below outlines the basic process for a hacking attempt.</p>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">Hacking allows characters proficient with Hacking Tools to break into digital systems. This is an overview of the core Hacking Actions from Chapter 7 (p. 50-51).</p>
                 
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-2xl font-semibold mb-4">Hacking Process Flow</h3>
-                    <div class="flex flex-col md:flex-row items-center justify-between gap-2 text-center">
-                        <div class="bg-stone-100 p-4 rounded-lg shadow w-full md:w-1/4">
-                            <h4 class="font-bold text-lg">1. Initiate Hack</h4>
-                            <p class="text-sm">Make an Intelligence (Computers) check to gain access to the target system. DC is set by the GM based on security.</p>
-                        </div>
-                        <div class="text-4xl font-bold text-amber-500 transform rotate-90 md:rotate-0">→</div>
-                        <div class="bg-stone-100 p-4 rounded-lg shadow w-full md:w-1/4">
-                            <h4 class="font-bold text-lg">2. Run Program</h4>
-                            <p class="text-sm">On success, choose a program to run (e.g., 'Recon' to learn, 'Backdoor' to create an exit).</p>
-                        </div>
-                        <div class="text-4xl font-bold text-amber-500 transform rotate-90 md:rotate-0">→</div>
-                        <div class="bg-stone-100 p-4 rounded-lg shadow w-full md:w-1/4">
-                            <h4 class="font-bold text-lg">3. Execute Exploit</h4>
-                            <p class="text-sm">Choose an exploit (e.g., 'Control' to take over a device, 'Extract' to steal data, 'Shutdown' to disable).</p>
-                        </div>
-                        <div class="text-4xl font-bold text-amber-500 transform rotate-90 md:rotate-0">→</div>
-                        <div class="bg-green-100 p-4 rounded-lg shadow w-full md:w-1/4 border-2 border-green-500">
-                            <h4 class="font-bold text-lg">4. Result</h4>
-                            <p class="text-sm">The hack succeeds. On a failure at any step, the hacker may be detected or locked out.</p>
-                        </div>
+                <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <h3 class="text-2xl font-semibold mb-4">Core Hacking Actions</h3>
+                    
+                    <div class="p-4 border border-stone-200 rounded-lg">
+                        <h4 class="font-bold text-lg">1. Bypass Device Security (p. 50)</h4>
+                        <p class="text-sm">This is the first step. Make an **Intelligence (Hacking Tools)** check against the system's Security DC.</p>
+                        <ul class="list-disc list-inside text-sm mt-2 ml-4">
+                            <li><strong>DC 15:</strong> Minimum Security</li>
+                            <li><strong>DC 20:</strong> Average Security</li>
+                            <li><strong>DC 25:</strong> Exceptional Security</li>
+                            <li><strong>DC 30:</strong> Maximum Security</li>
+                        </ul>
+                        <p class="text-sm mt-2"><strong>On a failure:</strong> You must make a **DC 20 Intelligence saving throw**. If you *also* fail this save, an alarm is triggered, and you are locked out for 24 hours.</p>
+                    </div>
+
+                    <div class="p-4 border border-stone-200 rounded-lg">
+                        <h4 class="font-bold text-lg">2. Degrade Programming (p. 51)</h4>
+                        <p class="text-sm">Used to mess with active programs (like security AI). Make an **Intelligence (Hacking Tools)** check.</p>
+                        <ul class="list-disc list-inside text-sm mt-2 ml-4">
+                            <li><strong>DC 10:</strong> Crash the device (restarts in 1 min).</li>
+                            <li><strong>DC 15:</strong> Damage the programming (disadvantage on checks).</li>
+                            <li><strong>DC 20:</strong> Destroy the programming (unusable until repaired).</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 border border-stone-200 rounded-lg">
+                        <h4 class="font-bold text-lg">3. File Search (p. 51)</h4>
+                        <p class="text-sm">Make an **Intelligence (Investigation)** check to find data on a network. The DC and time depend on the network size.</p>
+                        <ul class="list-disc list-inside text-sm mt-2 ml-4">
+                            <li><strong>DC 10 (1 round):</strong> Personal Computer</li>
+                            <li><strong>DC 15 (2 rounds):</strong> Small Office Network</li>
+                            <li><strong>DC 25 (10 minutes):</strong> Massive Corporation Network</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 border border-stone-200 rounded-lg">
+                        <h4 class="font-bold text-lg">4. Operate Remote Device (p. 51)</h4>
+                        <p class="text-sm">Make an **Intelligence (Hacking Tools)** check to control connected devices.</p>
+                        <ul class="list-disc list-inside text-sm mt-2 ml-4">
+                            <li><strong>DC 20:</strong> Shut down a passive device (camera, lock).</li>
+                            <li><strong>DC 25:</strong> Shut down an active device (alarm, motion detector).</li>
+                            <li><strong>DC 25:</strong> Reset parameters or change passcodes.</li>
+                        </ul>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
-                    <h3 class="text-2xl font-semibold">Hacking Terms</h3>
-                    <ul class="list-disc list-inside space-y-2">
-                        <li><strong>Program:</strong> A tool that sets up the hack (e.g., Recon, Backdoor, Rootkit). You run one Program per successful hack.</li>
-                        <li><strong>Exploit:</strong> The action you take once inside (e.g., Control, Extract, Shutdown, Overload). You execute one Exploit per successful hack.</li>
-                        <li><strong>Security DC:</strong> The difficulty of gaining access. A simple smartphone might be DC 10, while a corporate server is DC 20+.</li>
-                        <li><strong>Detection:</strong> Failing a check by 5 or more typically means you are detected and locked out of the system.</li>
-                    </ul>
-                </div>
+            </div>
+
+            <!-- Magic Page -->
+            <div id="magic" class="page-content hidden space-y-6">
+                <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">✨ Magic</h2>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">This section details the new spells from Chapter 9 (p. 60-64). Spells marked with <span class="text-xs bg-amber-200 text-amber-800 font-bold p-1 rounded">TECHNOMAGIC</span> are part of this new category and cannot be learned by Druids. Click a spell level to see the spells.</p>
+                
+                <div id="spell-accordion" class="space-y-2"></div>
             </div>
 
         </main>
@@ -354,166 +424,321 @@
 
     <script>
         // --- Data ---
+        // Accurate Subclass Data from Chapter 2 (p. 9-26)
         const subclassData = {
             "Barbarian": {
-                name: "Path of the Juggernaut",
-                desc: "You are an unstoppable force of urban destruction, shrugging off blows that would fell lesser warriors.",
+                name: "Path of the Brawler",
+                desc: "You always had a knack for finding trouble... you make up for it with sheer stubborn fury.",
                 features: [
-                    "<strong>3rd Level: Tenacity:</strong> You can use your reaction to reduce incoming damage.",
-                    "<strong>6th Level: Implacable:</strong> You gain advantage on checks to resist being moved or knocked prone.",
-                    "<strong>10th Level: Unstoppable:</strong> You can take the Dash action as a bonus action while raging.",
-                    "<strong>14th Level: Juggernaut:</strong> While raging, you are immune to the frightened and stunned conditions."
+                    "<strong>3rd Level: Whatever's at Hand:</strong> Gain proficiency with improvised weapons & unarmed strikes. While raging, unarmed strikes deal 1d6 (or 1d8 if hands are free). Can deal 1d4 to a grappled creature at the start of your turn.",
+                    "<strong>6th Level: Break Stuff:</strong> Once per turn while raging, when you hit with a non-magic melee/thrown weapon, you can destroy it to deal extra damage (1d6, scales to 2d6 at 9th, 3d6 at 17th).",
+                    "<strong>6th Level: Running Tackle:</strong> If you move towards an enemy, gain advantage on all attacks against them this turn.",
+                    "<strong>10th Level: Bits and Pieces:</strong> When you use Break Stuff, you can make an additional improvised weapon attack as a bonus action (1d6 damage, weapon is destroyed).",
+                    "<strong>14th Level: Got Your Back:</strong> As a reaction, take the damage for an ally within 5 ft. Gain a +1 bonus on damage rolls against that attacker. (Uses = proficiency bonus)."
                 ]
             },
             "Bard": {
-                name: "College of the Dissident",
-                desc: "You use your voice and art to rally the common people, inciting rebellion and spreading truth.",
+                name: "College of Life",
+                desc: "These bards instead choose to learn their skills and hone their talents through real-life experiences...",
                 features: [
-                    "<strong>3rd Level: Stirring Rhetoric:</strong> You can expend a Bardic Inspiration to grant allies temporary HP and a bonus to attack rolls.",
-                    "<strong>6th Level: Incite Riot:</strong> You can use your action to charm or frighten a group of humanoids.",
-                    "<strong>14th Level: Voice of the People:</strong> You can cast *Mass Suggestion* once per long rest."
+                    "<strong>3rd Level: Informal Education:</strong> Gain proficiency in one skill, one artisan's tool, one gaming set, one musical instrument, and one language.",
+                    "<strong>3rd Level: Quick Study:</strong> As a bonus action, expend a Bardic Inspiration to make an Insight/Investigation check vs. target's Deception. On success, learn its Damage Immunities/Resistances/Vulnerabilities and Condition Immunities. For 1 min, you can add/subtract your inspiration die from attacks/checks against that target.",
+                    "<strong>6th Level: Grounding Words:</strong> When a creature adds your Bardic Inspiration to a save against being charmed, frightened, paralyzed, or stunned, they have advantage.",
+                    "<strong>14th Level: Inspiring Perseverance:</strong> As an action, expend one Bardic Inspiration. Choose creatures up to your CHA mod (min 1) within 60 ft. For 10 min, they add your CHA mod to all attack rolls, ability checks, and saving throws. (1/long rest)."
                 ]
             },
              "Cleric": {
-                name: "Protection Domain",
-                desc: "Your faith is a shield, protecting your allies from the dangers of the modern world, be they bullets or blades.",
+                name: "City Domain",
+                desc: "The City domain is concerned with the citizenry, commerce, traffic, and even architecture of modern civilization.",
                 features: [
-                    "<strong>1st Level: Domain Spells:</strong> *Shield, Sanctuary, etc.*",
-                    "<strong>1st Level: Protective Ward:</strong> You can use your reaction to impose disadvantage on an attack against an ally.",
-                    "<strong>2nd Level: Channel Divinity:</strong> Create a barrier that deflects attacks.",
-                    "<strong>6th Level: Resilient Defense:</strong> You and nearby allies gain a bonus to saving throws.",
-                    "<strong>17th Level: Indomitable Shield:</strong> You can grant an ally resistance to all damage for one round."
+                    "<strong>1st Level: Domain Spells:</strong> Includes *Remote Access*, *Find Vehicle*, *Protection from Ballistics*, *Synchronicity*, *Shutdown*.",
+                    "<strong>1st Level: Bonus Cantrip:</strong> Gain the *On/Off* cantrip.",
+                    "<strong>1st Level: Bonus Proficiencies:</strong> Gain proficiency with martial weapons and vehicles (land).",
+                    "<strong>1st Level: Heart of the City:</strong> While in a city, gain advantage on one Deception, Intimidation, or Persuasion check (you are considered proficient). (Uses = WIS mod).",
+                    "<strong>2nd Level: Channel Divinity: Spirits of the City:</strong> As an action, city utilities within 30 ft work perfectly or shut down for 1 min. Hostile creatures within 30 ft must make a CHA save or be knocked prone or restrained (your choice).",
+                    "<strong>6th Level: Block Watch:</strong> While in an urban environment, you are considered proficient in Insight and Perception and add double your proficiency bonus.",
+                    "<strong>8th Level: Divine Strike:</strong> Once per turn, deal an extra 1d8 psychic damage on a weapon attack (2d8 at 14th).",
+                    "<strong>17th Level: Express Transit:</strong> Teleport between mass transit stops within a city. (1/short or long rest)."
                 ]
             },
             "Druid": {
-                name: "Circle of the Streets",
-                desc: "You find your connection to nature not in ancient forests, but in the resilient life of the city.",
+                name: "Circle of Preservation",
+                desc: "Druids who join the Circle of Preservation act as righteous guardians and stout protectors of their cherished wilds...",
                 features: [
-                    "<strong>2nd Level: Urban Wild Shape:</strong> You can transform into beasts found in cities, like rats, pigeons, or stray dogs.",
-                    "<strong>6th Level: Concrete Jungle:</strong> You can cast *Spike Growth* as if it were concrete shards. You are not hindered by difficult urban terrain.",
-                    "<strong>10th Level: City's Resilience:</strong> You gain proficiency in Constitution saving throws.",
-                    "<strong>14th Level: Aspect of the Metropolis:</strong> You can blend into any urban crowd, becoming effectively invisible."
+                    "<strong>2nd Level: Boughs of Breaking:</strong> Unarmed strikes deal 1d8 + STR. When you hit with one, you can expend a spell slot to cast *ensnaring strike* as part of the attack.",
+                    "<strong>2nd Level: Circle Spells:</strong> Includes *compelled duel*, *ensnaring strike*, *warding bond*, *plant growth*, *grasping vine*, *wrath of nature*.",
+                    "<strong>2nd Level: Guardian Form:</strong> As a bonus action, expend a Wild Shape. For 10 min: AC = 10 + CON + WIS, gain temp HP as a bonus action (equal to WIS mod), unarmed strike reach +5 ft, can use WIS for unarmed attacks.",
+                    "<strong>6th Level: Arboreal Strikes:</strong> Can attack twice with the Attack action. Can replace one attack with a cantrip. Unarmed strikes count as magical.",
+                    "<strong>10th Level: Grasp of the Forest:</strong> As an action, expend a Wild Shape to cast *plant growth*. Choose creatures equal to your WIS mod to ignore the difficult terrain.",
+                    "<strong>14th Level: Verdant Mastery:</strong> In Guardian Form, you grow one size category, gain resistance to bludgeoning/piercing/poison/slashing damage, duration becomes 1 hour, and you can speak to plants."
                 ]
             },
             "Fighter": {
-                name: "Gunslinger",
-                desc: "You are a master of firearms, a deadly marksman who relies on speed, precision, and a bit of luck.",
+                name: "Commando",
+                desc: "Trained for a higher level of independent action than the typical soldier, Commandos are used to fighting while outnumbered...",
                 features: [
-                    "<strong>3rd Level: Gunsmith:</strong> You gain proficiency with firearms and tinker's tools. You can craft ammo.",
-                    "<strong>3rd Level: Deadeye:</strong> You can use a bonus action to gain advantage on your next attack roll with a firearm.",
-                    "<strong>7th Level: Quickdraw:</strong> You can draw or stow a firearm as a free action and gain a bonus to initiative.",
-                    "<strong>10th Level: Bullet Time:</strong> You can use your reaction to take a shot against an enemy that moves within 10 feet of you.",
-                    "<strong>15th Level: Trick Shot:</strong> You can expend a superiority die (d8) to perform special maneuvers, like disarming an opponent or ricocheting a shot."
+                    "<strong>3rd Level: Special Operations School:</strong> As a bonus action, give an ally advantage on one attack roll or ability check (Uses = proficiency bonus). Gain advantage on CON checks and saves vs. charmed/frightened. Learn one language. Choose a discipline (Army: no extra climb cost, Vehicles (land) prof; Navy: no extra swim cost, Vehicles (water) prof; Airborne: half fall damage, Vehicles (air) prof).",
+                    "<strong>7th Level: Overpenetration:</strong> Once per round, when you kill a target with a ranged attack, one target within a 15-ft cone behind it must make a DC 15 CON save or take half damage from the attack.",
+                    "<strong>10th Level: Survival Tactics:</strong> Choose one favored terrain (from Ranger list). Gain benefits in it (ignore difficult terrain, advantage on stealth, cannot be surprised).",
+                    "<strong>15th Level: Embrace the Suck:</strong> Advantage on CON checks to end/avoid a condition. Once per long rest, can make a DC 15 CON check to remove one level of exhaustion.",
+                    "<strong>18th Level: Combined Arms:</strong> When you use Action Surge, you can instead grant an immediate reaction to each member of your party. (1/short or long rest)."
                 ]
             },
             "Monk": {
-                name: "Way of the Brawler",
-                desc: "You are a scrappy fighter, using improvised weapons and bar-room tactics to dominate your foes.",
+                name: "Way of the Gun",
+                desc: "In your hands, firearms become as elegant as any blade, intertwining their form and function in your delicate dance of martial combat.",
                 features: [
-                    "<strong>3rd Level: Brawler's Cunning:</strong> You gain proficiency with improvised weapons. They count as monk weapons for you.",
-                    "<strong>6th Level: Haymaker:</strong> When you hit a creature with an unarmed strike or improvised weapon, you can expend a ki point to force them to make a Con save or be stunned.",
-                    "<strong>11th Level: Tough as Nails:</strong> You gain proficiency in Constitution saving throws.",
-                    "<strong>17th Level: Bar-Room Blitz:</strong> As an action, you can make an unarmed strike or improvised weapon attack against every enemy within your reach."
+                    "<strong>3rd Level: Gun Kata:</strong> Gain proficiency with light, one-handed simple/martial firearms. Can use them as monk weapons. Can make a melee attack with a firearm as an unarmed strike. No disadvantage on ranged attacks with firearms at 5 feet.",
+                    "<strong>6th Level: Disarming Shot:</strong> When you hit with a firearm, you can spend 1 ki point to force a STR save vs. your Ki Save DC. On a fail, the target drops one item.",
+                    "<strong>11th Level: Ricochet:</strong> Your attacks with a firearm ignore all cover.",
+                    "<strong>17th Level: CQB:</strong> When you use Martial Arts or Flurry of Blows, you can make an attack with a firearm instead of an unarmed strike."
                 ]
             },
             "Paladin": {
-                name: "Oath of the People",
-                desc: "You have sworn an oath not to a deity or king, but to the common people, protecting them from corruption and tyranny.",
+                name: "Oath of the Peacemaker",
+                desc: "An unshakeable vow to protect those who are otherwise unequipped to protect themselves.",
                 features: [
-                    "<strong>3rd Level: Tenets:</strong> *Community, Equality, Freedom, Justice.*",
-                    "<strong>3rd Level: Channel Divinity:</strong> 1. *Rallying Cry:* Grant temporary HP to allies. 2. *Expose Injustice:* Compel a creature to speak the truth.",
-                    "<strong>7th Level: Aura of Solidarity:</strong> You and allies within 10 feet can use your reaction to take damage for another creature in the aura.",
-                    "<strong>15th Level: People's Champion:</strong> You have advantage on saving throws against being charmed or frightened.",
-                    "<strong>20th Level: Voice of the Masses:</strong> You can become an avatar of the collective, gaining resistance to all damage and dealing extra radiant damage."
+                    "<strong>3rd Level: Tenets:</strong> Aim with your eye. Shoot with your mind. Kill with your heart.",
+                    "<strong>3rd Level: Oath Spells:</strong> Includes *zephyr strike*, *magic weapon*, *lightning arrow*, *swift quiver*.",
+                    "<strong>3rd Level: Channel Divinity 1: Take Up Your Guns:</strong> As an action, summon 2 revolvers, holsters, and 60 bullets. You can use Divine Smite with these ranged weapons.",
+                    "<strong>3rd Level: Channel Divinity 2: Steady Aim:</strong> Gain a +10 bonus to an attack roll. If using one of your summoned guns, the attack does not have disadvantage at long range.",
+                    "<strong>7th Level: Aura of Deflection:</strong> Ranged weapon attacks against you and allies within 10 ft have disadvantage (30 ft at 18th level).",
+                    "<strong>15th Level: Quickdraw:</strong> Add your CHA mod to your initiative rolls.",
+                    "<strong>20th Level: True Grit:</strong> For 1 min: Use reaction to attack a creature that attacks you (before they roll). Take no damage on a successful DEX save (half on fail). Opportunity attacks against you have disadvantage. (1/long rest)."
                 ]
             },
              "Ranger": {
-                name: "Urban Ranger",
-                desc: "You are a master of the concrete jungle, tracking your foes through crowded streets and navigating urban decay.",
+                name: "Drone Expert",
+                desc: "Rangers in the modern world have learned to bring support resources that are a bit more predictable... than wild animals.",
                 features: [
-                    "<strong>3rd Level: Natural Explorer:</strong> You are at home in cities. You can't get lost in urban environments and gain advantage on stealth checks.",
-                    "<strong>3rd Level: Favored Enemy:</strong> You can choose two types of humanoid organizations (e.g., a specific gang, corporation, or police force).",
-                    "<strong>7th Level: Rooftop Runner:</strong> You gain a climbing speed equal to your walking speed.",
-                    "<strong>11th Level: Street Smarts:</strong> You have advantage on Charisma (Persuasion) and (Deception) checks made against city dwellers.",
-                    "<strong>15th Level: Ghost of the Streets:</strong> You can use a bonus action to become invisible until the end of your next turn."
+                    "<strong>3rd Level: Hide in Plain Sight:</strong> Feature changes to allow hiding in urban environments.",
+                    "<strong>3rd Level: Tool Proficiency:</strong> Gain proficiency with Engineering Kits.",
+                    "<strong>3rd Level: Drone Master Magic:</strong> Learn spells like *catapult*, *heat metal*, *fly*, *fabricate*, *animate objects*.",
+                    "<strong>3rd Level: Chimera Drone:</strong> You get a customizable pet construct (see stat block p. 17). It acts on your initiative. Can be repaired with an action and 1st-level spell slot.",
+                    "<strong>3rd Level: Loadout:</strong> Choose two drone attachments (Hacker-Bot, Primed Shot, Razor Casing, Serum Shot, Shock Prod).",
+                    "<strong>5th Level: Coordinated Attack:</strong> When you take the Attack action, you can forgo one or two attacks to have your drone use its reaction to make them instead.",
+                    "<strong>7th Level: Upgrades:</strong> Your drone's attachments get better (e.g., Hacker-Bot gets an EMP, Primed Shot damage die increases to d12).",
+                    "<strong>11th Level: Rise of the Machines:</strong> Choose one advanced attachment (Hijack Module, Autocannon, Riot Control).",
+                    "<strong>1Stillth Level: Master's Call:</strong> As a reaction when you are attacked, have your drone move up to half its speed. If it ends within 5 ft of you, the attack targets the drone instead."
                 ]
             },
             "Rogue": {
-                name: "Combat Hacker",
-                desc: "You use your technical skills as a weapon, disabling enemy tech, bypassing security, and causing digital chaos.",
+                name: "Gambler",
+                desc: "Rogues such as you believe that chance is always on your side. You make sure of this by honing your skills...",
                 features: [
-                    "<strong>3rd Level: Tech Savant:</strong> You gain proficiency with the Computers skill and hacking tools.",
-                    "<strong>3rd Level: Remote Hack:</strong> As a bonus action, you can make an Int (Computers) check to temporarily disable an electronic device within 30 feet.",
-                    "<strong>9th Level: System Shock:</strong> When you use Remote Hack, you can choose to have the device create an electrical burst, dealing lightning damage to the user.",
-                    "<strong>13th Level: Personal Blackout:</strong> You can create a 20-foot sphere of electronic silence, disabling all tech within it for 1 minute.",
-                    "<strong>17th Level: Master Hacker:</strong> You can cast *Dominate Monster* on any creature with cybernetic implants or *Dominate Machine* (new spell) on a vehicle or drone."
+                    "<strong>3rd Level: Dirty Tricks:</strong> You gain 4 `Gambling Dice` (d6s, regain on short/long rest) and learn 4 'Tricks' (maneuvers) to spend them on, such as `Double Down` (add 1d6 damage per die spent) or `Loaded Dice` (add to Stealth/initiative).",
+                    "<strong>3rd Level: Gaming Proficiencies:</strong> Gain proficiency in all gaming sets.",
+                    "<strong>9th Level: Lucky Number:</strong> Choose a number on a d20 (not 1 or 20). When you roll it on an attack or save, it's a critical success.",
+                    "<strong>9th Level: Improved Dirty Tricks:</strong> Your gambling dice become d8s (d10s at 13th, d12s at 17th).",
+                    "<strong>13th Level: Mulligan:</strong> Twice per long rest, you can choose to roll an additional d20 and decide which d20 is used for an attack, check, or save (yours or an attacker's).",
+                    "<strong>17th Level: Ace Up Your Sleeve:</strong> When you roll initiative with no gambling dice, regain 1."
                 ]
             },
             "Sorcerer": {
-                name: "Bioware Sorcery",
-                desc: "Your magic comes from cybernetic or biological enhancements, allowing you to blend technology and arcane power.",
+                name: "Fame",
+                desc: "You... were born to be famous. Your claim to fame is an innate and captivating magic that grants you a natural magnetism.",
                 features: [
-                    "<strong>1st Level: Arcane Augmentations:</strong> Your body is a magical focus. You gain a +1 bonus to AC.",
-                    "<strong>6th Level: Overclock:</strong> You can expend sorcery points to gain an extra action on your turn.",
-                    "<strong>14th Level: System Reboot:</strong> Once per long rest, you can use an action to regain hit points equal to half your maximum.",
-                    "<strong>18th Level: Arcane Singularity:</strong> You can teleport up to 60 feet as a bonus action, dealing force damage in the area you left."
+                    "<strong>1st Level: Star Struck:</strong> As an action, charm creatures equal to your CHA mod within 30 ft (WIS save). Charmed creatures are incapacitated and must use their movement to approach you. (Can maintain with action).",
+                    "<strong>1st Level: Quick Disguise:</strong> Can cast *Disguise Self* once per long rest (or with spell slots).",
+                    "<strong>6th Level: Special Treatment:</strong> As an action, spend 3 sorcery points to activate one effect: `15 Minutes of Fame` (allies in 30 ft add your CHA mod to CHA checks/saves), `Adoring Fans` (cast *Spirit Guardians* at 3rd level), `Recognition` (cast *Friends* at 3rd level).",
+                    "<strong>14th Level: In The Spotlight:</strong> As an action (1/long rest), transform for 1 min. Creatures within 30 ft make a CON save: take 6d8 radiant damage and be blinded (save ends) on fail, half damage on success. You shed bright light. At end of your turn, you and creatures within 30 ft take radiant damage = half your level. Once per turn, deal extra radiant damage = your level.",
+                    "<strong>18th Level: Super Stardom:</strong> Treat a d20 roll of 9 or lower as a 10 on CHA (Persuasion/Deception) checks. Your Special Treatment features now only cost 1 sorcery point."
                 ]
             },
             "Warlock": {
-                name: "The Great Old One",
-                desc: "A classic patron with a modern twist. Your patron's alien mind can breach digital and mental security alike.",
+                name: "Ghost in The Machine",
+                desc: "You have made a bargain for power granted by an entity that you believe to be completely digital.",
                 features: [
-                    "<strong>Pact Boon: Pact of the Net:</strong> Your patron grants you a 'familiar' in the form of an AI that lives in your smartphone or laptop. It can perform hacking tasks for you.",
-                    "<strong>New Invocations:</strong> *Digital Mind:* You can communicate telepathically with AI and machines. *Psychic Static:* You can use your reaction to impose disadvantage on an attack roll made by an enemy you can see."
+                    "<strong>1st Level: Expanded Spell list:</strong> Gain *On/Off* cantrip. Spells include *Remote Access*, *Arcane Hacking*, *Haywire*, *Conjure Knowbot*, *Shutdown*.",
+                    "<strong>1st Level: Bonus Proficiency:</strong> Gain proficiency with hacking tools.",
+                    "<strong>1st Level: Information Surge:</strong> As an action, target a computerized device within 30 ft. If held, creature makes an INT save. On fail, device ceases to function until the end of your next turn. (1/short or long rest).",
+                    "<strong>6th Level: Wire Walk:</strong> As a bonus action, touch a device connected to a hardwired network and teleport to another device/socket on that network within line of sight. (1/short or long rest).",
+                    "<strong>10th Level: Personal Encryption:</strong> Advantage on saving throws against scrying, thought detection, or magical location. Effects that force an ability check to find/read you are made with disadvantage.",
+                    "<strong>14th Level: Technovirus:</strong> As an action, make a melee spell attack. On hit, target makes a CON save. On fail, takes 8d10 psychic damage (half on success). If they fail, you can use an action to issue a one-word *Command* (they save with disadvantage). (1/long rest)."
                 ]
             },
             "Wizard": {
-                name: "School of Psionics",
-                desc: "You use your powerful mind to warp reality, a \"wizard\" who casts spells without components, using only thought.",
+                name: "Technomancy",
+                desc: "Ancient tomes, leather-bound journals, and dusty scrolls are relics of the past... To these wizards, technology is the greatest tool of all.",
                 features: [
-                    "<strong>2nd Level: Psionic Focus:</strong> You can cast spells without verbal, somatic, or material components (that don't have a cost).",
-                    "<strong>6th Level: Telekinetic Hand:</strong> You learn the *Mage Hand* cantrip, it is invisible, and you can use it as a bonus action.",
-                    "<strong>10th Level: Mental Shield:</strong> You are resistant to psychic damage and have advantage on saves against being charmed or frightened.",
-                    "<strong>14th Level: Mind Blast:</strong> You can use your action to emit a 60-foot cone of psionic energy, dealing psychic damage and stunning creatures who fail an Int save."
+                    "<strong>2nd Level: Electronic Device:</strong> Your spellbook is a smartphone/tablet. You can use it as a spellcasting focus. Add half proficiency to Int (History/Nature/Religion) checks. Copying spells is free (still takes 2 hours/level to decipher).",
+                    "<strong>2nd Level: Electronic Interface:</strong> Learn *Shocking Grasp* (range 30 ft). As an action, can also use `Group Message` (speak through devices in 60-ft radius) or `Eavesdrop` (see/hear through one device in 30 ft for 1 min).",
+                    "<strong>6th Level: Elite Hacker:</strong> Gain resistance to lightning damage. Add INT mod to lightning damage spells. Gain new `Electronic Interface` actions: `Malware` (DC 15 Arcana to disable a device) and `Back-door` (access unencrypted data, DC 20 Arcana to break encryption).",
+                    "<strong>10th Level: Arcane Storage Space:</strong> Your Electronic Device can store up to 3 levels worth of spells (1st-3rd level), which you can cast from it.",
+                    "<strong>10th Level: Animate Electronics:</strong> You learn *Animate Objects*.",
+                    "<strong>14th Level: Neural Network:</strong> While device is on you, you have advantage on all Intelligence skill checks. Can change prepared spells over a short rest (1/long rest). Gain new `Electronic Interface` action: `EMP` (deactivate all electronics within 1 mile for 1 min, concentration. 1/long rest)."
                 ]
             }
         };
 
+        // Accurate Weapon Data from Chapter 6 (p. 43)
         const weaponData = [
-            { name: "Light Pistol", category: "Pistol", cost: 250, damage: "2d4", avgDmg: 5, properties: "Ammunition (range 40/120), Light" },
-            { name: "Heavy Pistol", category: "Pistol", cost: 350, damage: "2d6", avgDmg: 7, properties: "Ammunition (range 50/150)" },
-            { name: "Revolver", category: "Pistol", cost: 300, damage: "2d8", avgDmg: 9, properties: "Ammunition (range 60/180), Reload (6 shots)" },
-            { name: "Submachine Gun", category: "SMG", cost: 500, damage: "2d6", avgDmg: 7, properties: "Ammunition (range 40/120), Automatic, Two-Handed" },
-            { name: "Pump-Action Shotgun", category: "Shotgun", cost: 450, damage: "2d8", avgDmg: 9, properties: "Ammunition (range 30/90), Two-Handed" },
-            { name: "Combat Shotgun", category: "Shotgun", cost: 600, damage: "2d10", avgDmg: 11, properties: "Ammunition (range 40/120), Burst Fire (2), Two-Handed" },
-            { name: "Hunting Rifle", category: "Rifle", cost: 500, damage: "2d10", avgDmg: 11, properties: "Ammunition (range 100/400), Reload (5 shots), Two-Handed" },
-            { name: "Assault Rifle", category: "Rifle", cost: 800, damage: "2d8", avgDmg: 9, properties: "Ammunition (range 150/600), Burst Fire (3), Automatic, Two-Handed" },
-            { name: "Sniper Rifle", category: "Rifle", cost: 1200, damage: "2d12", avgDmg: 13, properties: "Ammunition (range 300/1200), Reload (4 shots), Two-Handed" },
-            { name: "Light Machine Gun", category: "SMG", cost: 1500, damage: "2d10", avgDmg: 11, properties: "Ammunition (range 100/400), Automatic, Heavy, Two-Handed" },
+            { name: "Baton, expandable", category: "Simple Melee", value: 7, damage: "1d6 bludgeoning", avgDmg: 3.5, properties: "Covert, Finesse, Light" },
+            { name: "Baton, stun", category: "Simple Melee", value: 9, damage: "1d4 lightning", avgDmg: 2.5, properties: "Finesse, Light, Special" },
+            { name: "Combat Knife", category: "Simple Melee", value: 6, damage: "1d6 slashing", avgDmg: 3.5, properties: "Covert, Finesse, Light, Thrown (20/60)" },
+            { name: "Machete", category: "Simple Melee", value: 6, damage: "1d6 slashing", avgDmg: 3.5, properties: "" },
+            { name: "Pocket Knife", category: "Simple Melee", value: 5, damage: "1d4 slashing", avgDmg: 2.5, properties: "Covert, Finesse, Light, Thrown (20/60)" },
+            { name: "Pistol, pocket", category: "Simple Ranged", value: 15, damage: "1d4 piercing", avgDmg: 2.5, properties: "Ammunition, Covert, Light, Range (30/80), Reload 10; Box, Special" },
+            { name: "Pistol", category: "Simple Ranged", value: 18, damage: "1d6 piercing", avgDmg: 3.5, properties: "Ammunition, Light, Range (50/100), Reload 15; Box" },
+            { name: "Revolver", category: "Simple Ranged", value: 17, damage: "1d8 piercing", avgDmg: 4.5, properties: "Ammunition, Light, Range (40/120), Reload 6; Internal" },
+            { name: "Shotgun", category: "Simple Ranged", value: 19, damage: "2d6 piercing", avgDmg: 7, properties: "Ammunition, Range (30/90), Reload 5; Internal, Two-handed, Spread" },
+            { name: "Chain", category: "Martial Melee", value: 2, damage: "1d4 bludgeoning", avgDmg: 2.5, properties: "Reach, Two-Handed" },
+            { name: "Chainsaw", category: "Martial Melee", value: 10, damage: "2d6 slashing", avgDmg: 7, properties: "Heavy, Two-Handed, Special" },
+            { name: "Katana", category: "Martial Melee", value: 9, damage: "1d8 slashing", avgDmg: 4.5, properties: "Versatile (1d10)" },
+            { name: "Sword Cane", category: "Martial Melee", value: 7, damage: "1d6 slashing", avgDmg: 3.5, properties: "Finesse, Special" },
+            { name: "Tactical Tomahawk", category: "Martial Melee", value: 6, damage: "1d6 slashing", avgDmg: 3.5, properties: "Finesse, Light, Thrown (20/60)" },
+            { name: "Flamethrower", category: "Martial Ranged", value: 21, damage: "3d6 fire", avgDmg: 10.5, properties: "Ammunition, Heavy, Range (30 ft line), Reload (10; special), Two-Handed, Special" },
+            { name: "Grenade Launcher", category: "Martial Ranged", value: 25, damage: "Special", avgDmg: 0, properties: "Ammunition, Heavy, Range (40/120), Reload (1; internal), Two-handed, Special" },
+            { name: "Machine Gun, Heavy", category: "Martial Ranged", value: 25, damage: "2d8 ballistic", avgDmg: 9, properties: "Auto, Heavy, Range (100/300), Reload (100; belt), Two-handed, Special" },
+            { name: "Machine Gun, Light", category: "Martial Ranged", value: 23, damage: "1d10 ballistic", avgDmg: 5.5, properties: "Auto, Range (80/160), Reload (100; belt), Two-handed, Finesse" },
+            { name: "Rifle, Sniper", category: "Martial Ranged", value: 22, damage: "1d12 piercing", avgDmg: 6.5, properties: "Ammunition, Range (150/600), Reload 5; internal, Two-handed" },
+            { name: "Rifle, Automatic", category: "Martial Ranged", value: 21, damage: "1d8 ballistic", avgDmg: 4.5, properties: "Ammunition, Auto, Range (100/200), Reload 30; box, Two-handed" },
+            { name: "Submachine Gun", category: "Martial Ranged", value: 20, damage: "1d6 ballistic", avgDmg: 3.5, properties: "Auto, Burst (3), Range (30/120), Light, Reload 30; box" }
         ];
 
+        // Accurate Armor Data from Chapter 6 (p. 41)
+        const armorData = [
+            { name: "Leather Jacket", category: "Light Armor", value: 10, ac: "11 + DEX modifier", strength: "--", stealth: "--" },
+            { name: "Undercover Vest", category: "Light Armor", value: 11, ac: "12 + DEX modifier", strength: "--", stealth: "--" },
+            { name: "Patrol Vest", category: "Medium Armor", value: 11, ac: "13 + DEX modifier (max 2)", strength: "--", stealth: "--" },
+            { name: "Soft Panel Vest", category: "Medium Armor", value: 11, ac: "14 + DEX modifier (max 3)", strength: "--", stealth: "--" },
+            { name: "Tactical Vest", category: "Medium Armor", value: 12, ac: "15 + DEX modifier (max 2)", strength: "--", stealth: "Disadvantage" },
+            { name: "Plate Carrier", category: "Heavy Armor", value: 14, ac: "16 + DEX modifier (max 1)", strength: "STR 10", stealth: "--" },
+            { name: "Modular Tactical Vest", category: "Heavy Armor", value: 17, ac: "17", strength: "STR 13", stealth: "Disadvantage" },
+            { name: "Combat Armor", category: "Heavy Armor", value: 20, ac: "18", strength: "STR 14", stealth: "Disadvantage" },
+            { name: "Riot Shield", category: "Shields", value: 12, ac: "+2", strength: "STR 12", stealth: "Disadvantage" }
+        ];
+
+        // Accurate Vehicle Data from Appendix B (p. 84-96)
         const vehicleData = [
-            { name: "Motorcycle", category: "Land", cost: 8000, speed: "120 ft.", ac: 12, hp: 25, crew: 1, pass: 1 },
-            { name: "Sedan", category: "Land", cost: 20000, speed: "100 ft.", ac: 14, hp: 40, crew: 1, pass: 4 },
-            { name: "SUV/Truck", category: "Land", cost: 35000, speed: "90 ft.", ac: 15, hp: 60, crew: 1, pass: 5 },
-            { name: "Armored Car", category: "Land", cost: 150000, speed: "70 ft.", ac: 18, hp: 100, crew: 2, pass: 4 },
-            { name: "Main Battle Tank", category: "Land", cost: 2500000, speed: "50 ft.", ac: 22, hp: 250, crew: 3, pass: 2 },
-            { name: "Helicopter", category: "Air", cost: 1200000, speed: "150 ft. (fly)", ac: 16, hp: 120, crew: 2, pass: 6 },
-            { name: "Attack Helicopter", category: "Air", cost: 9000000, speed: "180 ft. (fly)", ac: 19, hp: 180, crew: 2, pass: 0 },
-            { name: "Cargo Plane", category: "Air", cost: 20000000, speed: "250 ft. (fly)", ac: 15, hp: 300, crew: 4, pass: 50 },
-            { name: "Speedboat", category: "Water", cost: 40000, speed: "80 ft. (swim)", ac: 13, hp: 50, crew: 1, pass: 5 },
+            { name: "Armored Car", category: "Land", ac: 16, hp: 110, speed: "120 ft.", crew: 1, pass: 4, range: 300 },
+            { name: "Sedan", category: "Land", ac: 13, hp: 55, speed: "120 ft.", crew: 1, pass: 4, range: 400 },
+            { name: "Sports Car", category: "Land", ac: 15, hp: 90, speed: "140 ft.", crew: 1, pass: 4, range: 400 },
+            { name: "Pickup Truck", category: "Land", ac: 13, hp: 80, speed: "100 ft.", crew: 1, pass: 4, range: 300 },
+            { name: "Bus", category: "Land", ac: 13, hp: 170, speed: "90 ft.", crew: 1, pass: 50, range: 500 },
+            { name: "Humvee", category: "Land", ac: 17, hp: 140, speed: "80 ft.", crew: 1, pass: 7, range: 300 },
+            { name: "Main Battle Tank", category: "Land", ac: 20, hp: 300, speed: "70 ft.", crew: 2, pass: 4, range: 300 },
+            { name: "Touring Motorcycle", category: "Land", ac: 15, hp: 55, speed: "130 ft.", crew: 1, pass: 0, range: 150 },
+            { name: "Sport Motorcycle", category: "Land", ac: 14, hp: 25, speed: "140 ft.", crew: 1, pass: 0, range: 150 },
+            { name: "Motorboat", category: "Water", ac: 13, hp: 55, speed: "swim 100 ft", crew: 1, pass: 4, range: 200 },
+            { name: "Speedboat", category: "Water", ac: 15, hp: 90, speed: "swim 110 ft", crew: 1, pass: 4, range: 200 },
+            { name: "Patrol Boat", category: "Water", ac: 16, hp: 140, speed: "swim 100 ft", crew: 1, pass: 9, range: 500 },
+            { name: "Civilian Helicopter", category: "Air", ac: 14, hp: 75, speed: "fly 130 ft.", crew: 1, pass: 5, range: 500 },
+            { name: "Attack Helicopter", category: "Air", ac: 16, hp: 125, speed: "fly 140 ft.", crew: 2, pass: 0, range: 500 },
+            { name: "Private Jet", category: "Air", ac: 13, hp: 180, speed: "fly 80 ft.", crew: 1, pass: 12, range: 1800 }
         ];
 
-        const creditScores = {
-            "Wretched": 10,
-            "Squalid": 12,
-            "Poor": 14,
-            "Modest": 16,
-            "Comfortable": 18,
-            "Wealthy": 20,
-            "Aristocratic": 22
-        };
+        // NEW: Adventuring Gear Data from Chapter 6 (p. 39)
+        const adventuringGearData = [
+            { name: "Airhorn", value: 4 },
+            { name: "Binoculars", value: 7 },
+            { name: "Blanket, Emergency", value: 4 },
+            { name: "Burner Phone", value: 5 },
+            { name: "Compass", value: 2 },
+            { name: "Computer, Desktop", value: 16 },
+            { name: "Computer, Laptop", value: 15 },
+            { name: "Computer, Tablet", value: 14 },
+            { name: "Computer, Smartphone", value: 13 },
+            { name: "Fake ID", value: 7 },
+            { name: "Fire Extinguisher", value: 6 },
+            { name: "Flashlight", value: 4 },
+            { name: "Gas Mask", value: 11 },
+            { name: "Ghillie Suit", value: 9 },
+            { name: "Glowsticks (5)", value: 2 },
+            { name: "GPS, handheld", value: 9 },
+            { name: "Holster, Concealed", value: 9 },
+            { name: "Goggles, Nightvision", value: 13 },
+            { name: "Magazine, Box", value: 4 },
+            { name: "Magazine, Belt Links (100)", value: 4 },
+            { name: "Pepper Spray", value: 5 },
+            { name: "Signal Flare", value: 4 },
+            { name: "Sleeping Bag", value: 4 },
+            { name: "Sling, Rifle", value: 4 },
+            { name: "Two-Way Radio", value: 5 }
+        ];
 
+        // NEW: Appendix A Armory Data (p. 66-79)
+        const appendixWeaponData = [
+            { name: "Beretta Model 92", category: "Pistol", value: 17, damage: "1d6 piercing", properties: "Semiautomatic, 15 box, Light" },
+            { name: "Beretta Model 93R", category: "Pistol", value: 17, damage: "1d6 piercing", properties: "Semiautomatic, Burst (3), 20 box, Light" },
+            { name: "Colt M1911A1", category: "Pistol", value: 15, damage: "1d6 piercing", properties: "Semiautomatic, 7 box, Light" },
+            { name: "Colt Python", category: "Pistol", value: 15, damage: "1d8 piercing", properties: "Semiautomatic, 6 internal (cylinder)" },
+            { name: "Desert Eagle", category: "Pistol", value: 18, damage: "1d8 piercing", properties: "Semiautomatic, 9 box, Heavy" },
+            { name: "FN Five-SeveN", category: "Pistol", value: 19, damage: "1d6 piercing", properties: "Semiautomatic, 20 box, Light, Special (Silent w/ suppressor)" },
+            { name: "Glock 17", category: "Pistol", value: 17, damage: "1d6 piercing", properties: "Semiautomatic, 17 box, Light" },
+            { name: "Glock 18c", category: "Pistol", value: 21, damage: "1d6 piercing", properties: "Semiautomatic, Automatic, 25 box, Light" },
+            { name: "Glock 26", category: "Pistol", value: 17, damage: "1d6 piercing", properties: "Semiautomatic, 10 box, Light, Covert" },
+            { name: "S&W Model 29", category: "Pistol", value: 16, damage: "1d8 piercing", properties: "Semiautomatic, 6 internal (cylinder), Heavy" },
+            { name: "S&W Model 642", category: "Pistol", value: 14, damage: "1d4 piercing", properties: "Semiautomatic, 6 internal (cylinder), Light, Covert" },
+            { name: "TCA Contender", category: "Pistol", value: 17, damage: "1d8 piercing", properties: "Single Shot, 1 internal" },
+            { name: "Walther PPK", category: "Pistol", value: 15, damage: "1d4 piercing", properties: "Semiautomatic, 7 box, Light, Covert" },
+            { name: "AK-47", category: "Rifle", value: 15, damage: "1d8 piercing", properties: "Semiautomatic, Automatic, 30 box, Auto, Two-handed" },
+            { name: "AS Val", category: "Rifle", value: 22, damage: "1d8 piercing", properties: "Semiautomatic, Automatic, 20 box, Auto, Special (Silent), Two-handed" },
+            { name: "Colt M4 Carbine", category: "Rifle", value: 18, damage: "1d8 piercing", properties: "Semiautomatic, Burst (3), 30 box, Two-handed" },
+            { name: "Henry Model X", category: "Rifle", value: 16, damage: "1d10 piercing", properties: "Repeating (Lever), 4 Internal, Two-handed" },
+            { name: "Steyr AUG", category: "Rifle", value: 19, damage: "1d8 piercing", properties: "Semiautomatic, Automatic, Burst (2), 30 box, Auto, Two-handed" },
+            { name: "AI Arctic Warfare", category: "Sniper Rifle", value: 22, damage: "1d10 piercing", properties: "Repeating (Bolt), 10 box, Two-handed" },
+            { name: "Dragunov SVD", category: "Sniper Rifle", value: 20, damage: "1d10 piercing", properties: "Semiautomatic, 10 box, Two-handed" },
+            { name: "H&K PSG1", category: "Sniper Rifle", value: 24, damage: "1d10 piercing", properties: "Semiautomatic, 5 box, Two-handed" },
+            { name: "M40A5", category: "Sniper Rifle", value: 21, damage: "1d10 piercing", properties: "Repeating (Bolt), 4 internal, Two-handed" },
+            { name: "Barrett M82A1", category: "Antimateriel", value: 25, damage: "1d12 piercing", properties: "Semiautomatic, 10 box, Heavy, Two-handed" },
+            { name: "Denel NTW-20", category: "Antimateriel", value: 23, damage: "1d12 piercing", properties: "Single Shot, 1 Internal, Heavy, Two-handed" },
+            { name: "Gepárd GM6 Lynx", category: "Antimateriel", value: 24, damage: "1d12 piercing", properties: "Semiautomatic, 5 box, Heavy, Two-handed" },
+            { name: "McMillan Tac-50", category: "Antimateriel", value: 22, damage: "1d12 piercing", properties: "Repeating (Bolt), 5 box, Heavy, Two-handed" },
+            { name: "FN P90", category: "Submachine Gun", value: 21, damage: "1d6 piercing", properties: "Semiautomatic, Automatic, 50 box, Auto, Special, Two-Handed" },
+            { name: "H&K MP5", category: "Submachine Gun", value: 19, damage: "1d6 piercing", properties: "Semiautomatic, Automatic, 30 box, Auto, Two-Handed" },
+            { name: "IMI Mini-Uzi", category: "Submachine Gun", value: 18, damage: "1d6 piercing", properties: "Semiautomatic, Automatic, 20 box, Auto, Two-Handed" },
+            { name: "Ingram Mac-10", category: "Submachine Gun", value: 17, damage: "1d6 piercing", properties: "Semiautomatic, Automatic, 30 box, Auto, Special (Silent w/ suppressor), Two-Handed" },
+            { name: "FN MAG", category: "Machine Gun", value: 21, damage: "1d10 piercing", properties: "Automatic, 100 belt, Auto, Heavy, Two-Handed" },
+            { name: "M60E4", category: "Machine Gun", value: 21, damage: "1d10 piercing", properties: "Automatic, 100 belt, Auto, Heavy, Two-Handed" },
+            { name: "RPK-74M", category: "Machine Gun", value: 19, damage: "1d8 piercing", properties: "Semiautomatic, Automatic, 45 box, Auto, Two-Handed" },
+            { name: "Browning M2HB", category: "Machine Gun", value: 25, damage: "1d12 piercing", properties: "Repeating (Special), Automatic, 100 belt, Auto, Heavy" },
+            { name: "DShK-M", category: "Machine Gun", value: 23, damage: "1d12 piercing", properties: "Automatic, 100 belt, Auto, Heavy" },
+            { name: "GE M134 Minigun", category: "Machine Gun", value: 24, damage: "3d4 piercing", properties: "Automatic, 500 belt, Auto, Heavy" },
+            { name: "Benelli M4 Super 90", category: "Shotgun", value: 24, damage: "2d6 piercing", properties: "Repeating, Semiautomatic, 7 Internal, Two-Handed, Spread" },
+            { name: "Daewoo USAS-12", category: "Shotgun", value: 20, damage: "2d6 piercing", properties: "Semiautomatic, Automatic, 20 box, Two-Handed, Spread" },
+            { name: "Remington 870", category: "Shotgun", value: 16, damage: "2d6 piercing", properties: "Repeating (Pump), 5 Internal, Two-Handed, Spread" },
+            { name: "Saiga-12", category: "Shotgun", value: 17, damage: "2d6 piercing", properties: "Semiautomatic, 8 box, Two-Handed, Spread" },
+            { name: "Sears Double-Barrel", category: "Shotgun", value: 14, damage: "2d6 piercing", properties: "Single Shot (2), 2 Internal, Two-Handed, Spread" },
+            { name: "Colt M79", category: "Launcher", value: 14, damage: "Special", properties: "Single Shot, 1 Internal, Ammunition, Special, Two-Handed" },
+            { name: "Colt M203", category: "Launcher", value: 14, damage: "Special", properties: "Single Shot, 1 Internal, Ammunition, Special, Two-Handed" },
+            { name: "Milkor MGL", category: "Launcher", value: 19, damage: "Special", properties: "Semiautomatic, 6 Internal (Cylinder), Ammunition, Special, Two-Handed" }
+        ];
+
+        // NEW: Spell Data from Chapter 9 (p. 60-64)
+        const spellData = {
+            "Cantrips (0 Level)": [
+                { name: "On/Off", technomagic: true, range: "60 feet", duration: "Instantaneous", desc: "Activate or deactivate any electronic device with a clearly defined on/off function." },
+                { name: "Trip", technomagic: false, range: "30 feet", duration: "Instantaneous", desc: "A Large or smaller creature you can see must succeed on a DEX save or be knocked prone." }
+            ],
+            "1st Level": [
+                { name: "Degauss", technomagic: true, range: "Touch", duration: "Instantaneous", desc: "Erase all files on a single electronic storage device you touch." },
+                { name: "Infallible Relay", technomagic: true, range: "Self", duration: "Concentration, up to 10 minutes", desc: "The nearest phone to a target you know rings. Target must make a CHA save or be compelled to answer. The call is crystal clear and cannot be dropped." },
+                { name: "Power Device", technomagic: true, range: "Touch", duration: "Concentration, up to 10 minutes", desc: "You touch an electrical or mechanical device and it functions as if it had power." },
+                { name: "Remote Access", technomagic: true, range: "120 feet", duration: "10 minutes", desc: "Use any electronic device within range as if it were in your hands (simulating its mechanical functions). One device at a time." }
+            ],
+            "2nd Level": [
+                { name: "Find Vehicle", technomagic: true, range: "30 feet", duration: "8 hours", desc: "Summon a spirit that assumes the form of a nonmilitary land vehicle. You are proficient with it and add double your proficiency bonus to driving checks." },
+                { name: "Arcane Hacking", technomagic: true, range: "Self", duration: "Concentration, up to 1 hour", desc: "Gain advantage on INT (Hacking Tools) checks to break encryption. Can also be used to break 2nd level or lower magical protections (like *Arcane Lock*)." },
+                { name: "Digital Phantom", technomagic: true, range: "Self", duration: "Concentration, up to 1 hour", desc: "You and chosen users on your network gain a +10 bonus to INT checks to avoid detection in a system. Erases all traces of your presence when you leave." }
+            ],
+            "3rd Level": [
+                { name: "Haywire", technomagic: true, range: "90 feet", duration: "Concentration, up to 1 minute", desc: "Each electronic device in a 10-ft-radius sphere is subject to random behavior (roll d6 at start of your turn: 1=Shutdown, 2-4=Not Functioning, 5=Power Surge/Shock, 6=Usable)." },
+                { name: "Invisibility to Cameras", technomagic: true, range: "10 feet", duration: "Concentration, up to 1 minute", desc: "Four creatures of your choice become undetectable to electronic sensors and cameras (but not to normal sight)." },
+                { name: "Protection from Ballistics", technomagic: false, range: "Touch", duration: "Concentration, up to 10 minutes", desc: "Target gains resistance to non-magical piercing damage from firearms." }
+            ],
+            "4th Level": [
+                { name: "Conjure Knowbot", technomagic: true, range: "Touch", duration: "10 minutes", desc: "Conjure a partially sentient piece of software in a device. As a bonus action, you can have the knowbot execute a computer task (using your stats/profs)." },
+                { name: "Synchronicity", technomagic: false, range: "Touch", duration: "Concentration, up to 1 hour", desc: "Reality shifts to the target's favor. Traffic lights are green, elevators are waiting. Gain advantage on Stealth checks and all ability checks made to drive a vehicle." },
+                { name: "System Backdoor", technomagic: true, range: "Touch", duration: "Concentration, up to 1 hour", desc: "Bypass system security to create a secure admin-level login on a foreign system." },
+                { name: "Wire Walk", technomagic: true, range: "10 feet", duration: "8 hours", desc: "Creates a magical link between two machines on the same plane. Any creature can transport between them as 5 ft. of movement." }
+            ],
+            "5th Level": [
+                { name: "Commune with City", technomagic: true, range: "Self", duration: "Instantaneous", desc: "(Ritual) Become one with the city. Instantly gain 3 facts about the area (1 mile radius) (e.g., terrain, buildings, powerful creatures, electrical currents)." },
+                { name: "Shutdown", technomagic: true, range: "120 feet", duration: "Concentration, up to 1 minute", desc: "Shuts down all electronic devices within range not held by a creature. If held, creature must make a CON save to prevent it. No device can be restarted in range." }
+            ]
+        };
+        
         let weaponDamageChart, weaponCostChart;
 
         // --- Navigation ---
@@ -577,6 +802,28 @@
             }
         }
 
+        function setupAccordion(accordionId, buttonClass, contentClass) {
+            const accordion = document.getElementById(accordionId);
+            if (!accordion) return;
+            
+            accordion.addEventListener('click', (e) => {
+                const button = e.target.closest(`.${buttonClass}`);
+                if (!button) return;
+                
+                const content = button.nextElementSibling;
+                const isOpen = content.classList.contains('open');
+                
+                // Optional: Close all others
+                accordion.querySelectorAll(`.${contentClass}.open`).forEach(c => c.classList.remove('open'));
+                accordion.querySelectorAll(`.${buttonClass} span:last-child`).forEach(s => s.textContent = '+');
+                
+                if (!isOpen) {
+                    content.classList.add('open');
+                    button.querySelector('span:last-child').textContent = '−';
+                }
+            });
+        }
+
         // --- Character Options ---
         function populateSubclasses() {
             const accordion = document.getElementById('subclass-accordion');
@@ -588,45 +835,24 @@
                 item.className = 'border border-stone-300 rounded-lg overflow-hidden';
                 
                 const button = document.createElement('button');
-                button.className = 'subclass-toggle w-full p-4 text-left font-semibold text-lg bg-stone-100 hover:bg-stone-200 flex justify-between items-center';
+                button.className = 'content-accordion-button w-full p-4 text-left font-semibold text-lg bg-stone-100 hover:bg-stone-200 flex justify-between items-center';
                 button.innerHTML = `<span>${className}: ${data.name}</span><span class="text-xl font-light">+</span>`;
                 
                 const content = document.createElement('div');
-                content.className = 'subclass-content bg-white p-4 border-t border-stone-200';
+                content.className = 'content-accordion-content bg-white p-4 border-t border-stone-200';
                 content.innerHTML = `
                     <p class="italic mb-4">${data.desc}</p>
-                    <ul class="list-disc list-inside space-y-2">${data.features.join('')}</ul>
+                    <ul class="list-disc list-inside space-y-2 text-sm">${data.features.join('')}</ul>
                 `;
-                
-                button.addEventListener('click', () => {
-                    const isOpen = content.classList.contains('open');
-                    document.querySelectorAll('.subclass-content.open').forEach(c => c.classList.remove('open'));
-                    document.querySelectorAll('.subclass-toggle span:last-child').forEach(s => s.textContent = '+');
-                    
-                    if (!isOpen) {
-                        content.classList.add('open');
-                        button.querySelector('span:last-child').textContent = '−';
-                    }
-                });
                 
                 item.appendChild(button);
                 item.appendChild(content);
                 accordion.appendChild(item);
             });
+            setupAccordion('subclass-accordion', 'content-accordion-button', 'content-accordion-content');
         }
 
         // --- Equipment ---
-        function setupCreditCalculator() {
-            const select = document.getElementById('lifestyle-select');
-            const output = document.getElementById('credit-dc-output');
-            if (select && output) {
-                select.addEventListener('change', () => {
-                    output.textContent = select.value;
-                });
-                output.textContent = select.value; 
-            }
-        }
-
         function populateWeaponGrid() {
             const grid = document.getElementById('weapon-grid');
             if (!grid) return;
@@ -656,7 +882,7 @@
                         <span class="px-2 py-1 bg-stone-200 text-stone-700 text-xs font-medium rounded-full">${w.category}</span>
                     </div>
                     <p class="text-lg font-bold">${w.damage} <span class="text-sm font-normal text-stone-600">(${w.avgDmg} avg)</span></p>
-                    <p class="text-sm text-stone-600 mb-2">Cost: $${w.cost}</p>
+                    <p class="text-sm text-stone-600 mb-2">Value: ${w.value}</p>
                     <p class="text-sm text-stone-800">${w.properties}</p>
                 `;
                 grid.appendChild(card);
@@ -688,18 +914,18 @@
             const costCtx = document.getElementById('weapon-cost-chart')?.getContext('2d');
             if (!damageCtx || !costCtx) return;
 
-            const categories = ["Pistol", "Rifle", "Shotgun", "SMG"];
+            const categories = ["Simple Melee", "Simple Ranged", "Martial Melee", "Martial Ranged"];
             const avgDamage = categories.map(cat => {
-                const items = weaponData.filter(w => w.category === cat);
+                const items = weaponData.filter(w => w.category === cat && w.avgDmg > 0);
                 if (items.length === 0) return 0;
                 const sum = items.reduce((acc, w) => acc + w.avgDmg, 0);
-                return sum / items.length;
+                return (sum / items.length).toFixed(1);
             });
             const avgCost = categories.map(cat => {
                 const items = weaponData.filter(w => w.category === cat);
                 if (items.length === 0) return 0;
-                const sum = items.reduce((acc, w) => acc + w.cost, 0);
-                return sum / items.length;
+                const sum = items.reduce((acc, w) => acc + w.value, 0);
+                return (sum / items.length).toFixed(1);
             });
 
             const chartOptions = {
@@ -713,7 +939,8 @@
                 }
             };
 
-            weaponDamageChart = new Chart(damageCtx, {
+            if (window.weaponDamageChart) window.weaponDamageChart.destroy();
+            window.weaponDamageChart = new Chart(damageCtx, {
                 type: 'bar',
                 data: {
                     labels: categories,
@@ -726,18 +953,111 @@
                 options: chartOptions
             });
 
-            weaponCostChart = new Chart(costCtx, {
+            if (window.weaponCostChart) window.weaponCostChart.destroy();
+            window.weaponCostChart = new Chart(costCtx, {
                 type: 'bar',
                 data: {
                     labels: categories,
                     datasets: [{
-                        label: 'Average Cost',
+                        label: 'Average Value',
                         data: avgCost,
                         backgroundColor: ['#78716c', '#a8a29e', '#d6d3d1', '#e7e5e4'],
                     }]
                 },
                 options: chartOptions
             });
+        }
+
+        function populateArmorGrid() {
+            const grid = document.getElementById('armor-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            armorData.forEach(a => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow border border-stone-200';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xl font-semibold text-amber-700">${a.name}</h4>
+                        <span class="px-2 py-1 bg-stone-200 text-stone-700 text-xs font-medium rounded-full">${a.category}</span>
+                    </div>
+                    <p class="text-sm text-stone-600">Value: ${a.value}</p>
+                    <p class="text-sm text-stone-800"><strong>AC:</strong> ${a.ac}</p>
+                    <p class="text-sm text-stone-800"><strong>Strength:</strong> ${a.strength}</p>
+                    <p class="text-sm text-stone-800"><strong>Stealth:</strong> ${a.stealth}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function populateGearTab() {
+            const grid = document.getElementById('adventuring-gear-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            adventuringGearData.forEach(g => {
+                const item = document.createElement('div');
+                item.className = 'bg-stone-50 p-3 rounded-md shadow-sm';
+                item.innerHTML = `
+                    <span class="font-semibold">${g.name}</span>
+                    <span class="text-stone-600 text-sm">(Value: ${g.value})</span>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        function populateArmoryGrid() {
+            const grid = document.getElementById('armory-grid');
+            if (!grid) return;
+            const search = document.getElementById('armory-search').value.toLowerCase();
+            const activeButton = document.querySelector('.armory-filter-button.bg-amber-400');
+            if (!activeButton) return; 
+            const filter = activeButton.getAttribute('data-filter');
+
+            grid.innerHTML = '';
+            const filteredWeapons = appendixWeaponData.filter(w => {
+                const nameMatch = w.name.toLowerCase().includes(search);
+                const filterMatch = (filter === 'all' || w.category === filter);
+                return nameMatch && filterMatch;
+            });
+
+            if (filteredWeapons.length === 0) {
+                grid.innerHTML = `<p class="text-stone-600 italic">No weapons match your criteria.</p>`;
+                return;
+            }
+
+            filteredWeapons.forEach(w => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow border border-stone-200';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xl font-semibold text-amber-700">${w.name}</h4>
+                        <span class="px-2 py-1 bg-stone-200 text-stone-700 text-xs font-medium rounded-full">${w.category}</span>
+                    </div>
+                    <p class="text-lg font-bold">${w.damage}</p>
+                    <p class="text-sm text-stone-600 mb-2">Value: ${w.value}</p>
+                    <p class="text-sm text-stone-800">${w.properties}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupArmoryFilters() {
+            document.querySelectorAll('.armory-filter-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.armory-filter-button').forEach(btn => {
+                        btn.classList.remove('bg-amber-400');
+                        btn.classList.add('bg-stone-200');
+                    });
+                    button.classList.add('bg-amber-400');
+                    button.classList.remove('bg-stone-200');
+                    populateArmoryGrid();
+                });
+            });
+            document.getElementById('armory-search')?.addEventListener('keyup', populateArmoryGrid);
+            const allButton = document.querySelector('.armory-filter-button[data-filter="all"]');
+            if (allButton) {
+                allButton.classList.add('bg-amber-400');
+                allButton.classList.remove('bg-stone-200');
+            }
         }
 
         // --- Vehicles ---
@@ -759,7 +1079,7 @@
                         <h4 class="text-xl font-semibold text-amber-700">${v.name}</h4>
                         <span class="px-2 py-1 bg-stone-200 text-stone-700 text-xs font-medium rounded-full">${v.category}</span>
                     </div>
-                    <p class="text-sm text-stone-600 mb-2">Cost: $${v.cost.toLocaleString()}</p>
+                    <p class="text-sm text-stone-600 mb-2">Range: ${v.range} miles</p>
                     <div class="grid grid-cols-3 gap-2 text-center">
                         <div><span class="block text-xs text-stone-500">Speed</span><span class="font-bold">${v.speed}</span></div>
                         <div><span class="block text-xs text-stone-500">AC</span><span class="font-bold">${v.ac}</span></div>
@@ -788,9 +1108,45 @@
             });
             const allButton = document.querySelector('.vehicle-filter-button[data-filter="all"]');
             if (allButton) {
-                allButton.classList.add('bg-amber-4OS0');
+                allButton.classList.add('bg-amber-400');
                 allButton.classList.remove('bg-stone-200');
             }
+        }
+
+        // --- Magic ---
+        function populateMagicPage() {
+            const accordion = document.getElementById('spell-accordion');
+            if (!accordion) return;
+            accordion.innerHTML = '';
+            Object.keys(spellData).forEach(level => {
+                const spells = spellData[level];
+                const item = document.createElement('div');
+                item.className = 'border border-stone-300 rounded-lg overflow-hidden';
+                
+                const button = document.createElement('button');
+                button.className = 'content-accordion-button w-full p-4 text-left font-semibold text-lg bg-stone-100 hover:bg-stone-200 flex justify-between items-center';
+                button.innerHTML = `<span>${level}</span><span class="text-xl font-light">+</span>`;
+                
+                const content = document.createElement('div');
+                content.className = 'content-accordion-content bg-white p-4 border-t border-stone-200 space-y-3';
+                
+                spells.forEach(spell => {
+                    const spellEl = document.createElement('div');
+                    spellEl.className = 'p-3 bg-stone-50 rounded-md';
+                    const technoTag = spell.technomagic ? '<span class="ml-2 text-xs bg-amber-200 text-amber-800 font-bold p-1 rounded">TECHNOMAGIC</span>' : '';
+                    spellEl.innerHTML = `
+                        <h4 class="text-lg font-semibold text-amber-700">${spell.name}${technoTag}</h4>
+                        <p class="text-sm italic text-stone-600">Range: ${spell.range} | Duration: ${spell.duration}</p>
+                        <p class="text-sm mt-1">${spell.desc}</p>
+                    `;
+                    content.appendChild(spellEl);
+                });
+                
+                item.appendChild(button);
+                item.appendChild(content);
+                accordion.appendChild(item);
+            });
+            setupAccordion('spell-accordion', 'content-accordion-button', 'content-accordion-content');
         }
 
         // --- Initialization ---
@@ -800,14 +1156,19 @@
             setupTabNavigation('equip-tabs', 'equip-tab');
             
             populateSubclasses();
-            setupCreditCalculator();
             
             setupWeaponFilters();
             populateWeaponGrid();
             createWeaponCharts();
+            populateArmorGrid();
+            populateGearTab();
+            setupArmoryFilters();
+            populateArmoryGrid();
             
             setupVehicleFilters();
             populateVehicleGrid();
+            
+            populateMagicPage();
         });
     </script>
 </body>
