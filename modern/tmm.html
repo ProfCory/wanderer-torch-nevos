@@ -105,6 +105,30 @@
                     <h3 class="font-bold text-xl mb-2">How to Use This Guide</h3>
                     <p>Click the links in the navigation bar to jump to any section. Many sections, like 'Equipment', have sub-navigation tabs and interactive filters to help you find exactly what you're looking for. 'Character Options' features a collapsible accordion to let you browse new subclasses without getting overwhelmed. Explore and enjoy!</p>
                 </div>
+
+                <!-- New Resources Section -->
+                <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <h3 class="font-bold text-xl mb-2 text-stone-800">Campaign Resources</h3>
+                    <p class="text-lg">Access the original files and audio overview for your campaign.</p>
+                    <ul class="list-disc list-inside space-y-3">
+                        <li>
+                            <a href="https://homebrewery.naturalcrit.com/share/E9W-mVroT_p8" target="_blank" rel="noopener noreferrer" class="text-amber-600 font-medium hover:text-amber-800 hover:underline">
+                                View the Original Homebrewery Document (tmm)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="HB-TheModernManual.txt" download class="text-amber-600 font-medium hover:text-amber-800 hover:underline">
+                                Download the Raw Text File (HB-TheModernManual.txt)
+                            </a>
+                        </li>
+                        <li>
+                            <p class="font-medium text-stone-700">Audio Overview: The "Pulp Fantasy" Philosophy</p>
+                            <audio controls class="w-full mt-2" src="modern-manual-audio-overview.mp3">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Character Options Page -->
@@ -608,7 +632,7 @@
             if (!grid) return;
             const search = document.getElementById('weapon-search').value.toLowerCase();
             const activeButton = document.querySelector('.weapon-filter-button.bg-amber-400');
-            if (!activeButton) return; // Guard clause in case no button is active
+            if (!activeButton) return; 
             const filter = activeButton.getAttribute('data-filter');
 
             grid.innerHTML = '';
@@ -721,7 +745,7 @@
             const grid = document.getElementById('vehicle-grid');
             if (!grid) return;
             const activeButton = document.querySelector('.vehicle-filter-button.bg-amber-400');
-            if (!activeButton) return; // Guard clause
+            if (!activeButton) return; 
             const filter = activeButton.getAttribute('data-filter');
 
             grid.innerHTML = '';
@@ -764,7 +788,7 @@
             });
             const allButton = document.querySelector('.vehicle-filter-button[data-filter="all"]');
             if (allButton) {
-                allButton.classList.add('bg-amber-400');
+                allButton.classList.add('bg-amber-4OS0');
                 allButton.classList.remove('bg-stone-200');
             }
         }
