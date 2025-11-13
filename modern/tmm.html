@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Modern Manual: Interactive Guide</title>
+    <!-- Chosen Palette: Warm Neutral (Amber and Stone) -->
+    <!-- Application Structure Plan: A single-page application with a persistent sidebar navigation (top bar on mobile). This non-linear, task-oriented structure replaces the linear book format. Users can instantly jump to 'Character Options', 'Equipment', 'Vehicles', or 'Hacking'. This is superior for a TTRPG reference, where users need to look up specific rules, items, or class features quickly, rather than read front-to-back. Key interactions include:
+    1. 'Character Options': A nested accordion system to browse classes and their modern subclasses without clutter.
+    2. 'Equipment': A filterable card grid for weapons, paired with summary charts (Chart.js) for at-a-glance comparison. Also includes an interactive 'Credit Score Calculator'.
+    3. 'Vehicles': A filterable card grid for vehicles.
+    4. 'Hacking': A static HTML/CSS flowchart to visually simplify the complex hacking process.
+    This structure is designed for findability and rapid reference during gameplay or character creation. -->
+    <!-- Visualization & Content Choices:
+    - Report Info: Weapon Tables (Name, Cost, Damage, Properties). Goal: Compare & find weapons. Viz/Method: Interactive card grid + Bar Charts (Chart.js). Interaction: Text search & category filters update the card grid. Charts show avg. damage/cost by category. Justification: Cards are more responsive and readable than tables. Charts give a quick summary. Library: Vanilla JS (filtering), Chart.js (charts).
+    - Report Info: Subclass Features (Lists of features by level). Goal: Easy browsing of character progression. Viz/Method: HTML/JS Accordion. Interaction: Click class name to expand/collapse its subclass details. Justification: Hides irrelevant information, reducing clutter. Library: Vanilla JS.
+    - Report Info: Credit Score Table. Goal: Quickly find a purchase DC. Viz/Method: HTML Table (reference) + JS "Calculator". Interaction: Select lifestyle from dropdown, JS displays the corresponding DC. Justification: Interactive tool is faster and more engaging than manual table lookup. Library: Vanilla JS.
+    - Report Info: Hacking Rules (Multi-step process). Goal: Simplify the rule's flow. Viz/Method: Flowchart built with HTML divs and Tailwind flexbox. Interaction: None (static visual aid). Justification: Visual flow is easier to grasp than dense text. Adheres to NO SVG/Mermaid.
+    - Report Info: Vehicle Stats. Goal: Browse & compare vehicles. Viz/Method: Filterable card grid. Interaction: Category filters (Land, Air). Justification: Consistent, responsive browsing experience (like weapons). Library: Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #f59e0b; 
+            color: #1c1917; 
+            font-weight: 600;
+        }
+        .subclass-content {
+            transition: max-height 0.3s ease-out;
+            overflow: hidden;
+            max-height: 0;
+        }
+        .subclass-content.open {
+            max-height: 2000px; 
+        }
+        .page-content {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: tailwind.colors.amber,
+                        stone: tailwind.colors.stone,
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-stone-100 text-stone-900 font-sans leading-relaxed">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar / Topbar -->
+        <nav class="bg-stone-800 text-stone-100 w-full md:w-64 p-4 md:p-6 shadow-lg flex-shrink-0">
+            <h1 class="text-2xl md:text-3xl font-bold text-amber-400 mb-4 md:mb-8 text-center md:text-left">The Modern Manual</h1>
+            <ul class="flex flex-row md:flex-col justify-around md:justify-start md:space-y-2">
+                <li><a href="#home" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">🏠 Home</a></li>
+                <li><a href="#characterOptions" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">👤 Character Options</a></li>
+                <li><a href="#equipment" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">🎒 Equipment</a></li>
+                <li><a href="#vehicles" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">🚗 Vehicles</a></li>
+                <li><a href="#hacking" class="nav-link block p-3 rounded-lg hover:bg-stone-700 text-center md:text-left">💻 Hacking</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content Area -->
+        <main id="content-area" class="flex-1 p-6 md:p-10 overflow-y-auto">
+
+            <!-- Home Page -->
+            <div id="home" class="page-content space-y-6">
+                <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">Welcome to the Modern Manual</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md space-y-4 text-lg">
+                    <p>This interactive guide provides a complete reference for running and playing in a modern-day Dungeons & Dragons 5th Edition campaign, based on "The Modern Manual." The original document is a fantastic resource, and this app's goal is to make that information even more accessible and easier to reference during your game.</p>
+                    <p>Many a question has been raised regarding different mechanics to "modernize" Dungeons and Dragons. Forum post after forum post features inquiries, suggestions, rebuttals, and arguments over how (and why) to integrate things like firearms and computers into the D&D setting. The name of the game is, after all, Dungeons and Dragons, not Dodge Chargers and Derringers.</p>
+                    <p>This supplement (and this app) is designed to integrate modern technology into the fantastic world of D&D. Use the navigation on the left to explore new character subclasses, filterable lists of modern weapons and vehicles, and simplified rules for hacking and credit scores. Time marches on. A good adventurer should always be prepared to adapt.</p>
+                </div>
+                <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-900 p-4 rounded-lg shadow">
+                    <h3 class="font-bold text-xl mb-2">How to Use This Guide</h3>
+                    <p>Click the links in the navigation bar to jump to any section. Many sections, like 'Equipment', have sub-navigation tabs and interactive filters to help you find exactly what you're looking for. 'Character Options' features a collapsible accordion to let you browse new subclasses without getting overwhelmed. Explore and enjoy!</p>
+                </div>
+            </div>
+
+            <!-- Character Options Page -->
+            <div id="characterOptions" class="page-content hidden space-y-6">
+                <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">👤 Character Options</h2>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">The modern world offers new paths and skills. This section contains new skills, backgrounds, feats, and a complete set of new subclasses for every core class, designed to fit a modern setting. Use the tabs below to explore these new options.</p>
+                
+                <div class="bg-white rounded-lg shadow-md">
+                    <div id="char-opt-tabs" class="flex border-b border-stone-300">
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-skills">New Skills</button>
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-backgrounds">Backgrounds</button>
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-feats">Feats</button>
+                        <button class="char-opt-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="char-opt-subclasses">Subclasses</button>
+                    </div>
+
+                    <div id="char-opt-skills" class="char-opt-tab-content p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Skills</h3>
+                        <p>The following skills can be added to the standard 5th Edition skill list. Your GM will decide if they are available in your campaign.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Computers (Intelligence):</strong> Your Intelligence (Computers) check measures your ability to access, control, and manipulate computer systems, software, and networks.</li>
+                            <li><strong>Demolitions (Intelligence):</strong> Your Intelligence (Demolitions) check measures your ability to properly identify, set, and disarm explosives, as well as identify their properties.</li>
+                        </ul>
+                    </div>
+                    <div id="char-opt-backgrounds" class="char-opt-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Backgrounds</h3>
+                        <p>These backgrounds are appropriate for characters in a modern setting.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Hacker:</strong> You are a self-taught (or formally-taught) computer expert, capable of breaking into systems with ease.</li>
+                            <li><strong>Mechanic:</strong> You've always had a way with machines, and can fix just about anything with an engine.</li>
+                            <li><strong>Officer:</strong> You were a member of a police force, dedicated to upholding the law and protecting the innocent.</li>
+                            <li><strong>Radical:</strong> You fought for a cause, perhaps one outside the law, using unconventional methods.</li>
+                            <li><strong>Soldier:</strong> You were a professional soldier, trained in modern combat and tactics.</li>
+                        </ul>
+                    </div>
+                    <div id="char-opt-feats" class="char-opt-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Feats</h3>
+                        <p>These feats offer new capabilities related to modern combat and technology.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Close Quarters Combatant:</strong> You are adept at fighting in close range, even with ranged weapons.</li>
+                            <li><strong>Computer Whiz:</strong> You have an innate talent for technology, granting you advantage on certain Computers checks.</li>
+                            <li><strong>Modern Heavy Armor Master:</strong> You can use your armor to deflect bullets, reducing incoming ballistic damage.</li>
+                            <li><strong>Pistol Expert:</strong> You have mastered the art of fighting with pistols, gaining bonuses to attack and damage.</li>
+                            <li><strong>Rifle Expert:</strong> You are a master of the rifle, able to make difficult shots and reroll damage.</li>
+                        </ul>
+                    </div>
+                    <div id="char-opt-subclasses" class="char-opt-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">New Subclasses</h3>
+                        <p>Click on any class below to see its new modern-themed subclass and features.</p>
+                        <div id="subclass-accordion" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment Page -->
+            <div id="equipment" class="page-content hidden space-y-6">
+                <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">🎒 Equipment</h2>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">This section details new equipment for the modern age, from armor and weapons to computers and explosives. It also introduces the Credit Score system as an alternative to tracking exact currency for large purchases. Use the tabs to navigate.</p>
+                
+                <div class="bg-white rounded-lg shadow-md">
+                    <div id="equip-tabs" class="flex border-b border-stone-300">
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-credit">Credit Score</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-armor">Armor</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-weapons">Weapons</button>
+                        <button class="equip-tab-button p-4 font-semibold text-stone-600 hover:bg-stone-50 border-b-2 border-transparent" data-target="equip-gear">Adventuring Gear</button>
+                    </div>
+
+                    <div id="equip-credit" class="equip-tab-content p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Credit Score</h3>
+                        <p>In a modern setting, tracking every dollar can be tedious. The Credit Score system abstracts your purchasing power. When you attempt to buy something significant, you make a Charisma (Persuasion) or Intelligence (Investigation) check against a DC determined by your lifestyle. On a success, you acquire the item.</p>
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1">
+                                <h4 class="text-xl font-semibold mb-2">Credit Score DC by Lifestyle</h4>
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-stone-100">
+                                            <th class="p-2 border border-stone-300">Lifestyle</th>
+                                            <th class="p-2 border border-stone-300">Check DC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="p-2 border border-stone-300">Wretched</td><td class="p-2 border border-stone-300">10</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">Squalid</td><td class="p-2 border border-stone-300">12</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">Poor</td><td class="p-2 border border-stone-300">14</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">Modest</td><td class="p-2 border border-stone-300">16</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">Comfortable</td><td class="p-2 border border-stone-300">18</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">Wealthy</td><td class="p-2 border border-stone-300">20</td></tr>
+                                        <tr><td class="p-2 border border-stone-300">Aristocratic</td><td class="p-2 border border-stone-300">22</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex-1 bg-amber-50 p-4 rounded-lg shadow-inner">
+                                <h4 class="text-xl font-semibold mb-2">Credit Check Calculator</h4>
+                                <label for="lifestyle-select" class="block mb-2 font-medium">Select your Lifestyle:</label>
+                                <select id="lifestyle-select" class="w-full p-2 border border-stone-300 rounded-lg">
+                                    <option value="10">Wretched</option>
+                                    <option value="12">Squalid</option>
+                                    <option value="14">Poor</option>
+                                    <option value="16" selected>Modest</option>
+                                    <option value="18">Comfortable</option>
+                                    <option value="20">Wealthy</option>
+                                    <option value="22">Aristocratic</option>
+                                </select>
+                                <p class="mt-4 text-lg">Your Credit Check DC is: <span id="credit-dc-output" class="font-bold text-2xl text-amber-600">16</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="equip-armor" class="equip-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Modern Armor</h3>
+                        <p>Modern materials offer protection comparable to medieval armor, with different properties. "Ballistic" armor is designed to stop bullets, while "Impact" armor protects against melee trauma.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Light Armor:</strong> Padded Vest, Kevlar Vest (Ballistic)</li>
+                            <li><strong>Medium Armor:</strong> Riot Gear (Impact), Dragon Skin Vest (Ballistic)</li>
+                            <li><strong>Heavy Armor:</strong> Bomb Suit (Impact), Plate Carrier (Ballistic)</li>
+                            <li><strong>Shield:</strong> Ballistic Shield</li>
+                        </ul>
+                    </div>
+                    <div id="equip-weapons" class="equip-tab-content p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Modern Weapons</h3>
+                        <p>Firearms are prevalent in the modern age. Use the filters below to browse the weapon database. New properties like 'Automatic' and 'Burst Fire' add new tactical options.</p>
+                        
+                        <div class="flex flex-wrap gap-4 mb-6">
+                            <input type="text" id="weapon-search" placeholder="Search weapons..." class="flex-grow p-2 border border-stone-300 rounded-lg">
+                            <div class="flex gap-2 flex-wrap">
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="all">All</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Pistol">Pistols</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Rifle">Rifles</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Shotgun">Shotguns</button>
+                                <button class="weapon-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="SMG">SMGs</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-stone-50 p-4 rounded-lg shadow-inner">
+                                <h4 class="text-xl font-semibold mb-2 text-center">Avg. Damage by Category</h4>
+                                <div class="chart-container">
+                                    <canvas id="weapon-damage-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-stone-50 p-4 rounded-lg shadow-inner">
+                                <h4 class="text-xl font-semibold mb-2 text-center">Avg. Cost by Category</h4>
+                                <div class="chart-container">
+                                    <canvas id="weapon-cost-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="weapon-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        </div>
+                    </div>
+                    <div id="equip-gear" class="equip-tab-content hidden p-6 space-y-4">
+                        <h3 class="text-2xl font-semibold">Adventuring Gear</h3>
+                        <p>Modern adventurers carry different tools.</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>Smartphone:</strong> A handheld device for communication, simple computing, and accessing the internet.</li>
+                            <li><strong>Laptop:</strong> A portable computer required for most advanced Computers checks and hacking attempts.</li>
+                            <li><strong>First Aid Kit:</strong> Can be used to stabilize a dying creature without a Medicine check.</li>
+                            <li><strong>Duct Tape:</strong> Can be used for temporary repairs or as makeshift bindings.</li>
+                            <li><strong>Zip Ties:</strong> A modern replacement for manacles.</li>
+                            <li><strong>Explosives:</strong> C4, Dynamite, Flashbang, Smoke Grenade. Require Demolitions (Int) checks to use effectively.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicles Page -->
+            <div id="vehicles" class="page-content hidden space-y-6">
+                <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">🚗 Vehicles</h2>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">Vehicles are a key part of modern life. This section provides stats and rules for a variety of land, air, and water vehicles. Use the filters to find a specific type of vehicle. Each vehicle has its own stat block, similar to a creature, including Armor Class, Hit Points, and Speed.</p>
+                
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="all">All</V>
+                    <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Land">Land</button>
+                    <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Air">Air</button>
+                    <button class="vehicle-filter-button px-4 py-2 bg-stone-200 rounded-lg hover:bg-amber-400" data-filter="Water">Water</button>
+                </div>
+
+                <div id="vehicle-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                </div>
+            </div>
+
+            <!-- Hacking Page -->
+            <div id="hacking" class="page-content hidden space-y-6">
+                <h2 class="text-4xl font-bold text-stone-800 border-b-4 border-amber-400 pb-2">💻 Hacking</h2>
+                <p class="text-lg bg-white p-6 rounded-lg shadow-md">Hacking allows characters proficient with the Computers skill to break into digital systems. This is often a multi-step process involving gaining access, running programs, and executing exploits. The flowchart below outlines the basic process for a hacking attempt.</p>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-semibold mb-4">Hacking Process Flow</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-2 text-center">
+                        <div class="bg-stone-100 p-4 rounded-lg shadow w-full md:w-1/4">
+                            <h4 class="font-bold text-lg">1. Initiate Hack</h4>
+                            <p class="text-sm">Make an Intelligence (Computers) check to gain access to the target system. DC is set by the GM based on security.</p>
+                        </div>
+                        <div class="text-4xl font-bold text-amber-500 transform rotate-90 md:rotate-0">→</div>
+                        <div class="bg-stone-100 p-4 rounded-lg shadow w-full md:w-1/4">
+                            <h4 class="font-bold text-lg">2. Run Program</h4>
+                            <p class="text-sm">On success, choose a program to run (e.g., 'Recon' to learn, 'Backdoor' to create an exit).</p>
+                        </div>
+                        <div class="text-4xl font-bold text-amber-500 transform rotate-90 md:rotate-0">→</div>
+                        <div class="bg-stone-100 p-4 rounded-lg shadow w-full md:w-1/4">
+                            <h4 class="font-bold text-lg">3. Execute Exploit</h4>
+                            <p class="text-sm">Choose an exploit (e.g., 'Control' to take over a device, 'Extract' to steal data, 'Shutdown' to disable).</p>
+                        </div>
+                        <div class="text-4xl font-bold text-amber-500 transform rotate-90 md:rotate-0">→</div>
+                        <div class="bg-green-100 p-4 rounded-lg shadow w-full md:w-1/4 border-2 border-green-500">
+                            <h4 class="font-bold text-lg">4. Result</h4>
+                            <p class="text-sm">The hack succeeds. On a failure at any step, the hacker may be detected or locked out.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <h3 class="text-2xl font-semibold">Hacking Terms</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Program:</strong> A tool that sets up the hack (e.g., Recon, Backdoor, Rootkit). You run one Program per successful hack.</li>
+                        <li><strong>Exploit:</strong> The action you take once inside (e.g., Control, Extract, Shutdown, Overload). You execute one Exploit per successful hack.</li>
+                        <li><strong>Security DC:</strong> The difficulty of gaining access. A simple smartphone might be DC 10, while a corporate server is DC 20+.</li>
+                        <li><strong>Detection:</strong> Failing a check by 5 or more typically means you are detected and locked out of the system.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- Data ---
+        const subclassData = {
+            "Barbarian": {
+                name: "Path of the Juggernaut",
+                desc: "You are an unstoppable force of urban destruction, shrugging off blows that would fell lesser warriors.",
+                features: [
+                    "<strong>3rd Level: Tenacity:</strong> You can use your reaction to reduce incoming damage.",
+                    "<strong>6th Level: Implacable:</strong> You gain advantage on checks to resist being moved or knocked prone.",
+                    "<strong>10th Level: Unstoppable:</strong> You can take the Dash action as a bonus action while raging.",
+                    "<strong>14th Level: Juggernaut:</strong> While raging, you are immune to the frightened and stunned conditions."
+                ]
+            },
+            "Bard": {
+                name: "College of the Dissident",
+                desc: "You use your voice and art to rally the common people, inciting rebellion and spreading truth.",
+                features: [
+                    "<strong>3rd Level: Stirring Rhetoric:</strong> You can expend a Bardic Inspiration to grant allies temporary HP and a bonus to attack rolls.",
+                    "<strong>6th Level: Incite Riot:</strong> You can use your action to charm or frighten a group of humanoids.",
+                    "<strong>14th Level: Voice of the People:</strong> You can cast *Mass Suggestion* once per long rest."
+                ]
+            },
+             "Cleric": {
+                name: "Protection Domain",
+                desc: "Your faith is a shield, protecting your allies from the dangers of the modern world, be they bullets or blades.",
+                features: [
+                    "<strong>1st Level: Domain Spells:</strong> *Shield, Sanctuary, etc.*",
+                    "<strong>1st Level: Protective Ward:</strong> You can use your reaction to impose disadvantage on an attack against an ally.",
+                    "<strong>2nd Level: Channel Divinity:</strong> Create a barrier that deflects attacks.",
+                    "<strong>6th Level: Resilient Defense:</strong> You and nearby allies gain a bonus to saving throws.",
+                    "<strong>17th Level: Indomitable Shield:</strong> You can grant an ally resistance to all damage for one round."
+                ]
+            },
+            "Druid": {
+                name: "Circle of the Streets",
+                desc: "You find your connection to nature not in ancient forests, but in the resilient life of the city.",
+                features: [
+                    "<strong>2nd Level: Urban Wild Shape:</strong> You can transform into beasts found in cities, like rats, pigeons, or stray dogs.",
+                    "<strong>6th Level: Concrete Jungle:</strong> You can cast *Spike Growth* as if it were concrete shards. You are not hindered by difficult urban terrain.",
+                    "<strong>10th Level: City's Resilience:</strong> You gain proficiency in Constitution saving throws.",
+                    "<strong>14th Level: Aspect of the Metropolis:</strong> You can blend into any urban crowd, becoming effectively invisible."
+                ]
+            },
+            "Fighter": {
+                name: "Gunslinger",
+                desc: "You are a master of firearms, a deadly marksman who relies on speed, precision, and a bit of luck.",
+                features: [
+                    "<strong>3rd Level: Gunsmith:</strong> You gain proficiency with firearms and tinker's tools. You can craft ammo.",
+                    "<strong>3rd Level: Deadeye:</strong> You can use a bonus action to gain advantage on your next attack roll with a firearm.",
+                    "<strong>7th Level: Quickdraw:</strong> You can draw or stow a firearm as a free action and gain a bonus to initiative.",
+                    "<strong>10th Level: Bullet Time:</strong> You can use your reaction to take a shot against an enemy that moves within 10 feet of you.",
+                    "<strong>15th Level: Trick Shot:</strong> You can expend a superiority die (d8) to perform special maneuvers, like disarming an opponent or ricocheting a shot."
+                ]
+            },
+            "Monk": {
+                name: "Way of the Brawler",
+                desc: "You are a scrappy fighter, using improvised weapons and bar-room tactics to dominate your foes.",
+                features: [
+                    "<strong>3rd Level: Brawler's Cunning:</strong> You gain proficiency with improvised weapons. They count as monk weapons for you.",
+                    "<strong>6th Level: Haymaker:</strong> When you hit a creature with an unarmed strike or improvised weapon, you can expend a ki point to force them to make a Con save or be stunned.",
+                    "<strong>11th Level: Tough as Nails:</strong> You gain proficiency in Constitution saving throws.",
+                    "<strong>17th Level: Bar-Room Blitz:</strong> As an action, you can make an unarmed strike or improvised weapon attack against every enemy within your reach."
+                ]
+            },
+            "Paladin": {
+                name: "Oath of the People",
+                desc: "You have sworn an oath not to a deity or king, but to the common people, protecting them from corruption and tyranny.",
+                features: [
+                    "<strong>3rd Level: Tenets:</strong> *Community, Equality, Freedom, Justice.*",
+                    "<strong>3rd Level: Channel Divinity:</strong> 1. *Rallying Cry:* Grant temporary HP to allies. 2. *Expose Injustice:* Compel a creature to speak the truth.",
+                    "<strong>7th Level: Aura of Solidarity:</strong> You and allies within 10 feet can use your reaction to take damage for another creature in the aura.",
+                    "<strong>15th Level: People's Champion:</strong> You have advantage on saving throws against being charmed or frightened.",
+                    "<strong>20th Level: Voice of the Masses:</strong> You can become an avatar of the collective, gaining resistance to all damage and dealing extra radiant damage."
+                ]
+            },
+             "Ranger": {
+                name: "Urban Ranger",
+                desc: "You are a master of the concrete jungle, tracking your foes through crowded streets and navigating urban decay.",
+                features: [
+                    "<strong>3rd Level: Natural Explorer:</strong> You are at home in cities. You can't get lost in urban environments and gain advantage on stealth checks.",
+                    "<strong>3rd Level: Favored Enemy:</strong> You can choose two types of humanoid organizations (e.g., a specific gang, corporation, or police force).",
+                    "<strong>7th Level: Rooftop Runner:</strong> You gain a climbing speed equal to your walking speed.",
+                    "<strong>11th Level: Street Smarts:</strong> You have advantage on Charisma (Persuasion) and (Deception) checks made against city dwellers.",
+                    "<strong>15th Level: Ghost of the Streets:</strong> You can use a bonus action to become invisible until the end of your next turn."
+                ]
+            },
+            "Rogue": {
+                name: "Combat Hacker",
+                desc: "You use your technical skills as a weapon, disabling enemy tech, bypassing security, and causing digital chaos.",
+                features: [
+                    "<strong>3rd Level: Tech Savant:</strong> You gain proficiency with the Computers skill and hacking tools.",
+                    "<strong>3rd Level: Remote Hack:</strong> As a bonus action, you can make an Int (Computers) check to temporarily disable an electronic device within 30 feet.",
+                    "<strong>9th Level: System Shock:</strong> When you use Remote Hack, you can choose to have the device create an electrical burst, dealing lightning damage to the user.",
+                    "<strong>13th Level: Personal Blackout:</strong> You can create a 20-foot sphere of electronic silence, disabling all tech within it for 1 minute.",
+                    "<strong>17th Level: Master Hacker:</strong> You can cast *Dominate Monster* on any creature with cybernetic implants or *Dominate Machine* (new spell) on a vehicle or drone."
+                ]
+            },
+            "Sorcerer": {
+                name: "Bioware Sorcery",
+                desc: "Your magic comes from cybernetic or biological enhancements, allowing you to blend technology and arcane power.",
+                features: [
+                    "<strong>1st Level: Arcane Augmentations:</strong> Your body is a magical focus. You gain a +1 bonus to AC.",
+                    "<strong>6th Level: Overclock:</strong> You can expend sorcery points to gain an extra action on your turn.",
+                    "<strong>14th Level: System Reboot:</strong> Once per long rest, you can use an action to regain hit points equal to half your maximum.",
+                    "<strong>18th Level: Arcane Singularity:</strong> You can teleport up to 60 feet as a bonus action, dealing force damage in the area you left."
+                ]
+            },
+            "Warlock": {
+                name: "The Great Old One",
+                desc: "A classic patron with a modern twist. Your patron's alien mind can breach digital and mental security alike.",
+                features: [
+                    "<strong>Pact Boon: Pact of the Net:</strong> Your patron grants you a 'familiar' in the form of an AI that lives in your smartphone or laptop. It can perform hacking tasks for you.",
+                    "<strong>New Invocations:</strong> *Digital Mind:* You can communicate telepathically with AI and machines. *Psychic Static:* You can use your reaction to impose disadvantage on an attack roll made by an enemy you can see."
+                ]
+            },
+            "Wizard": {
+                name: "School of Psionics",
+                desc: "You use your powerful mind to warp reality, a \"wizard\" who casts spells without components, using only thought.",
+                features: [
+                    "<strong>2nd Level: Psionic Focus:</strong> You can cast spells without verbal, somatic, or material components (that don't have a cost).",
+                    "<strong>6th Level: Telekinetic Hand:</strong> You learn the *Mage Hand* cantrip, it is invisible, and you can use it as a bonus action.",
+                    "<strong>10th Level: Mental Shield:</strong> You are resistant to psychic damage and have advantage on saves against being charmed or frightened.",
+                    "<strong>14th Level: Mind Blast:</strong> You can use your action to emit a 60-foot cone of psionic energy, dealing psychic damage and stunning creatures who fail an Int save."
+                ]
+            }
+        };
+
+        const weaponData = [
+            { name: "Light Pistol", category: "Pistol", cost: 250, damage: "2d4", avgDmg: 5, properties: "Ammunition (range 40/120), Light" },
+            { name: "Heavy Pistol", category: "Pistol", cost: 350, damage: "2d6", avgDmg: 7, properties: "Ammunition (range 50/150)" },
+            { name: "Revolver", category: "Pistol", cost: 300, damage: "2d8", avgDmg: 9, properties: "Ammunition (range 60/180), Reload (6 shots)" },
+            { name: "Submachine Gun", category: "SMG", cost: 500, damage: "2d6", avgDmg: 7, properties: "Ammunition (range 40/120), Automatic, Two-Handed" },
+            { name: "Pump-Action Shotgun", category: "Shotgun", cost: 450, damage: "2d8", avgDmg: 9, properties: "Ammunition (range 30/90), Two-Handed" },
+            { name: "Combat Shotgun", category: "Shotgun", cost: 600, damage: "2d10", avgDmg: 11, properties: "Ammunition (range 40/120), Burst Fire (2), Two-Handed" },
+            { name: "Hunting Rifle", category: "Rifle", cost: 500, damage: "2d10", avgDmg: 11, properties: "Ammunition (range 100/400), Reload (5 shots), Two-Handed" },
+            { name: "Assault Rifle", category: "Rifle", cost: 800, damage: "2d8", avgDmg: 9, properties: "Ammunition (range 150/600), Burst Fire (3), Automatic, Two-Handed" },
+            { name: "Sniper Rifle", category: "Rifle", cost: 1200, damage: "2d12", avgDmg: 13, properties: "Ammunition (range 300/1200), Reload (4 shots), Two-Handed" },
+            { name: "Light Machine Gun", category: "SMG", cost: 1500, damage: "2d10", avgDmg: 11, properties: "Ammunition (range 100/400), Automatic, Heavy, Two-Handed" },
+        ];
+
+        const vehicleData = [
+            { name: "Motorcycle", category: "Land", cost: 8000, speed: "120 ft.", ac: 12, hp: 25, crew: 1, pass: 1 },
+            { name: "Sedan", category: "Land", cost: 20000, speed: "100 ft.", ac: 14, hp: 40, crew: 1, pass: 4 },
+            { name: "SUV/Truck", category: "Land", cost: 35000, speed: "90 ft.", ac: 15, hp: 60, crew: 1, pass: 5 },
+            { name: "Armored Car", category: "Land", cost: 150000, speed: "70 ft.", ac: 18, hp: 100, crew: 2, pass: 4 },
+            { name: "Main Battle Tank", category: "Land", cost: 2500000, speed: "50 ft.", ac: 22, hp: 250, crew: 3, pass: 2 },
+            { name: "Helicopter", category: "Air", cost: 1200000, speed: "150 ft. (fly)", ac: 16, hp: 120, crew: 2, pass: 6 },
+            { name: "Attack Helicopter", category: "Air", cost: 9000000, speed: "180 ft. (fly)", ac: 19, hp: 180, crew: 2, pass: 0 },
+            { name: "Cargo Plane", category: "Air", cost: 20000000, speed: "250 ft. (fly)", ac: 15, hp: 300, crew: 4, pass: 50 },
+            { name: "Speedboat", category: "Water", cost: 40000, speed: "80 ft. (swim)", ac: 13, hp: 50, crew: 1, pass: 5 },
+        ];
+
+        const creditScores = {
+            "Wretched": 10,
+            "Squalid": 12,
+            "Poor": 14,
+            "Modest": 16,
+            "Comfortable": 18,
+            "Wealthy": 20,
+            "Aristocratic": 22
+        };
+
+        let weaponDamageChart, weaponCostChart;
+
+        // --- Navigation ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${pageId}`) {
+                    link.classList.add('active');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = e.target.closest('a').getAttribute('href').substring(1);
+                    showPage(pageId);
+                });
+            });
+            showPage('home'); // Show home page by default
+        }
+
+        function setupTabNavigation(tabContainerId, contentClass) {
+            const tabContainer = document.getElementById(tabContainerId);
+            if (tabContainer) {
+                const tabs = tabContainer.querySelectorAll(`.${contentClass}-button`);
+                const contents = tabContainer.parentElement.querySelectorAll(`.${contentClass}-content`);
+                
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => {
+                            t.classList.remove('text-amber-600', 'border-amber-500');
+                            t.classList.add('text-stone-600', 'border-transparent');
+                        });
+                        tab.classList.add('text-amber-600', 'border-amber-500');
+                        tab.classList.remove('text-stone-600', 'border-transparent');
+                        
+                        contents.forEach(content => {
+                            content.classList.add('hidden');
+                        });
+                        const targetId = tab.getAttribute('data-target');
+                        const targetContent = document.getElementById(targetId);
+                        if (targetContent) {
+                            targetContent.classList.remove('hidden');
+                        }
+                    });
+                });
+                
+                if (tabs.length > 0) {
+                    tabs[0].click();
+                }
+            }
+        }
+
+        // --- Character Options ---
+        function populateSubclasses() {
+            const accordion = document.getElementById('subclass-accordion');
+            if (!accordion) return;
+            accordion.innerHTML = '';
+            Object.keys(subclassData).forEach(className => {
+                const data = subclassData[className];
+                const item = document.createElement('div');
+                item.className = 'border border-stone-300 rounded-lg overflow-hidden';
+                
+                const button = document.createElement('button');
+                button.className = 'subclass-toggle w-full p-4 text-left font-semibold text-lg bg-stone-100 hover:bg-stone-200 flex justify-between items-center';
+                button.innerHTML = `<span>${className}: ${data.name}</span><span class="text-xl font-light">+</span>`;
+                
+                const content = document.createElement('div');
+                content.className = 'subclass-content bg-white p-4 border-t border-stone-200';
+                content.innerHTML = `
+                    <p class="italic mb-4">${data.desc}</p>
+                    <ul class="list-disc list-inside space-y-2">${data.features.join('')}</ul>
+                `;
+                
+                button.addEventListener('click', () => {
+                    const isOpen = content.classList.contains('open');
+                    document.querySelectorAll('.subclass-content.open').forEach(c => c.classList.remove('open'));
+                    document.querySelectorAll('.subclass-toggle span:last-child').forEach(s => s.textContent = '+');
+                    
+                    if (!isOpen) {
+                        content.classList.add('open');
+                        button.querySelector('span:last-child').textContent = '−';
+                    }
+                });
+                
+                item.appendChild(button);
+                item.appendChild(content);
+                accordion.appendChild(item);
+            });
+        }
+
+        // --- Equipment ---
+        function setupCreditCalculator() {
+            const select = document.getElementById('lifestyle-select');
+            const output = document.getElementById('credit-dc-output');
+            if (select && output) {
+                select.addEventListener('change', () => {
+                    output.textContent = select.value;
+                });
+                output.textContent = select.value; 
+            }
+        }
+
+        function populateWeaponGrid() {
+            const grid = document.getElementById('weapon-grid');
+            if (!grid) return;
+            const search = document.getElementById('weapon-search').value.toLowerCase();
+            const activeButton = document.querySelector('.weapon-filter-button.bg-amber-400');
+            if (!activeButton) return; // Guard clause in case no button is active
+            const filter = activeButton.getAttribute('data-filter');
+
+            grid.innerHTML = '';
+            const filteredWeapons = weaponData.filter(w => {
+                const nameMatch = w.name.toLowerCase().includes(search);
+                const filterMatch = (filter === 'all' || w.category === filter);
+                return nameMatch && filterMatch;
+            });
+
+            if (filteredWeapons.length === 0) {
+                grid.innerHTML = `<p class="text-stone-600 italic">No weapons match your criteria.</p>`;
+                return;
+            }
+
+            filteredWeapons.forEach(w => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow border border-stone-200';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xl font-semibold text-amber-700">${w.name}</h4>
+                        <span class="px-2 py-1 bg-stone-200 text-stone-700 text-xs font-medium rounded-full">${w.category}</span>
+                    </div>
+                    <p class="text-lg font-bold">${w.damage} <span class="text-sm font-normal text-stone-600">(${w.avgDmg} avg)</span></p>
+                    <p class="text-sm text-stone-600 mb-2">Cost: $${w.cost}</p>
+                    <p class="text-sm text-stone-800">${w.properties}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupWeaponFilters() {
+            document.querySelectorAll('.weapon-filter-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.weapon-filter-button').forEach(btn => {
+                        btn.classList.remove('bg-amber-400');
+                        btn.classList.add('bg-stone-200');
+                    });
+                    button.classList.add('bg-amber-400');
+                    button.classList.remove('bg-stone-200');
+                    populateWeaponGrid();
+                });
+            });
+            document.getElementById('weapon-search')?.addEventListener('keyup', populateWeaponGrid);
+            const allButton = document.querySelector('.weapon-filter-button[data-filter="all"]');
+            if (allButton) {
+                allButton.classList.add('bg-amber-400');
+                allButton.classList.remove('bg-stone-200');
+            }
+        }
+
+        function createWeaponCharts() {
+            const damageCtx = document.getElementById('weapon-damage-chart')?.getContext('2d');
+            const costCtx = document.getElementById('weapon-cost-chart')?.getContext('2d');
+            if (!damageCtx || !costCtx) return;
+
+            const categories = ["Pistol", "Rifle", "Shotgun", "SMG"];
+            const avgDamage = categories.map(cat => {
+                const items = weaponData.filter(w => w.category === cat);
+                if (items.length === 0) return 0;
+                const sum = items.reduce((acc, w) => acc + w.avgDmg, 0);
+                return sum / items.length;
+            });
+            const avgCost = categories.map(cat => {
+                const items = weaponData.filter(w => w.category === cat);
+                if (items.length === 0) return 0;
+                const sum = items.reduce((acc, w) => acc + w.cost, 0);
+                return sum / items.length;
+            });
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            };
+
+            weaponDamageChart = new Chart(damageCtx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Average Damage',
+                        data: avgDamage,
+                        backgroundColor: ['#f59e0b', '#fbbf24', '#fcd34d', '#fde68a'],
+                    }]
+                },
+                options: chartOptions
+            });
+
+            weaponCostChart = new Chart(costCtx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Average Cost',
+                        data: avgCost,
+                        backgroundColor: ['#78716c', '#a8a29e', '#d6d3d1', '#e7e5e4'],
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        // --- Vehicles ---
+        function populateVehicleGrid() {
+            const grid = document.getElementById('vehicle-grid');
+            if (!grid) return;
+            const activeButton = document.querySelector('.vehicle-filter-button.bg-amber-400');
+            if (!activeButton) return; // Guard clause
+            const filter = activeButton.getAttribute('data-filter');
+
+            grid.innerHTML = '';
+            const filteredVehicles = vehicleData.filter(v => filter === 'all' || v.category === filter);
+
+            filteredVehicles.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow border border-stone-200';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xl font-semibold text-amber-700">${v.name}</h4>
+                        <span class="px-2 py-1 bg-stone-200 text-stone-700 text-xs font-medium rounded-full">${v.category}</span>
+                    </div>
+                    <p class="text-sm text-stone-600 mb-2">Cost: $${v.cost.toLocaleString()}</p>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div><span class="block text-xs text-stone-500">Speed</span><span class="font-bold">${v.speed}</span></div>
+                        <div><span class="block text-xs text-stone-500">AC</span><span class="font-bold">${v.ac}</span></div>
+                        <div><span class="block text-xs text-stone-500">HP</span><span class="font-bold">${v.hp}</span></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-center mt-2 pt-2 border-t">
+                        <div><span class="block text-xs text-stone-500">Crew</span><span class="font-bold">${v.crew}</span></div>
+                        <div><span class="block text-xs text-stone-500">Passengers</span><span class="font-bold">${v.pass}</span></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupVehicleFilters() {
+            document.querySelectorAll('.vehicle-filter-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.vehicle-filter-button').forEach(btn => {
+                        btn.classList.remove('bg-amber-400');
+                        btn.classList.add('bg-stone-200');
+                    });
+                    button.classList.add('bg-amber-400');
+                    button.classList.remove('bg-stone-200');
+                    populateVehicleGrid();
+                });
+            });
+            const allButton = document.querySelector('.vehicle-filter-button[data-filter="all"]');
+            if (allButton) {
+                allButton.classList.add('bg-amber-400');
+                allButton.classList.remove('bg-stone-200');
+            }
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            setupTabNavigation('char-opt-tabs', 'char-opt-tab');
+            setupTabNavigation('equip-tabs', 'equip-tab');
+            
+            populateSubclasses();
+            setupCreditCalculator();
+            
+            setupWeaponFilters();
+            populateWeaponGrid();
+            createWeaponCharts();
+            
+            setupVehicleFilters();
+            populateVehicleGrid();
+        });
+    </script>
+</body>
+</html>
