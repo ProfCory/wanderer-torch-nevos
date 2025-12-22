@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Roster — Fighter/Rogue (2024 Human)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">⚔️🗡️</div>
+      <div>
+        <div class="title">Roster — Fighter / Rogue (2024 Human)</div>
+        <div class="subtitle">Digital pen-and-paper • Local save • JSON export/import</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btnNew" class="btn primary">New Character</button>
+      <button id="btnImport" class="btn">Import JSON</button>
+      <button id="btnExportAll" class="btn">Export All</button>
+      <a class="btn" href="SETUP.md" target="_blank" rel="noreferrer">Setup</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel left">
+      <div class="panel-header">
+        <div class="panel-title">Characters</div>
+        <input id="search" class="input" placeholder="Search…" />
+      </div>
+      <div id="list" class="list"></div>
+      <div class="panel-footer">
+        <div class="muted small">Saved in your browser (localStorage).</div>
+      </div>
+    </aside>
+
+    <section class="panel right">
+      <div id="emptyState" class="empty">
+        <h2>No character selected</h2>
+        <p>Create a new character or click one on the left.</p>
+      </div>
+
+      <div id="editor" class="editor hidden">
+        <div class="editor-header">
+          <div class="row gap">
+            <div class="field grow">
+              <label>Name</label>
+              <input id="pc_name" class="input" />
+            </div>
+            <div class="field">
+              <label>Level</label>
+              <div class="row gap">
+                <select id="pc_level" class="input narrow"></select>
+                <button id="btnLevelUp" class="btn">Level Up</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Class</label>
+              <select id="pc_class" class="input">
+                <option value="Fighter">Fighter</option>
+                <option value="Rogue">Rogue</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Species</label>
+              <div class="row gap align">
+                <input class="input" value="Human (2024)" disabled />
+                <a class="help" target="_blank" rel="noreferrer" href="https://www.dndbeyond.com/species/1751441-human" title="Open Human (2024) rules">?</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row gap wrap">
+            <button id="btnDuplicate" class="btn">Duplicate</button>
+            <button id="btnDelete" class="btn danger">Delete</button>
+            <button id="btnExport" class="btn">Export JSON</button>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-title">Ability Scores <span class="mini-links">
+              <a class="help" target="_blank" rel="noreferrer" href="https://www.dndbeyond.com/sources/dnd/br-2024/playing-the-game#TheSixAbilities" title="Open rules: The Six Abilities">?</a>
+              <a class="help" target="_blank" rel="noreferrer" href="https://roll20.net/compendium/dnd5e/Free%20Basic%20Rules%20%282024%29#toc_13" title="Open Roll20: The Six Abilities">?</a>
+            </span></div>
+
+            <div class="grid six">
+              <div class="score">
+                <label>STR</label>
+                <input id="ab_STR" type="number" class="input" min="1" max="30" />
+                <div class="muted small" id="mod_STR"></div>
+              </div>
+              <div class="score">
+                <label>DEX</label>
+                <input id="ab_DEX" type="number" class="input" min="1" max="30" />
+                <div class="muted small" id="mod_DEX"></div>
+              </div>
+              <div class="score">
+                <label>CON</label>
+                <input id="ab_CON" type="number" class="input" min="1" max="30" />
+                <div class="muted small" id="mod_CON"></div>
+              </div>
+              <div class="score">
+                <label>INT</label>
+                <input id="ab_INT" type="number" class="input" min="1" max="30" />
+                <div class="muted small" id="mod_INT"></div>
+              </div>
+              <div class="score">
+                <label>WIS</label>
+                <input id="ab_WIS" type="number" class="input" min="1" max="30" />
+                <div class="muted small" id="mod_WIS"></div>
+              </div>
+              <div class="score">
+                <label>CHA</label>
+                <input id="ab_CHA" type="number" class="input" min="1" max="30" />
+                <div class="muted small" id="mod_CHA"></div>
+              </div>
+            </div>
+
+            <div class="row gap">
+              <div class="field">
+                <label>Proficiency Bonus</label>
+                <input id="derived_pb" class="input narrow" disabled />
+              </div>
+              <div class="field grow">
+                <label>Notes</label>
+                <input id="pc_notes" class="input" placeholder="Short notes (background, vibe, etc.)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Vitals</div>
+            <div class="grid two">
+              <div class="field">
+                <label>Max HP</label>
+                <input id="vit_maxhp" type="number" class="input" min="0" />
+              </div>
+              <div class="field">
+                <label>Current HP</label>
+                <input id="vit_curhp" type="number" class="input" min="0" />
+              </div>
+              <div class="field">
+                <label>AC</label>
+                <input id="vit_ac" type="number" class="input" min="0" />
+              </div>
+              <div class="field">
+                <label>Initiative</label>
+                <input id="vit_init" class="input" disabled />
+              </div>
+              <div class="field">
+                <label>Speed</label>
+                <input id="vit_speed" type="number" class="input" min="0" />
+              </div>
+              <div class="field">
+                <label>Passive Perception</label>
+                <input id="vit_pp" class="input" disabled />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-title">Skills (quick toggles)</div>
+            <div class="muted small">Check “Prof” for proficiency. Add “Expertise” only if applicable (Rogue).</div>
+            <div id="skills" class="skills"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Features & Feats
+              <span class="mini-links">
+                <a class="help" target="_blank" rel="noreferrer" href="https://www.dndbeyond.com/sources/dnd/br-2024/character-classes" title="Open rules: Classes">?</a>
+                <a class="help" target="_blank" rel="noreferrer" href="https://www.dndbeyond.com/classes/2190879-fighter" title="Open Fighter details">?</a>
+                <a class="help" target="_blank" rel="noreferrer" href="https://www.dndbeyond.com/classes/2190883-rogue" title="Open Rogue details">?</a>
+              </span>
+            </div>
+
+            <div class="row gap wrap">
+              <button id="btnAddFeature" class="btn">Add Custom Feature</button>
+              <button id="btnAddFeat" class="btn">Add Custom Feat</button>
+              <button id="btnAutoFeatures" class="btn">Rebuild Class Features</button>
+            </div>
+
+            <div id="features" class="features"></div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-title">Attacks / Actions</div>
+            <div class="row gap wrap">
+              <button id="btnAddAttack" class="btn">Add Attack</button>
+            </div>
+            <div id="attacks" class="features"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Inventory</div>
+            <div class="row gap wrap">
+              <button id="btnAddItem" class="btn">Add Item</button>
+              <label class="row gap align small">
+                <input id="inv_useWeight" type="checkbox" />
+                Track weight
+              </label>
+            </div>
+
+            <div class="grid three">
+              <div class="field"><label>GP</label><input id="coin_gp" type="number" class="input" /></div>
+              <div class="field"><label>SP</label><input id="coin_sp" type="number" class="input" /></div>
+              <div class="field"><label>CP</label><input id="coin_cp" type="number" class="input" /></div>
+            </div>
+
+            <div class="row gap">
+              <div class="field grow">
+                <label>Total Weight</label>
+                <input id="inv_weightTotal" class="input" disabled />
+              </div>
+            </div>
+
+            <div id="inventory" class="inventory"></div>
+          </div>
+        </div>
+
+        <footer class="footnote">
+          <div class="muted small">
+            Rules reference links point to free sources. This app stores your data locally in your browser unless you export JSON.
+          </div>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <input id="filePicker" type="file" accept="application/json" style="display:none" />
+  <script src="rules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
