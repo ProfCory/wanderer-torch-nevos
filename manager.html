@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Party Tome — D&D Character Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5ead6;
+    --parchment-dark: #e8d5b0;
+    --parchment-mid: #efe0c0;
+    --blood: #8b1a1a;
+    --blood-light: #b52525;
+    --gold: #c9922a;
+    --gold-light: #e8b84b;
+    --aged: #6b4f2a;
+    --shadow: rgba(26,18,8,0.18);
+    --rule-5e: #1a3a6e;
+    --rule-55: #4a1a6e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #2a1f0e url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    font-family: 'Crimson Pro', serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    background: linear-gradient(180deg, #1a0a00 0%, #2d1500 60%, #3d1f00 100%);
+    border-bottom: 3px solid var(--gold);
+    padding: 18px 28px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  #header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: var(--gold-light);
+    letter-spacing: 3px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+  }
+  #header h1 span { color: var(--blood-light); }
+  .header-controls { display: flex; gap: 10px; align-items: center; }
+
+  /* ── TABS / PARTY ROSTER ── */
+  #roster-bar {
+    background: #1e1108;
+    border-bottom: 2px solid var(--gold);
+    padding: 0 20px;
+    display: flex; align-items: stretch; gap: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .char-tab {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #c4a86a;
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(201,146,42,0.2);
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+  }
+  .char-tab:hover { background: rgba(201,146,42,0.1); color: var(--gold-light); }
+  .char-tab.active {
+    background: var(--parchment);
+    color: var(--ink);
+    border-bottom: 2px solid var(--parchment);
+    margin-bottom: -2px;
+  }
+  .char-tab.active::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px; background: var(--gold);
+  }
+  .char-tab .tab-hp {
+    display: block; font-family: 'Crimson Pro', serif;
+    font-size: 0.68rem; font-weight: 400; font-style: italic;
+    color: inherit; opacity: 0.7; margin-top: 1px;
+  }
+  #add-char-btn {
+    font-family: 'Cinzel', serif; font-size: 1.1rem;
+    color: var(--gold); background: transparent; border: none;
+    padding: 10px 16px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center;
+  }
+  #add-char-btn:hover { color: var(--gold-light); transform: scale(1.15); }
+  #dm-view-btn {
+    font-family: 'Cinzel', serif; font-size: 0.75rem;
+    color: var(--blood-light); background: transparent;
+    border: 1px solid var(--blood);
+    padding: 6px 14px; cursor: pointer;
+    transition: all 0.2s; border-radius: 2px;
+    margin-left: auto;
+  }
+  #dm-view-btn:hover, #dm-view-btn.active {
+    background: var(--blood); color: #fff;
+  }
+
+  /* ── RULESET TOGGLE ── */
+  .ruleset-toggle {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.25); border-radius: 20px;
+    padding: 4px 6px;
+  }
+  .ruleset-toggle label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 1px; color: #c4a86a; }
+  .toggle-switch {
+    position: relative; width: 40px; height: 20px;
+    background: var(--rule-5e); border-radius: 10px;
+    cursor: pointer; transition: background 0.3s;
+  }
+  .toggle-switch.v55 { background: var(--rule-55); }
+  .toggle-knob {
+    position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; transition: transform 0.3s;
+  }
+  .toggle-switch.v55 .toggle-knob { transform: translateX(20px); }
+
+  /* ── MAIN SHEET ── */
+  #main { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+
+  .sheet-page {
+    background: var(--parchment);
+    border: 1px solid var(--parchment-dark);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 80px rgba(180,140,80,0.08);
+    border-radius: 2px;
+    padding: 24px 28px;
+    position: relative;
+  }
+  .sheet-page::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; border-radius: 2px;
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-family: 'Cinzel', serif; font-size: 0.7rem;
+    font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--blood);
+    border-bottom: 1px solid var(--blood);
+    padding-bottom: 4px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  /* ── HEADER ROW ── */
+  .char-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px; margin-bottom: 20px;
+  }
+  .char-header-left { grid-column: 1/3; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .char-portrait {
+    grid-row: 1/3;
+    width: 100px; height: 120px;
+    border: 2px solid var(--gold);
+    background: var(--parchment-dark);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; overflow: hidden;
+    color: var(--aged); font-size: 0.7rem; text-align: center;
+    font-family: 'Cinzel', serif;
+  }
+  .char-portrait img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+  .field-group { display: flex; flex-direction: column; gap: 2px; }
+  .field-label {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    letter-spacing: 1.5px; color: var(--aged); text-transform: uppercase;
+  }
+  .field-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--parchment-dark);
+    font-family: 'Crimson Pro', serif; font-size: 1rem; color: var(--ink);
+    padding: 2px 4px; width: 100%; outline: none; transition: border-color 0.2s;
+  }
+  .field-input:focus { border-color: var(--gold); }
+  select.field-input { cursor: pointer; }
+
+  /* ── ABILITY SCORES ── */
+  .abilities-row {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 8px; margin-bottom: 20px;
+  }
+  .ability-box {
+    background: var(--parchment-dark);
+    border: 1px solid var(--aged);
+    border-radius: 2px; padding: 8px 4px;
+    text-align: center; position: relative;
+  }
+  .ability-name {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    letter-spacing: 2px; color: var(--blood); text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .ability-score {
+    font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 700;
+    background: transparent; border: none; outline: none;
+    width: 100%; text-align: center; color: var(--ink);
+    background: var(--parchment-mid);
+    border: 1px solid var(--parchment-dark);
+  }
+  .ability-mod {
+    font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700;
+    color: var(--blood); margin-top: 4px; cursor: default;
+  }
+
+  /* ── THREE COLUMN LAYOUT ── */
+  .sheet-cols { display: grid; grid-template-columns: 200px 1fr 220px; gap: 20px; }
+
+  /* ── COMBAT STATS ── */
+  .combat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 16px;
+  }
+  .combat-box {
+    background: var(--parchment-dark); border: 1px solid var(--aged);
+    text-align: center; padding: 6px 4px;
+  }
+  .combat-value {
+    font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700;
+    background: transparent; border: none; outline: none;
+    width: 100%; text-align: center; color: var(--ink);
+    background: var(--parchment-mid); border: 1px solid var(--parchment-dark);
+  }
+  .combat-label {
+    font-family: 'Cinzel', serif; font-size: 0.55rem;
+    letter-spacing: 1.5px; color: var(--aged); margin-top: 3px;
+  }
+
+  /* ── HP BAR ── */
+  .hp-section { margin-bottom: 16px; }
+  .hp-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .hp-bar-wrap { margin-top: 6px; }
+  .hp-bar-bg { height: 8px; background: var(--parchment-dark); border: 1px solid var(--aged); border-radius: 1px; }
+  .hp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blood), var(--blood-light)); border-radius: 1px; transition: width 0.4s; }
+
+  /* ── SAVES / SKILLS ── */
+  .save-row, .skill-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 0; font-size: 0.85rem;
+  }
+  .proficiency-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 1.5px solid var(--aged); cursor: pointer;
+    flex-shrink: 0; transition: background 0.2s;
+  }
+  .proficiency-dot.prof { background: var(--ink); border-color: var(--ink); }
+  .proficiency-dot.expert { background: var(--gold); border-color: var(--gold); }
+  .save-mod, .skill-mod {
+    font-family: 'Cinzel', serif; font-size: 0.75rem;
+    font-weight: 700; width: 28px; text-align: right;
+    flex-shrink: 0;
+  }
+  .save-name, .skill-name { font-size: 0.85rem; flex: 1; }
+  .skill-attr {
+    font-family: 'Cinzel', serif; font-size: 0.58rem;
+    color: var(--aged); margin-left: auto;
+  }
+
+  /* ── ATTACKS TABLE ── */
+  .attacks-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 8px; }
+  .attacks-table th {
+    font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 1.5px;
+    color: var(--blood); border-bottom: 1px solid var(--blood);
+    padding: 2px 6px; text-align: left;
+  }
+  .attacks-table td { padding: 3px 6px; border-bottom: 1px solid var(--parchment-dark); }
+  .attacks-table input {
+    background: transparent; border: none; outline: none;
+    font-family: 'Crimson Pro', serif; font-size: 0.85rem;
+    color: var(--ink); width: 100%;
+  }
+  .attacks-table tr:hover td { background: rgba(201,146,42,0.06); }
+
+  /* ── FEATURE BLOCKS ── */
+  .feature-block {
+    background: var(--parchment-mid); border: 1px solid var(--parchment-dark);
+    border-left: 3px solid var(--gold); padding: 8px 10px;
+    margin-bottom: 8px; position: relative;
+  }
+  .feature-block-title {
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    font-weight: 700; color: var(--blood); letter-spacing: 1px;
+    background: transparent; border: none; outline: none;
+    width: calc(100% - 20px);
+  }
+  .feature-block-body {
+    font-size: 0.85rem; color: var(--ink); margin-top: 4px;
+    background: transparent; border: none; outline: none;
+    width: 100%; resize: vertical; min-height: 50px;
+    font-family: 'Crimson Pro', serif; line-height: 1.5;
+  }
+  .feature-block-source {
+    font-family: 'Cinzel', serif; font-size: 0.55rem;
+    color: var(--aged); background: transparent; border: none; outline: none;
+  }
+  .feature-block-del {
+    position: absolute; top: 6px; right: 6px;
+    background: transparent; border: none; color: var(--aged);
+    cursor: pointer; font-size: 0.9rem;
+  }
+  .feature-block-del:hover { color: var(--blood); }
+
+  /* ── SPELL SLOTS ── */
+  .spell-level-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .spell-level-label { font-family: 'Cinzel', serif; font-size: 0.65rem; width: 36px; color: var(--blood); }
+  .spell-slot-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1.5px solid var(--aged); cursor: pointer;
+    transition: background 0.15s;
+  }
+  .spell-slot-dot.used { background: var(--ink); }
+  .spell-slot-total {
+    font-family: 'Crimson Pro', serif; font-size: 0.78rem;
+    color: var(--aged); margin-left: 4px;
+  }
+
+  /* ── DEATH SAVES ── */
+  .death-saves { display: flex; gap: 8px; align-items: center; }
+  .ds-label { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 1px; color: var(--aged); width: 40px; }
+  .ds-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 1.5px solid var(--aged); cursor: pointer;
+    transition: background 0.15s;
+  }
+  .ds-dot.success { background: #2a7a2a; border-color: #2a7a2a; }
+  .ds-dot.fail { background: var(--blood); border-color: var(--blood); }
+
+  /* ── NOTES / TEXTAREA ── */
+  .notes-area {
+    width: 100%; background: transparent; border: 1px solid var(--parchment-dark);
+    font-family: 'Crimson Pro', serif; font-size: 0.9rem;
+    color: var(--ink); padding: 8px; resize: vertical; min-height: 80px;
+    outline: none; line-height: 1.6;
+  }
+  .notes-area:focus { border-color: var(--gold); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 1.5px;
+    background: var(--ink); color: var(--gold-light);
+    border: 1px solid var(--gold); padding: 6px 14px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn:hover { background: var(--gold); color: var(--ink); }
+  .btn-sm { padding: 3px 10px; font-size: 0.6rem; }
+  .btn-danger { border-color: var(--blood); }
+  .btn-danger:hover { background: var(--blood); color: #fff; }
+
+  /* ── DM VIEW ── */
+  #dm-panel {
+    display: none;
+    background: #160e04;
+    border-top: 2px solid var(--gold);
+    padding: 20px 24px;
+  }
+  #dm-panel.show { display: block; }
+  #dm-panel h2 {
+    font-family: 'Cinzel', serif; font-size: 1.1rem;
+    color: var(--gold-light); letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+  .dm-party-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .dm-card {
+    background: var(--parchment); border: 1px solid var(--gold);
+    padding: 14px; position: relative;
+  }
+  .dm-card h3 {
+    font-family: 'Cinzel', serif; font-size: 0.9rem;
+    color: var(--blood); margin-bottom: 8px;
+  }
+  .dm-stat-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 3px; }
+  .dm-stat-label { color: var(--aged); font-size: 0.75rem; }
+  .dm-stat-val { font-family: 'Cinzel', serif; font-weight: 700; }
+  .dm-hp-bar { height: 6px; background: #ccc; border-radius: 1px; margin: 4px 0; }
+  .dm-hp-fill { height: 100%; background: var(--blood); border-radius: 1px; transition: width 0.4s; }
+  .dm-conditions { margin-top: 6px; font-size: 0.75rem; color: var(--blood-light); font-style: italic; }
+
+  /* ── INVENTORY ── */
+  .inv-item { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+  .inv-item input { flex: 1; }
+  .inv-qty { width: 50px; }
+
+  /* ── CONDITIONS ── */
+  .conditions-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cond-btn {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    padding: 3px 8px; border: 1px solid var(--aged);
+    background: transparent; cursor: pointer; color: var(--aged);
+    transition: all 0.2s; border-radius: 1px;
+  }
+  .cond-btn.active { background: var(--blood); border-color: var(--blood); color: #fff; }
+
+  /* ── CURRENCY ── */
+  .currency-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .currency-item { text-align: center; }
+  .currency-coin {
+    width: 36px; height: 36px; border-radius: 50%;
+    margin: 0 auto 3px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 0.65rem; font-weight: 700;
+  }
+  .cp { background: #b87333; color: #fff; }
+  .sp { background: #aaa; color: var(--ink); }
+  .ep { background: #4a8; color: #fff; }
+  .gp { background: var(--gold); color: var(--ink); }
+  .pp { background: #b0a0d0; color: var(--ink); }
+  .currency-input { width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: 0.9rem; border: none; border-bottom: 1px solid var(--parchment-dark); background: transparent; outline: none; }
+
+  /* ── RULESET TAG ── */
+  .ruleset-tag {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    padding: 2px 8px; border-radius: 1px; letter-spacing: 1px;
+  }
+  .tag-5e { background: var(--rule-5e); color: #9ab; }
+  .tag-55 { background: var(--rule-55); color: #c9b; }
+  .tag-custom { background: #3a3a1a; color: #cc9; }
+
+  /* ── PAGE TABS (sheet sections) ── */
+  .page-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--parchment-dark); }
+  .page-tab {
+    font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 1.5px;
+    padding: 7px 16px; background: transparent; border: none;
+    cursor: pointer; color: var(--aged); border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all 0.2s;
+  }
+  .page-tab:hover { color: var(--ink); }
+  .page-tab.active { color: var(--blood); border-bottom-color: var(--blood); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── INSPIRATION ── */
+  .inspiration-gem {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid var(--gold); background: transparent;
+    cursor: pointer; transition: all 0.3s; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inspiration-gem.lit {
+    background: radial-gradient(circle at 35% 35%, #ffe97a, var(--gold), #8a5a00);
+    box-shadow: 0 0 12px var(--gold-light);
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #1a0a00; }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  /* util */
+  .flex { display: flex; } .gap8 { gap: 8px; } .gap12 { gap: 12px; }
+  .mb8 { margin-bottom: 8px; } .mb12 { margin-bottom: 12px; } .mb16 { margin-bottom: 16px; }
+  .mt8 { margin-top: 8px; }
+  .w100 { width: 100%; }
+  .text-center { text-align: center; }
+
+  @media (max-width: 900px) {
+    .sheet-cols { grid-template-columns: 1fr; }
+    .abilities-row { grid-template-columns: repeat(3, 1fr); }
+    .char-header { grid-template-columns: 1fr; }
+    .char-header-left { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Party <span>Tome</span></h1>
+  <div class="header-controls">
+    <div class="ruleset-toggle" id="ruleset-toggle-global" title="Switch default ruleset">
+      <label>5e</label>
+      <div class="toggle-switch" id="global-toggle" onclick="toggleGlobalRuleset()">
+        <div class="toggle-knob"></div>
+      </div>
+      <label>5.5e</label>
+    </div>
+    <button class="btn btn-sm" onclick="exportData()">⬇ Export</button>
+    <button class="btn btn-sm" onclick="document.getElementById('import-file').click()">⬆ Import</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+</div>
+
+<div id="roster-bar">
+  <div id="char-tabs"></div>
+  <button id="add-char-btn" onclick="addCharacter()" title="Add new character">＋</button>
+  <button id="dm-view-btn" onclick="toggleDmView()">⚔ DM VIEW</button>
+</div>
+
+<div id="dm-panel">
+  <h2>⚔ DM PARTY OVERVIEW</h2>
+  <div class="dm-party-grid" id="dm-party-grid"></div>
+</div>
+
+<div id="main">
+  <div id="sheet-container"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+
+const ABILITIES = ['STR','DEX','CON','INT','WIS','CHA'];
+const ABILITY_FULL = {STR:'Strength',DEX:'Dexterity',CON:'Constitution',INT:'Intelligence',WIS:'Wisdom',CHA:'Charisma'};
+const SAVES = ['STR','DEX','CON','INT','WIS','CHA'];
+const SKILLS_5E = [
+  {name:'Acrobatics',attr:'DEX'},{name:'Animal Handling',attr:'WIS'},{name:'Arcana',attr:'INT'},
+  {name:'Athletics',attr:'STR'},{
