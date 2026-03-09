@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Party Tome — D&D Character Manager</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" onerror="document.documentElement.classList.add('no-custom-fonts')">
+<style>
+  /* Fallback font stack if Google Fonts blocked */
+  .no-custom-fonts { --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif; --font-body: Georgia, 'Times New Roman', serif; }
+</style>
 <style>
   :root {
     --ink: #1a1208;
@@ -517,4 +523,872 @@ const ABILITY_FULL = {STR:'Strength',DEX:'Dexterity',CON:'Constitution',INT:'Int
 const SAVES = ['STR','DEX','CON','INT','WIS','CHA'];
 const SKILLS_5E = [
   {name:'Acrobatics',attr:'DEX'},{name:'Animal Handling',attr:'WIS'},{name:'Arcana',attr:'INT'},
-  {name:'Athletics',attr:'STR'},{
+  {name:'Athletics',attr:'STR'},{name:'Deception',attr:'CHA'},{name:'History',attr:'INT'},
+  {name:'Insight',attr:'WIS'},{name:'Intimidation',attr:'CHA'},{name:'Investigation',attr:'INT'},
+  {name:'Medicine',attr:'WIS'},{name:'Nature',attr:'INT'},{name:'Perception',attr:'WIS'},
+  {name:'Performance',attr:'CHA'},{name:'Persuasion',attr:'CHA'},{name:'Religion',attr:'INT'},
+  {name:'Sleight of Hand',attr:'DEX'},{name:'Stealth',attr:'DEX'},{name:'Survival',attr:'WIS'}
+];
+const CONDITIONS = ['Blinded','Charmed','Deafened','Exhaustion','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious'];
+const CLASSES = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorcerer','Warlock','Wizard','Custom'];
+const RACES_5E = ['Dragonborn','Dwarf','Elf','Gnome','Half-Elf','Half-Orc','Halfling','Human','Tiefling','Custom'];
+const BACKGROUNDS = ['Acolyte','Charlatan','Criminal','Entertainer','Folk Hero','Guild Artisan','Hermit','Noble','Outlander','Sage','Sailor','Soldier','Urchin','Custom'];
+const ALIGNMENTS = ['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil'];
+const SPELL_SLOTS = {1:2,2:3,3:4,4:5,5:6,6:7,7:8,8:9};
+
+function profBonus(level) {
+  return Math.ceil(level / 4) + 1;
+}
+function abilityMod(score) {
+  return Math.floor((score - 10) / 2);
+}
+function signedMod(n) {
+  return (n >= 0 ? '+' : '') + n;
+}
+
+function newCharacter(id) {
+  return {
+    id, name: 'New Character', playerName: '', ruleset: globalRuleset,
+    class: '', subclass: '', level: 1, race: '', background: '', alignment: '',
+    xp: 0, age: '', height: '', weight: '', eyes: '', hair: '', skin: '', portrait: '',
+    inspiration: false,
+    str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
+    hpMax: 10, hpCurrent: 10, hpTemp: 0,
+    ac: 10, speed: 30, initiative: 0,
+    profBonus: 2,
+    savingThrows: {STR:false,DEX:false,CON:false,INT:false,WIS:false,CHA:false},
+    skills: Object.fromEntries(SKILLS_5E.map(s => [s.name, 0])), // 0=none,1=prof,2=expert
+    deathSuccesses: [false,false,false],
+    deathFailures: [false,false,false],
+    attacks: [{name:'',bonus:'',damage:'',type:''}],
+    spellcastingAbility: 'INT',
+    spellSlots: {1:{total:0,used:0},2:{total:0,used:0},3:{total:0,used:0},4:{total:0,used:0},5:{total:0,used:0},6:{total:0,used:0},7:{total:0,used:0},8:{total:0,used:0},9:{total:0,used:0}},
+    spells: [],
+    features: [],
+    inventory: [],
+    currency: {cp:0,sp:0,ep:0,gp:0,pp:0},
+    conditions: [],
+    traits: '', ideals: '', bonds: '', flaws: '',
+    backstory: '', notes: '', appearance: '',
+    activeTab: 'core'
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let globalRuleset = '5e';
+let characters = [];
+let activeCharId = null;
+let dmViewOpen = false;
+let idCounter = 1;
+
+// Safe localStorage wrappers (some mobile browsers block in strict contexts)
+function lsGet(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+function lsSet(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+
+function save() {
+  lsSet('partytome_v2', JSON.stringify({characters, activeCharId, idCounter, globalRuleset}));
+}
+
+function load() {
+  const raw = lsGet('partytome_v2');
+  if (raw) {
+    try {
+      const d = JSON.parse(raw);
+      // Normalize IDs to numbers to prevent === type mismatch after JSON round-trip
+      const loaded = (d.characters || []).map(c => {
+        const base = newCharacter(Number(c.id));
+        return Object.assign(base, c, { id: Number(c.id) });
+      });
+      characters = loaded;
+      activeCharId = Number(d.activeCharId) || null;
+      idCounter = d.idCounter || (characters.length ? Math.max(...characters.map(c=>c.id)) + 1 : 1);
+      globalRuleset = d.globalRuleset || '5e';
+      // Ensure activeCharId actually exists
+      if (characters.length && !characters.find(c => c.id === activeCharId)) {
+        activeCharId = characters[0].id;
+      }
+      if (!characters.length) initDefault();
+    } catch(e) { console.error('Load error:', e); characters = []; initDefault(); }
+  } else { initDefault(); }
+}
+
+function initDefault() {
+  const c = newCharacter(idCounter++);
+  c.name = 'Character 1';
+  characters = [c];
+  activeCharId = c.id;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER ROSTER
+// ══════════════════════════════════════════════════════════════
+function renderRoster() {
+  const tabs = document.getElementById('char-tabs');
+  tabs.innerHTML = '';
+  characters.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'char-tab' + (c.id === activeCharId ? ' active' : '');
+    const hpPct = c.hpMax > 0 ? Math.round((c.hpCurrent/c.hpMax)*100) : 0;
+    btn.innerHTML = `${c.name || 'Unnamed'}<span class="tab-hp">${c.hpCurrent}/${c.hpMax} HP · Lv${c.level}</span>`;
+    btn.onclick = () => { activeCharId = c.id; render(); };
+    tabs.appendChild(btn);
+  });
+  const tog = document.getElementById('global-toggle');
+  tog.className = 'toggle-switch' + (globalRuleset === '5.5e' ? ' v55' : '');
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAIN RENDER
+// ══════════════════════════════════════════════════════════════
+function render() {
+  renderRoster();
+  const char = characters.find(c => c.id == activeCharId); // loose equality handles type coercion
+  if (!char) return;
+  renderSheet(char);
+  renderDmPanel();
+}
+
+function getChar() {
+  return characters.find(c => c.id === activeCharId);
+}
+
+function updateField(charId, field, value) {
+  const c = characters.find(x => x.id === charId);
+  if (!c) return;
+  // nested dot notation support
+  const parts = field.split('.');
+  let obj = c;
+  for (let i=0;i<parts.length-1;i++) obj = obj[parts[i]];
+  obj[parts[parts.length-1]] = value;
+  if (['str','dex','con','int','wis','cha','level','hpMax','hpCurrent'].includes(field)) {
+    recalc(c);
+  }
+  save();
+  renderRoster();
+  renderDmPanel();
+}
+
+function recalc(c) {
+  c.profBonus = profBonus(c.level);
+  c.initiative = abilityMod(c.dex);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SHEET RENDER
+// ══════════════════════════════════════════════════════════════
+function renderSheet(c) {
+  recalc(c);
+  const con = document.getElementById('sheet-container');
+  con.innerHTML = '';
+  const page = document.createElement('div');
+  page.className = 'sheet-page';
+  page.innerHTML = buildSheetHTML(c);
+  con.appendChild(page);
+  bindEvents(c);
+}
+
+function buildSheetHTML(c) {
+  const pb = profBonus(c.level);
+  const mods = {};
+  ABILITIES.forEach(a => mods[a] = abilityMod(c[a.toLowerCase()]));
+
+  // page tabs
+  const tabs = ['core','spells','features','inventory','backstory'].map(t =>
+    `<button class="page-tab${c.activeTab===t?' active':''}" onclick="switchTab('${c.id}','${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`
+  ).join('');
+
+  return `
+  <div class="flex gap8" style="align-items:center;margin-bottom:14px;justify-content:space-between">
+    <div class="flex gap8 align-items:center">
+      <span class="ruleset-tag ${c.ruleset==='5e'?'tag-5e':'tag-55'}">${c.ruleset.toUpperCase()}</span>
+      <button class="btn btn-sm" onclick="toggleCharRuleset('${c.id}')">Switch Ruleset</button>
+    </div>
+    <div class="flex gap8">
+      <button class="btn btn-sm" onclick="duplicateChar('${c.id}')">⧉ Duplicate</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteChar('${c.id}')">✕ Delete</button>
+    </div>
+  </div>
+
+  <!-- CHAR HEADER -->
+  <div class="char-header mb16">
+    <div class="char-header-left">
+      <label class="char-portrait" id="portrait-${c.id}" onclick="uploadPortrait('${c.id}')">
+        ${c.portrait ? `<img src="${c.portrait}" alt="portrait">` : '📷<br>Portrait'}
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:2/4">
+        <div class="field-group" style="grid-column:1/3">
+          <label class="field-label">Character Name</label>
+          <input class="field-input" style="font-size:1.4rem;font-family:'Cinzel',serif" data-field="name" value="${c.name}">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Class</label>
+          <input class="field-input" data-field="class" value="${c.class}" list="class-list-${c.id}">
+          <datalist id="class-list-${c.id}">${CLASSES.map(x=>`<option value="${x}">`).join('')}</datalist>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Subclass</label>
+          <input class="field-input" data-field="subclass" value="${c.subclass}">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Level</label>
+          <input class="field-input" type="number" min="1" max="20" data-field="level" value="${c.level}">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Race / Species</label>
+          <input class="field-input" data-field="race" value="${c.race}" list="race-list-${c.id}">
+          <datalist id="race-list-${c.id}">${RACES_5E.map(x=>`<option value="${x}">`).join('')}</datalist>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Background</label>
+          <input class="field-input" data-field="background" value="${c.background}" list="bg-list-${c.id}">
+          <datalist id="bg-list-${c.id}">${BACKGROUNDS.map(x=>`<option value="${x}">`).join('')}</datalist>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Alignment</label>
+          <select class="field-input" data-field="alignment">
+            ${ALIGNMENTS.map(a=>`<option${a===c.alignment?' selected':''}>${a}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="field-group mb8">
+        <label class="field-label">Player Name</label>
+        <input class="field-input" data-field="playerName" value="${c.playerName}">
+      </div>
+      <div class="field-group mb8">
+        <label class="field-label">Experience Points</label>
+        <input class="field-input" type="number" data-field="xp" value="${c.xp}">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label class="field-label">Inspiration</label>
+        <div class="inspiration-gem${c.inspiration?' lit':''}" onclick="toggleInspiration('${c.id}')" title="Toggle Inspiration"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABILITY SCORES -->
+  <div class="section-title">Ability Scores <span style="font-size:0.6rem;font-family:'Crimson Pro',serif;font-weight:400">Prof. Bonus: ${signedMod(pb)}</span></div>
+  <div class="abilities-row mb16">
+    ${ABILITIES.map(a => `
+    <div class="ability-box">
+      <div class="ability-name">${a}</div>
+      <input class="ability-score" type="number" min="1" max="30" data-field="${a.toLowerCase()}" value="${c[a.toLowerCase()]}">
+      <div class="ability-mod" id="mod-${a}-${c.id}">${signedMod(mods[a])}</div>
+    </div>`).join('')}
+  </div>
+
+  <!-- PAGE TABS -->
+  <div class="page-tabs">${tabs}</div>
+
+  <!-- TAB: CORE -->
+  <div class="tab-content${c.activeTab==='core'?' active':''}" id="tab-core-${c.id}">
+    <div class="sheet-cols">
+
+      <!-- LEFT: SAVES + SKILLS -->
+      <div>
+        <div class="section-title mb8">Saving Throws</div>
+        ${SAVES.map(s => {
+          const prof = c.savingThrows[s];
+          const mod = mods[s] + (prof ? pb : 0);
+          return `<div class="save-row">
+            <div class="proficiency-dot${prof?' prof':''}" onclick="toggleSave('${c.id}','${s}')"></div>
+            <div class="save-mod">${signedMod(mod)}</div>
+            <div class="save-name">${ABILITY_FULL[s]}</div>
+          </div>`;
+        }).join('')}
+
+        <div class="section-title mb8 mt8">Skills</div>
+        ${SKILLS_5E.map(sk => {
+          const prof = c.skills[sk.name] || 0;
+          const base = mods[sk.attr];
+          const mod = base + (prof===1?pb:prof===2?pb*2:0);
+          const dotClass = prof===2 ? 'expert' : prof===1 ? 'prof' : '';
+          return `<div class="skill-row">
+            <div class="proficiency-dot${dotClass?' '+dotClass:''}" onclick="cycleSkill('${c.id}','${sk.name}')"></div>
+            <div class="skill-mod">${signedMod(mod)}</div>
+            <div class="skill-name">${sk.name}</div>
+            <div class="skill-attr">${sk.attr}</div>
+          </div>`;
+        }).join('')}
+
+        <div class="section-title mb8 mt8">Passive Perception</div>
+        <div style="font-family:'Cinzel',serif;font-size:1.2rem;font-weight:700;text-align:center;padding:8px;background:var(--parchment-dark);border:1px solid var(--aged)">
+          ${10 + mods.WIS + ((c.skills['Perception']||0)===1?pb:(c.skills['Perception']||0)===2?pb*2:0)}
+        </div>
+      </div>
+
+      <!-- MIDDLE: COMBAT + ATTACKS -->
+      <div>
+        <div class="section-title mb8">Combat</div>
+        <div class="combat-grid mb12">
+          <div class="combat-box">
+            <input class="combat-value" type="number" data-field="ac" value="${c.ac}">
+            <div class="combat-label">ARMOR CLASS</div>
+          </div>
+          <div class="combat-box">
+            <input class="combat-value" type="number" data-field="initiative" value="${c.initiative || signedMod(mods.DEX)}">
+            <div class="combat-label">INITIATIVE</div>
+          </div>
+          <div class="combat-box">
+            <input class="combat-value" type="number" data-field="speed" value="${c.speed}">
+            <div class="combat-label">SPEED (ft)</div>
+          </div>
+        </div>
+
+        <div class="hp-section mb12">
+          <div class="section-title mb8">Hit Points</div>
+          <div class="hp-row mb8">
+            <div class="field-group">
+              <label class="field-label">Maximum</label>
+              <input class="field-input" type="number" data-field="hpMax" value="${c.hpMax}">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Current</label>
+              <input class="field-input" type="number" data-field="hpCurrent" value="${c.hpCurrent}">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Temporary</label>
+              <input class="field-input" type="number" data-field="hpTemp" value="${c.hpTemp}">
+            </div>
+          </div>
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-bg">
+              <div class="hp-bar-fill" style="width:${Math.max(0,Math.min(100,c.hpMax>0?Math.round((c.hpCurrent/c.hpMax)*100):0))}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb12">
+          <div class="section-title mb8">Death Saves</div>
+          <div class="death-saves">
+            <span class="ds-label">Successes</span>
+            ${c.deathSuccesses.map((d,i)=>`<div class="ds-dot${d?' success':''}" onclick="toggleDeath('${c.id}','success',${i})"></div>`).join('')}
+            <span class="ds-label" style="margin-left:8px">Failures</span>
+            ${c.deathFailures.map((d,i)=>`<div class="ds-dot${d?' fail':''}" onclick="toggleDeath('${c.id}','fail',${i})"></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="section-title mb8">Attacks & Spellcasting</div>
+        <table class="attacks-table mb8">
+          <thead><tr><th>Name</th><th>Bonus</th><th>Damage/Type</th><th></th></tr></thead>
+          <tbody id="attacks-${c.id}">
+            ${c.attacks.map((atk,i)=>`<tr>
+              <td><input value="${atk.name}" onchange="updateAttack('${c.id}',${i},'name',this.value)" placeholder="Attack name"></td>
+              <td><input value="${atk.bonus}" onchange="updateAttack('${c.id}',${i},'bonus',this.value)" style="width:60px" placeholder="+5"></td>
+              <td><input value="${atk.damage}" onchange="updateAttack('${c.id}',${i},'damage',this.value)" placeholder="1d8+3 slashing"></td>
+              <td><button onclick="removeAttack('${c.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--aged)">✕</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <button class="btn btn-sm" onclick="addAttack('${c.id}')">+ Add Attack</button>
+
+        <div class="section-title mb8 mt8">Conditions</div>
+        <div class="conditions-grid">
+          ${CONDITIONS.map(cond=>`<button class="cond-btn${c.conditions.includes(cond)?' active':''}" onclick="toggleCondition('${c.id}','${cond}')">${cond}</button>`).join('')}
+        </div>
+      </div>
+
+      <!-- RIGHT: CURRENCY + PROFICIENCIES -->
+      <div>
+        <div class="section-title mb8">Currency</div>
+        <div class="currency-row mb12">
+          ${['cp','sp','ep','gp','pp'].map(coin=>`
+          <div class="currency-item">
+            <div class="currency-coin ${coin}">${coin.toUpperCase()}</div>
+            <input class="currency-input" type="number" min="0" data-field="currency.${coin}" value="${c.currency[coin]}">
+          </div>`).join('')}
+        </div>
+
+        <div class="section-title mb8">Languages & Proficiencies</div>
+        <textarea class="notes-area" style="min-height:60px" data-field="traits" placeholder="Languages, tool proficiencies, weapon/armor proficiencies...">${c.traits}</textarea>
+
+        <div class="section-title mb8 mt8">Personality Traits</div>
+        <textarea class="notes-area" style="min-height:50px" data-field="ideals" placeholder="Personality traits, mannerisms...">${c.ideals}</textarea>
+
+        <div class="section-title mb8 mt8">Ideals</div>
+        <textarea class="notes-area" style="min-height:40px" data-field="bonds" placeholder="What drives you...">${c.bonds}</textarea>
+
+        <div class="section-title mb8 mt8">Bonds &amp; Flaws</div>
+        <textarea class="notes-area" style="min-height:40px" data-field="flaws" placeholder="Bonds, flaws, quirks...">${c.flaws}</textarea>
+      </div>
+
+    </div><!-- end sheet-cols -->
+  </div><!-- end tab-core -->
+
+  <!-- TAB: SPELLS -->
+  <div class="tab-content${c.activeTab==='spells'?' active':''}" id="tab-spells-${c.id}">
+    <div class="sheet-cols" style="grid-template-columns:180px 1fr">
+      <div>
+        <div class="section-title mb8">Spellcasting</div>
+        <div class="field-group mb8">
+          <label class="field-label">Spellcasting Ability</label>
+          <select class="field-input" data-field="spellcastingAbility">
+            ${ABILITIES.map(a=>`<option${a===c.spellcastingAbility?' selected':''}>${a}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field-group mb8">
+          <label class="field-label">Spell Save DC</label>
+          <div style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;text-align:center;padding:8px;background:var(--parchment-dark);border:1px solid var(--aged)">
+            ${8 + pb + mods[c.spellcastingAbility]}
+          </div>
+        </div>
+        <div class="field-group mb12">
+          <label class="field-label">Spell Attack Bonus</label>
+          <div style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;text-align:center;padding:8px;background:var(--parchment-dark);border:1px solid var(--aged)">
+            ${signedMod(pb + mods[c.spellcastingAbility])}
+          </div>
+        </div>
+        <div class="section-title mb8">Spell Slots</div>
+        ${[1,2,3,4,5,6,7,8,9].map(lvl=>{
+          const slot = c.spellSlots[lvl];
+          const dots = Array.from({length:slot.total||0},(_,i)=>
+            `<div class="spell-slot-dot${i<slot.used?' used':''}" onclick="toggleSlot('${c.id}',${lvl},${i})"></div>`
+          ).join('');
+          return `<div class="spell-level-row">
+            <span class="spell-level-label">${ordinal(lvl)}</span>
+            <input type="number" min="0" max="9" style="width:36px;font-family:'Cinzel',serif;font-size:0.8rem;background:var(--parchment-mid);border:1px solid var(--aged);text-align:center;outline:none"
+              value="${slot.total}" onchange="updateSlotTotal('${c.id}',${lvl},this.value)">
+            <div style="display:flex;flex-wrap:wrap;gap:3px">${dots}</div>
+            <span class="spell-slot-total">${slot.used}/${slot.total}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div>
+        <div class="section-title mb8">
+          Spells
+          <button class="btn btn-sm" onclick="addSpell('${c.id}')">+ Add Spell</button>
+        </div>
+        <div id="spells-list-${c.id}">
+          ${buildSpellList(c)}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: FEATURES -->
+  <div class="tab-content${c.activeTab==='features'?' active':''}" id="tab-features-${c.id}">
+    <div class="flex gap8 mb12">
+      <button class="btn btn-sm" onclick="addFeature('${c.id}','5e')">+ 5e Feature</button>
+      <button class="btn btn-sm" onclick="addFeature('${c.id}','5.5e')">+ 5.5e Feature</button>
+      <button class="btn btn-sm" onclick="addFeature('${c.id}','custom')">+ Custom Block</button>
+    </div>
+    <div id="features-list-${c.id}">
+      ${buildFeatureList(c)}
+    </div>
+  </div>
+
+  <!-- TAB: INVENTORY -->
+  <div class="tab-content${c.activeTab==='inventory'?' active':''}" id="tab-inventory-${c.id}">
+    <div class="section-title mb8">
+      Equipment & Inventory
+      <button class="btn btn-sm" onclick="addItem('${c.id}')">+ Add Item</button>
+    </div>
+    <div id="inventory-list-${c.id}">
+      ${buildInventory(c)}
+    </div>
+  </div>
+
+  <!-- TAB: BACKSTORY -->
+  <div class="tab-content${c.activeTab==='backstory'?' active':''}" id="tab-backstory-${c.id}">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div class="section-title mb8">Backstory</div>
+        <textarea class="notes-area" style="min-height:160px" data-field="backstory" placeholder="Character backstory, history, motivations...">${c.backstory}</textarea>
+        <div class="section-title mb8 mt8">Appearance</div>
+        <textarea class="notes-area" style="min-height:80px" data-field="appearance" placeholder="Physical description, distinguishing marks...">${c.appearance}</textarea>
+        <div class="field-group mt8">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field-group"><label class="field-label">Age</label><input class="field-input" data-field="age" value="${c.age}"></div>
+            <div class="field-group"><label class="field-label">Height</label><input class="field-input" data-field="height" value="${c.height}"></div>
+            <div class="field-group"><label class="field-label">Weight</label><input class="field-input" data-field="weight" value="${c.weight}"></div>
+            <div class="field-group"><label class="field-label">Eyes</label><input class="field-input" data-field="eyes" value="${c.eyes}"></div>
+            <div class="field-group"><label class="field-label">Hair</label><input class="field-input" data-field="hair" value="${c.hair}"></div>
+            <div class="field-group"><label class="field-label">Skin</label><input class="field-input" data-field="skin" value="${c.skin}"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title mb8">Session Notes</div>
+        <textarea class="notes-area" style="min-height:200px" data-field="notes" placeholder="Campaign notes, quest hooks, NPC relationships...">${c.notes}</textarea>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function buildSpellList(c) {
+  if (!c.spells.length) return '<div style="color:var(--aged);font-style:italic;padding:8px">No spells added yet.</div>';
+  // Group by level
+  const byLevel = {};
+  c.spells.forEach((s,i) => {
+    const lv = s.level || 0;
+    if (!byLevel[lv]) byLevel[lv] = [];
+    byLevel[lv].push({...s,_i:i});
+  });
+  return Object.keys(byLevel).sort((a,b)=>a-b).map(lv => {
+    const label = lv==0 ? 'Cantrip' : `Level ${lv}`;
+    return `<div class="mb8">
+      <div style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:2px;color:var(--blood);margin-bottom:4px;border-bottom:1px solid var(--parchment-dark);padding-bottom:2px">${label}</div>
+      ${byLevel[lv].map(s=>`<div class="feature-block" style="margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <input class="feature-block-title" style="flex:1" value="${s.name}" onchange="updateSpellField(${s._i},'name',this.value,'${c.id}')">
+          <input type="number" min="0" max="9" style="width:36px;font-family:'Cinzel',serif;font-size:0.8rem;background:transparent;border:1px solid var(--aged);text-align:center;outline:none" value="${s.level}" onchange="updateSpellField(${s._i},'level',+this.value,'${c.id}')">
+          <button class="feature-block-del" onclick="removeSpell('${c.id}',${s._i})">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:4px 0">
+          <input style="background:transparent;border-bottom:1px solid var(--parchment-dark);outline:none;font-size:0.75rem;font-family:'Crimson Pro',serif" placeholder="Casting time" value="${s.castingTime||''}" onchange="updateSpellField(${s._i},'castingTime',this.value,'${c.id}')">
+          <input style="background:transparent;border-bottom:1px solid var(--parchment-dark);outline:none;font-size:0.75rem;font-family:'Crimson Pro',serif" placeholder="Range" value="${s.range||''}" onchange="updateSpellField(${s._i},'range',this.value,'${c.id}')">
+          <input style="background:transparent;border-bottom:1px solid var(--parchment-dark);outline:none;font-size:0.75rem;font-family:'Crimson Pro',serif" placeholder="Duration" value="${s.duration||''}" onchange="updateSpellField(${s._i},'duration',this.value,'${c.id}')">
+        </div>
+        <textarea style="background:transparent;border:none;outline:none;width:100%;resize:vertical;min-height:36px;font-family:'Crimson Pro',serif;font-size:0.82rem;color:var(--ink)" placeholder="Description..." onchange="updateSpellField(${s._i},'desc',this.value,'${c.id}')">${s.desc||''}</textarea>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function buildFeatureList(c) {
+  if (!c.features.length) return '<div style="color:var(--aged);font-style:italic;padding:8px">No features added yet. Use the buttons above to add class features, racial traits, feats, or custom blocks.</div>';
+  return c.features.map((f,i)=>`
+    <div class="feature-block">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+        <input class="feature-block-title" value="${f.name}" onchange="updateFeatureField('${c.id}',${i},'name',this.value)" placeholder="Feature name">
+        <span class="ruleset-tag ${f.ruleset==='custom'?'tag-custom':f.ruleset==='5.5e'?'tag-55':'tag-5e'}">${f.ruleset}</span>
+        <input class="feature-block-source" value="${f.source||''}" onchange="updateFeatureField('${c.id}',${i},'source',this.value)" placeholder="Source (class, feat, custom...)">
+        <button class="feature-block-del" onclick="removeFeature('${c.id}',${i})">✕</button>
+      </div>
+      <textarea class="feature-block-body" onchange="updateFeatureField('${c.id}',${i},'body',this.value)" placeholder="Description, mechanics, notes...">${f.body||''}</textarea>
+    </div>
+  `).join('');
+}
+
+function buildInventory(c) {
+  if (!c.inventory.length) return '<div style="color:var(--aged);font-style:italic;padding:8px">No items yet.</div>';
+  return `<table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:1.5px;color:var(--blood);border-bottom:1px solid var(--blood);padding:4px 6px;text-align:left">Item</th>
+      <th style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:1.5px;color:var(--blood);border-bottom:1px solid var(--blood);padding:4px 6px;width:60px">Qty</th>
+      <th style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:1.5px;color:var(--blood);border-bottom:1px solid var(--blood);padding:4px 6px;width:80px">Weight</th>
+      <th style="border-bottom:1px solid var(--blood);width:30px"></th>
+    </tr></thead>
+    <tbody>
+    ${c.inventory.map((item,i)=>`<tr>
+      <td style="padding:3px 6px;border-bottom:1px solid var(--parchment-dark)">
+        <input style="background:transparent;border:none;outline:none;width:100%;font-family:'Crimson Pro',serif;font-size:0.9rem" value="${item.name||''}" onchange="updateInventoryField('${c.id}',${i},'name',this.value)" placeholder="Item name, notes...">
+      </td>
+      <td style="padding:3px 6px;border-bottom:1px solid var(--parchment-dark)">
+        <input type="number" min="0" style="width:52px;background:transparent;border:1px solid var(--parchment-dark);outline:none;text-align:center;font-family:'Cinzel',serif;font-size:0.85rem" value="${item.qty||1}" onchange="updateInventoryField('${c.id}',${i},'qty',+this.value)">
+      </td>
+      <td style="padding:3px 6px;border-bottom:1px solid var(--parchment-dark)">
+        <input style="width:70px;background:transparent;border:none;border-bottom:1px solid var(--parchment-dark);outline:none;font-family:'Crimson Pro',serif;font-size:0.85rem;text-align:center" value="${item.weight||''}" onchange="updateInventoryField('${c.id}',${i},'weight',this.value)" placeholder="lbs">
+      </td>
+      <td style="padding:3px 6px;border-bottom:1px solid var(--parchment-dark)">
+        <button onclick="removeItem('${c.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--aged)">✕</button>
+      </td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BIND EVENTS
+// ══════════════════════════════════════════════════════════════
+function bindEvents(c) {
+  document.querySelectorAll('[data-field]').forEach(el => {
+    const field = el.dataset.field;
+    const evt = el.tagName === 'TEXTAREA' ? 'input' : 'change';
+    el.addEventListener(evt, e => {
+      let val = e.target.type==='number' ? (parseFloat(e.target.value)||0) : e.target.value;
+      if (e.target.type==='checkbox') val = e.target.checked;
+      updateField(c.id, field, val);
+    });
+  });
+
+  // portrait upload
+  const pInput = document.createElement('input');
+  pInput.type = 'file'; pInput.accept = 'image/*'; pInput.style.display='none';
+  pInput.id = `portrait-input-${c.id}`;
+  document.body.appendChild(pInput);
+  pInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      updateField(c.id, 'portrait', ev.target.result);
+      render();
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════════════════════════
+function switchTab(charId, tab) {
+  const c = characters.find(x=>x.id==charId);
+  if (!c) return;
+  c.activeTab = tab;
+  save();
+  render();
+}
+
+function toggleSave(charId, ability) {
+  const c = characters.find(x=>x.id==charId);
+  c.savingThrows[ability] = !c.savingThrows[ability];
+  save(); render();
+}
+
+function cycleSkill(charId, skillName) {
+  const c = characters.find(x=>x.id==charId);
+  c.skills[skillName] = ((c.skills[skillName]||0) + 1) % 3;
+  save(); render();
+}
+
+function toggleInspiration(charId) {
+  const c = characters.find(x=>x.id==charId);
+  c.inspiration = !c.inspiration;
+  save(); render();
+}
+
+function toggleDeath(charId, type, idx) {
+  const c = characters.find(x=>x.id==charId);
+  if (type==='success') c.deathSuccesses[idx] = !c.deathSuccesses[idx];
+  else c.deathFailures[idx] = !c.deathFailures[idx];
+  save(); render();
+}
+
+function addAttack(charId) {
+  const c = characters.find(x=>x.id==charId);
+  c.attacks.push({name:'',bonus:'',damage:'',type:''});
+  save(); render();
+}
+
+function removeAttack(charId, idx) {
+  const c = characters.find(x=>x.id==charId);
+  c.attacks.splice(idx,1);
+  save(); render();
+}
+
+function updateAttack(charId, idx, field, val) {
+  const c = characters.find(x=>x.id==charId);
+  c.attacks[idx][field] = val;
+  save();
+}
+
+function toggleCondition(charId, cond) {
+  const c = characters.find(x=>x.id==charId);
+  const idx = c.conditions.indexOf(cond);
+  if (idx>=0) c.conditions.splice(idx,1); else c.conditions.push(cond);
+  save(); render();
+}
+
+function addFeature(charId, ruleset) {
+  const c = characters.find(x=>x.id==charId);
+  c.features.push({name:'New Feature',body:'',source:'',ruleset});
+  c.activeTab = 'features';
+  save(); render();
+}
+
+function updateFeatureField(charId, idx, field, val) {
+  const c = characters.find(x=>x.id==charId);
+  c.features[idx][field] = val;
+  save();
+}
+
+function removeFeature(charId, idx) {
+  const c = characters.find(x=>x.id==charId);
+  c.features.splice(idx,1);
+  save(); render();
+}
+
+function addSpell(charId) {
+  const c = characters.find(x=>x.id==charId);
+  c.spells.push({name:'New Spell',level:1,castingTime:'1 action',range:'',duration:'',desc:''});
+  save(); render();
+}
+
+function updateSpellField(idx, field, val, charId) {
+  const c = characters.find(x=>x.id==charId);
+  c.spells[idx][field] = val;
+  save();
+}
+
+function removeSpell(charId, idx) {
+  const c = characters.find(x=>x.id==charId);
+  c.spells.splice(idx,1);
+  save(); render();
+}
+
+function toggleSlot(charId, lvl, idx) {
+  const c = characters.find(x=>x.id==charId);
+  const slot = c.spellSlots[lvl];
+  if (idx < slot.used) slot.used = idx; else slot.used = idx + 1;
+  save(); render();
+}
+
+function updateSlotTotal(charId, lvl, val) {
+  const c = characters.find(x=>x.id==charId);
+  c.spellSlots[lvl].total = Math.max(0, Math.min(9, +val));
+  if (c.spellSlots[lvl].used > c.spellSlots[lvl].total)
+    c.spellSlots[lvl].used = c.spellSlots[lvl].total;
+  save(); render();
+}
+
+function addItem(charId) {
+  const c = characters.find(x=>x.id==charId);
+  c.inventory.push({name:'',qty:1,weight:''});
+  save(); render();
+}
+
+function removeItem(charId, idx) {
+  const c = characters.find(x=>x.id==charId);
+  c.inventory.splice(idx,1);
+  save(); render();
+}
+
+function updateInventoryField(charId, idx, field, val) {
+  const c = characters.find(x=>x.id==charId);
+  c.inventory[idx][field] = val;
+  save();
+}
+
+function uploadPortrait(charId) {
+  const inp = document.getElementById(`portrait-input-${charId}`);
+  if (inp) inp.click();
+}
+
+function addCharacter() {
+  const c = newCharacter(idCounter++);
+  c.name = `Character ${characters.length+1}`;
+  characters.push(c);
+  activeCharId = c.id;
+  save(); render();
+}
+
+function deleteChar(charId) {
+  if (characters.length <= 1) { alert('Cannot delete the last character.'); return; }
+  if (!confirm('Delete this character? This cannot be undone.')) return;
+  characters = characters.filter(c=>c.id != charId);
+  activeCharId = characters[0].id;
+  save(); render();
+}
+
+function duplicateChar(charId) {
+  const c = characters.find(x=>x.id==charId);
+  const copy = JSON.parse(JSON.stringify(c));
+  copy.id = idCounter++;
+  copy.name = c.name + ' (Copy)';
+  characters.push(copy);
+  activeCharId = copy.id;
+  save(); render();
+}
+
+function toggleCharRuleset(charId) {
+  const c = characters.find(x=>x.id==charId);
+  c.ruleset = c.ruleset === '5e' ? '5.5e' : '5e';
+  save(); render();
+}
+
+function toggleGlobalRuleset() {
+  globalRuleset = globalRuleset === '5e' ? '5.5e' : '5e';
+  save(); render();
+}
+
+function toggleDmView() {
+  dmViewOpen = !dmViewOpen;
+  const panel = document.getElementById('dm-panel');
+  const btn = document.getElementById('dm-view-btn');
+  panel.className = dmViewOpen ? 'show' : '';
+  btn.className = dmViewOpen ? 'active' : '';
+  renderDmPanel();
+}
+
+function renderDmPanel() {
+  if (!dmViewOpen) return;
+  const grid = document.getElementById('dm-party-grid');
+  grid.innerHTML = characters.map(c => {
+    const hpPct = c.hpMax>0 ? Math.max(0,Math.min(100,Math.round(c.hpCurrent/c.hpMax*100))) : 0;
+    const pb = profBonus(c.level);
+    const mods = {};
+    ABILITIES.forEach(a => mods[a] = abilityMod(c[a.toLowerCase()]));
+    const passPerc = 10 + mods.WIS + ((c.skills['Perception']||0)===1?pb:(c.skills['Perception']||0)===2?pb*2:0);
+    return `<div class="dm-card">
+      <h3>${c.name || 'Unnamed'}</h3>
+      <div style="font-size:0.75rem;color:var(--aged);margin-bottom:6px">${[c.race,c.class,`Lv${c.level}`].filter(Boolean).join(' · ')}</div>
+      <div class="dm-hp-bar"><div class="dm-hp-fill" style="width:${hpPct}%"></div></div>
+      <div class="dm-stat-row"><span class="dm-stat-label">HP</span><span class="dm-stat-val">${c.hpCurrent}/${c.hpMax}${c.hpTemp>0?` (+${c.hpTemp} temp)`:''}</span></div>
+      <div class="dm-stat-row"><span class="dm-stat-label">AC</span><span class="dm-stat-val">${c.ac}</span></div>
+      <div class="dm-stat-row"><span class="dm-stat-label">Speed</span><span class="dm-stat-val">${c.speed} ft</span></div>
+      <div class="dm-stat-row"><span class="dm-stat-label">Initiative</span><span class="dm-stat-val">${signedMod(c.initiative || mods.DEX)}</span></div>
+      <div class="dm-stat-row"><span class="dm-stat-label">Passive Perc.</span><span class="dm-stat-val">${passPerc}</span></div>
+      <div class="dm-stat-row"><span class="dm-stat-label">Prof Bonus</span><span class="dm-stat-val">${signedMod(pb)}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:6px">
+        ${ABILITIES.map(a=>`<div style="text-align:center;flex:1;min-width:30px;background:var(--parchment-dark);padding:3px 2px;border:1px solid var(--aged)"><div style="font-family:'Cinzel',serif;font-size:0.55rem;color:var(--blood)">${a}</div><div style="font-family:'Cinzel',serif;font-size:0.85rem;font-weight:700">${signedMod(mods[a])}</div></div>`).join('')}
+      </div>
+      ${c.conditions.length ? `<div class="dm-conditions">⚠ ${c.conditions.join(', ')}</div>` : ''}
+      ${c.inspiration ? `<div style="color:var(--gold);font-size:0.75rem;margin-top:4px">✦ Inspired</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════════════════════════════
+function exportData() {
+  const data = JSON.stringify({characters, idCounter, globalRuleset}, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'partytome_characters.json';
+  a.click();
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const d = JSON.parse(e.target.result);
+      if (d.characters) {
+        characters = d.characters;
+        idCounter = d.idCounter || (Math.max(...characters.map(c=>c.id))+1);
+        globalRuleset = d.globalRuleset || '5e';
+        activeCharId = characters[0]?.id || null;
+        save(); render();
+      }
+    } catch(err) { alert('Invalid file format.'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function ordinal(n) {
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT — wrapped in DOMContentLoaded for reliability on static hosts
+// ══════════════════════════════════════════════════════════════
+function init() {
+  load();
+  if (!characters.length) initDefault();
+  if (!activeCharId) activeCharId = characters[0].id;
+  render();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
